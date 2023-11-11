@@ -6,7 +6,7 @@ Learn more:
 
 * Read more about [Quali's Torque](https://www.quali.com/torque/).
 
-* Read more in the Toruqe [documentation](http://docs.qtorque.io/).
+* Read more in the Torque [documentation](http://docs.qtorque.io/).
 
 * Join the community [discussions](https://github.com/QualiTorque/qualitorque.github.io/).
 
@@ -14,6 +14,22 @@ Learn more:
 
 - [Terraform](https://developer.hashicorp.com/terraform/downloads) >= 1.0
 - [Go](https://golang.org/doc/install) >= 1.19
+
+## Quick Start
+
+```terraform
+terraform {
+  required_providers {
+    torque = {
+      source = "QualiTorque/torque"
+      version = "0.0.1"
+    }
+  }
+}
+
+provider "torque" {}
+
+```
 
 
 ## Building The Provider
