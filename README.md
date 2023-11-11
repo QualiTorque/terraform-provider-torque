@@ -1,4 +1,4 @@
-# Quali's Torque Terraform Provider (BAsed on Terraform Plugin Framework)
+# Quali's Torque Terraform Provider
 
 The Terraform Provider for Quali's Torque is a plugin for Terraform that allows you to interact with Torque and control Torque behavior and presentation.
 
