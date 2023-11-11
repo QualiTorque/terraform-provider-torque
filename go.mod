@@ -1,4 +1,4 @@
-module quali.com/terraform/torque
+module github.com/QualiTorque/terraform-provider-torque
 
 go 1.20
 
