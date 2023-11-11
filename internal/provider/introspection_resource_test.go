@@ -19,27 +19,27 @@ func TestAccExampleResource(t *testing.T) {
 			{
 				Config: testAccExampleResourceConfig("one"),
 				Check: resource.ComposeAggregateTestCheckFunc(
-					resource.TestCheckResourceAttr("scaffolding_example.test", "configurable_attribute", "one"),
-					resource.TestCheckResourceAttr("scaffolding_example.test", "defaulted", "example value when not configured"),
-					resource.TestCheckResourceAttr("scaffolding_example.test", "id", "example-id"),
+					resource.TestCheckResourceAttr("torque_introspection_resource.test", "display_name", "My Resource"),
+					resource.TestCheckResourceAttr("torque_introspection_resource.test", "image", "https://cdn-icons-png.flaticon.com/512/882/882730.png"),
+					resource.TestCheckResourceAttr("torque_introspection_resource.test", "introspection_data", "{size = \"large\", mode = \"party\"}"),
 				),
 			},
 			// ImportState testing
 			{
-				ResourceName:      "scaffolding_example.test",
+				ResourceName:      "torque_introspection_resource.test",
 				ImportState:       true,
 				ImportStateVerify: true,
 				// This is not normally necessary, but is here because this
 				// example code does not have an actual upstream service.
 				// Once the Read method is able to refresh information from
 				// the upstream service, this can be removed.
-				ImportStateVerifyIgnore: []string{"configurable_attribute", "defaulted"},
+				ImportStateVerifyIgnore: []string{"display_name", "My Resource"},
 			},
 			// Update and Read testing
 			{
-				Config: testAccExampleResourceConfig("two"),
+				Config: testAccExampleResourceConfig("Another Display Name"),
 				Check: resource.ComposeAggregateTestCheckFunc(
-					resource.TestCheckResourceAttr("scaffolding_example.test", "configurable_attribute", "two"),
+					resource.TestCheckResourceAttr("torque_introspection_resource.test", "display_name", "Another Display Name"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -49,8 +49,8 @@ func TestAccExampleResource(t *testing.T) {
 
 func testAccExampleResourceConfig(configurableAttribute string) string {
 	return fmt.Sprintf(`
-resource "scaffolding_example" "test" {
-  configurable_attribute = %[1]q
+resource "torque_introspection_resource" "test" {
+	display_name = %[1]q
 }
 `, configurableAttribute)
 }
