@@ -1,0 +1,24 @@
+spec_version: 2
+description: Torque auto generated blueprint
+
+inputs:
+  agent:
+    type: agent
+    default: "demo-dev"
+# blueprint outputs define which data that was generated during environment provisioning will be returned to the user, API or CI.
+outputs: {}
+grains:
+  provider-install-verification:
+    kind: terraform
+    spec:
+      source:
+        store: terraform-provider-torque
+        path: examples/provider-install-verification
+      agent:
+      # The Torque agent that will be used to provision the environment.
+        name: '{{ .inputs.agent }}'
+      inputs: []
+      env-vars: []
+      outputs: []
+    # The terraform version that will be used to deploy the module
+    tf-version: 1.5.5
