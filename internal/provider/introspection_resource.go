@@ -2,8 +2,6 @@ package provider
 
 import (
 	"context"
-	"fmt"
-	"net/http"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -22,7 +20,6 @@ func NewTorqueIntrospectionResource() resource.Resource {
 
 // TorqueIntrospectionResource defines the resource implementation.
 type TorqueIntrospectionResource struct {
-	client *http.Client
 }
 
 // TorqueIntrospectionResourceModel describes the resource data model.
@@ -67,18 +64,6 @@ func (r *TorqueIntrospectionResource) Configure(ctx context.Context, req resourc
 		return
 	}
 
-	client, ok := req.ProviderData.(*http.Client)
-
-	if !ok {
-		resp.Diagnostics.AddError(
-			"Unexpected Resource Configure Type",
-			fmt.Sprintf("Expected *http.Client, got: %T. Please report this issue to the provider developers.", req.ProviderData),
-		)
-
-		return
-	}
-
-	r.client = client
 }
 
 func (r *TorqueIntrospectionResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {

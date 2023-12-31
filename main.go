@@ -5,7 +5,7 @@ import (
 	"flag"
 	"log"
 
-	"github.com/QualiTorque/terraform-provider-torque/internal/provider"
+	"github.com/qualitorque/terraform-provider-torque/internal/provider"
 
 	"github.com/hashicorp/terraform-plugin-framework/providerserver"
 )

@@ -1,10 +1,12 @@
 terraform {
   required_providers {
     torque = {
-      source = "github.com/QualiTorque/terraform-provider-torque"
+      source = "QualiTorque/torque"
+      version = "0.0.1"
     }
   }
 }
+
 
 provider "torque" {}
 
