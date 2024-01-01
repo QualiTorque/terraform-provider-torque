@@ -44,7 +44,7 @@ type userDataSourceModel struct {
 
 // Metadata returns the data source type name.
 func (d *userDataSource) Metadata(_ context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_users"
+	resp.TypeName = req.ProviderTypeName + "_user"
 }
 
 // Schema defines the schema for the data source.
@@ -135,7 +135,7 @@ func (d *userDataSource) Read(ctx context.Context, req datasource.ReadRequest, r
 	user_data, err := d.client.GetUserDetails(email.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Unable to Read Torque users",
+			"Unable to Read Torque user",
 			err.Error(),
 		)
 		return
