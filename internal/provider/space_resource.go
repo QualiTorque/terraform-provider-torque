@@ -152,7 +152,7 @@ func (r *TorqueSpaceResource) Create(ctx context.Context, req resource.CreateReq
 	data.Color = color
 	data.Icon = icon
 
-	if space_memebrs.IsNull() == false {
+	if !space_memebrs.IsNull() {
 		for _, member := range space_memebrs.Elements() {
 			err := r.client.AddUserToSpace(trimQuote(member.String()), "Space Member", name.ValueString())
 			if err != nil {
@@ -162,7 +162,7 @@ func (r *TorqueSpaceResource) Create(ctx context.Context, req resource.CreateReq
 		}
 	}
 
-	if space_admins.IsNull() == false {
+	if !space_admins.IsNull() {
 		for _, admin := range space_admins.Elements() {
 			err := r.client.AddUserToSpace(trimQuote(admin.String()), "Space Admin", name.ValueString())
 			if err != nil {
@@ -172,7 +172,7 @@ func (r *TorqueSpaceResource) Create(ctx context.Context, req resource.CreateReq
 		}
 	}
 
-	if agent.IsNull() == false {
+	if !agent.IsNull() {
 		elements := make(map[string]types.String, len(agent.Elements()))
 		diags := agent.ElementsAs(ctx, &elements, false)
 		resp.Diagnostics.Append(diags...)
