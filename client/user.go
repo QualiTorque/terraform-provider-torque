@@ -29,9 +29,6 @@ func (c *Client) GetUserDetails(userEmail string) (*User, error) {
 	return &user, nil
 }
 
-//POST https://portal.qtorque.io/api/spaces/<space>/users
-//{"email":"*****@quali.com","space_role":"Space Member"}
-
 func (c *Client) AddUserToSpace(userEmail string, role string, space string) error {
 	fmt.Println(c.HostURL + "api/spaces")
 

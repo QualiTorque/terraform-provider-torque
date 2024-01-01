@@ -87,7 +87,7 @@ func (c *Client) AddAgentToSpace(agent string, ns string, sa string, space strin
 	return nil
 }
 
-// not tested
+// not tested.
 func (c *Client) RemoveAgentFromSpace(agent string) error {
 	fmt.Println(c.HostURL + "api/spaces")
 

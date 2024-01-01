@@ -7,10 +7,9 @@ import (
 	"time"
 )
 
-// HostURL - Default Hashicups URL
+// HostURL - Default Hashicups URL.
 const HostURL string = "https://portal.qtorque.io/"
 
-// Client -
 type Client struct {
 	HostURL    string
 	HTTPClient *http.Client
@@ -18,12 +17,10 @@ type Client struct {
 	Space      string
 }
 
-// NewClient -
 func NewClient(host, space, token *string) (*Client, error) {
 	c := Client{
 		HTTPClient: &http.Client{Timeout: 20 * time.Second},
-		// Default Torque URL
-		HostURL: HostURL,
+		HostURL:    HostURL,
 	}
 
 	if host != nil {

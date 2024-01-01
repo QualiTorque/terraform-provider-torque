@@ -86,7 +86,7 @@ func (p *torqueProvider) Configure(ctx context.Context, req provider.ConfigureRe
 	// 		"The provider cannot create the Torque API client as there is an unknown configuration value for the Torque API host. "+
 	// 			"Either target apply the source of the value first, set the value statically in the configuration, or use the TORQUE_HOST environment variable.",
 	// 	)
-	// }
+	// }.
 
 	// if config.Space.IsUnknown() {
 	// 	resp.Diagnostics.AddAttributeError(
@@ -95,7 +95,7 @@ func (p *torqueProvider) Configure(ctx context.Context, req provider.ConfigureRe
 	// 		"The provider cannot create the Torque API client as there is an unknown configuration value for the Torque API space. "+
 	// 			"Either target apply the source of the value first, set the value statically in the configuration, or use the TORQUE_SPACE environment variable.",
 	// 	)
-	// }
+	// }.
 
 	// if config.Token.IsUnknown() {
 	// 	resp.Diagnostics.AddAttributeError(
@@ -104,7 +104,7 @@ func (p *torqueProvider) Configure(ctx context.Context, req provider.ConfigureRe
 	// 		"The provider cannot create the Torque API client as there is an unknown configuration value for the Torque API token or long-token. "+
 	// 			"Either target apply the source of the value first, set the value statically in the configuration, or use the TORQUE_TOKEN environment variable.",
 	// 	)
-	// }
+	// }.
 
 	if resp.Diagnostics.HasError() {
 		return
@@ -139,7 +139,7 @@ func (p *torqueProvider) Configure(ctx context.Context, req provider.ConfigureRe
 	// 			"Set the host value in the configuration or use the TORQUE_HOST environment variable. "+
 	// 			"If either is already set, ensure the value is not empty.",
 	// 	)
-	// }
+	// }.
 
 	// if space == "" {
 	// 	resp.Diagnostics.AddAttributeError(
@@ -149,7 +149,7 @@ func (p *torqueProvider) Configure(ctx context.Context, req provider.ConfigureRe
 	// 			"Set the username value in the configuration or use the TORQUE_SPACE environment variable. "+
 	// 			"If either is already set, ensure the value is not empty.",
 	// 	)
-	// }
+	// }.
 
 	// if token == "" {
 	// 	resp.Diagnostics.AddAttributeError(
@@ -159,7 +159,7 @@ func (p *torqueProvider) Configure(ctx context.Context, req provider.ConfigureRe
 	// 			"Set the password value in the configuration or use the TORQUE_TOKEN environment variable. "+
 	// 			"If either is already set, ensure the value is not empty.",
 	// 	)
-	// }
+	// }.
 
 	if resp.Diagnostics.HasError() {
 		return
@@ -172,7 +172,7 @@ func (p *torqueProvider) Configure(ctx context.Context, req provider.ConfigureRe
 
 	tflog.Debug(ctx, "Creating Torque API client")
 
-	// Create a new Torque client using the configuration values
+	// Create a new Torque client using the configuration values.
 	client, err := client.NewClient(&host, &space, &token)
 
 	if err != nil {

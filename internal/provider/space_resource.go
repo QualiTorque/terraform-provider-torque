@@ -114,7 +114,6 @@ func trimQuote(s string) string {
 func (r *TorqueSpaceResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	var data TorqueSpaceResourceModel
 
-	// Read Terraform plan data into the model
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
 
 	if resp.Diagnostics.HasError() {
@@ -191,14 +190,14 @@ func (r *TorqueSpaceResource) Create(ctx context.Context, req resource.CreateReq
 
 	tflog.Trace(ctx, "Resource Created Successful!")
 
-	// Save data into Terraform state
+	// Save data into Terraform state.
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
 func (r *TorqueSpaceResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	var data TorqueSpaceResourceModel
 
-	// Read Terraform prior state data into the model
+	// Read Terraform prior state data into the model.
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
 
 	if resp.Diagnostics.HasError() {
@@ -213,7 +212,7 @@ func (r *TorqueSpaceResource) Read(ctx context.Context, req resource.ReadRequest
 	//     return
 	// }
 
-	// Save updated data into Terraform state
+	// Save updated data into Terraform state.
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
@@ -242,7 +241,7 @@ func (r *TorqueSpaceResource) Update(ctx context.Context, req resource.UpdateReq
 func (r *TorqueSpaceResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
 	var data TorqueSpaceResourceModel
 
-	// Read Terraform prior state data into the model
+	// Read Terraform prior state data into the model.
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
 
 	if resp.Diagnostics.HasError() {
