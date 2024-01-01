@@ -1,6 +1,5 @@
 package client
 
-// User
 type User struct {
 	Email                string   `json:"email"`
 	FirstName            string   `json:"first_name"`
@@ -15,7 +14,6 @@ type User struct {
 	Permissions          []string `json:"permissions"`
 }
 
-// UserSpaceAssociation
 type UserSpaceAssociation struct {
 	Email     string `json:"email"`
 	SpaceRole string `json:"space_role"`

@@ -1,6 +1,3 @@
-// Copyright (c) HashiCorp, Inc.
-// SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 import (
@@ -155,7 +152,6 @@ func (d *userDataSource) Read(ctx context.Context, req datasource.ReadRequest, r
 	state.Timezone = types.StringValue(user_data.Timezone)
 	state.UserType = types.StringValue(user_data.UserType)
 	state.Permissions, _ = types.ListValueFrom(ctx, types.StringType, user_data.Permissions)
-	// Set state
 	diags := resp.State.Set(ctx, &state)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {

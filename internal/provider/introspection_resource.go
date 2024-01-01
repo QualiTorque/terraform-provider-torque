@@ -143,7 +143,7 @@ func (r *TorqueIntrospectionResource) Update(ctx context.Context, req resource.U
 func (r *TorqueIntrospectionResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
 	var data TorqueIntrospectionResourceModel
 
-	// Read Terraform prior state data into the model
+	// Read Terraform prior state data into the model.
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
 
 	if resp.Diagnostics.HasError() {
@@ -156,7 +156,7 @@ func (r *TorqueIntrospectionResource) Delete(ctx context.Context, req resource.D
 	// if err != nil {
 	//     resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to delete example, got error: %s", err))
 	//     return
-	// }
+	// }.
 }
 
 func (r *TorqueIntrospectionResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
