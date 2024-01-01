@@ -3,12 +3,12 @@
 page_title: "torque_space_resource Resource - terraform-provider-torque"
 subcategory: ""
 description: |-
-  Creation of a new Torque space with associated entities (users, repos, ect...)
+  Creation of a new Torque space with associated entities (users, repos, etc...)
 ---
 
 # torque_space_resource (Resource)
 
-Creation of a new Torque space with associated entities (users, repos, ect...)
+Creation of a new Torque space with associated entities (users, repos, etc...)
 
 
 
@@ -22,14 +22,6 @@ Creation of a new Torque space with associated entities (users, repos, ect...)
 ### Optional
 
 - `associated_kubernetes_agent` (Map of String) Kubernetes agent to associate to the newly create space
-  ```terraform
-    associated_kubernetes_agent = {
-      "default_namespace" : "development-namespace",
-      "default_service_account" : "dev-sa",
-      "name" : "existing-agent-name"
-    }
-
-  ```
 - `color` (String) Space color to be used for the new space
 - `icon` (String) Space icon to be used
 - `space_admins` (List of String) List of space admins to be associate to the newly created space
