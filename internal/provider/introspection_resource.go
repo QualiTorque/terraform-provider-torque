@@ -160,5 +160,5 @@ func (r *TorqueIntrospectionResource) Delete(ctx context.Context, req resource.D
 }
 
 func (r *TorqueIntrospectionResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
-	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
+	resource.ImportStatePassthroughID(ctx, path.Root("display_name"), req, resp)
 }

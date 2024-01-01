@@ -256,5 +256,5 @@ func (r *TorqueSpaceResource) Delete(ctx context.Context, req resource.DeleteReq
 }
 
 func (r *TorqueSpaceResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
-	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
+	resource.ImportStatePassthroughID(ctx, path.Root("name"), req, resp)
 }

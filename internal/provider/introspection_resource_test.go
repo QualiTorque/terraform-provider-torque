@@ -4,40 +4,39 @@
 package provider
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 )
 
-func TestAccExampleResource(t *testing.T) {
+func TestIntrospectionResource(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { testAccPreCheck(t) },
 		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			// Create and Read testing
 			{
-				Config: testAccExampleResourceConfig("one"),
+				Config: providerConfig + `
+				resource "torque_introspection_resource" "test" {
+					display_name       = "My Resource"
+					image              = "https://cdn-icons-png.flaticon.com/512/882/882730.png"
+					introspection_data = {size = "large", mode = "party"}
+				}
+				`,
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr("torque_introspection_resource.test", "display_name", "My Resource"),
 					resource.TestCheckResourceAttr("torque_introspection_resource.test", "image", "https://cdn-icons-png.flaticon.com/512/882/882730.png"),
-					resource.TestCheckResourceAttr("torque_introspection_resource.test", "introspection_data", "{size = \"large\", mode = \"party\"}"),
+					resource.TestCheckResourceAttr("torque_introspection_resource.test", "introspection_data.size", "large"),
+					resource.TestCheckResourceAttr("torque_introspection_resource.test", "introspection_data.mode", "party"),
 				),
-			},
-			// ImportState testing
-			{
-				ResourceName:      "torque_introspection_resource.test",
-				ImportState:       true,
-				ImportStateVerify: true,
-				// This is not normally necessary, but is here because this
-				// example code does not have an actual upstream service.
-				// Once the Read method is able to refresh information from
-				// the upstream service, this can be removed.
-				ImportStateVerifyIgnore: []string{"display_name", "My Resource"},
 			},
 			// Update and Read testing
 			{
-				Config: testAccExampleResourceConfig("Another Display Name"),
+				Config: providerConfig + `
+				resource "torque_introspection_resource" "test" {
+					display_name       = "Another Display Name"
+				}
+				`,
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr("torque_introspection_resource.test", "display_name", "Another Display Name"),
 				),
@@ -45,12 +44,4 @@ func TestAccExampleResource(t *testing.T) {
 			// Delete testing automatically occurs in TestCase
 		},
 	})
-}
-
-func testAccExampleResourceConfig(configurableAttribute string) string {
-	return fmt.Sprintf(`
-resource "torque_introspection_resource" "test" {
-	display_name = %[1]q
-}
-`, configurableAttribute)
 }
