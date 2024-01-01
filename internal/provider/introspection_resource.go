@@ -2,8 +2,6 @@ package provider
 
 import (
 	"context"
-	"fmt"
-	"net/http"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -22,7 +20,6 @@ func NewTorqueIntrospectionResource() resource.Resource {
 
 // TorqueIntrospectionResource defines the resource implementation.
 type TorqueIntrospectionResource struct {
-	client *http.Client
 }
 
 // TorqueIntrospectionResourceModel describes the resource data model.
@@ -67,18 +64,6 @@ func (r *TorqueIntrospectionResource) Configure(ctx context.Context, req resourc
 		return
 	}
 
-	client, ok := req.ProviderData.(*http.Client)
-
-	if !ok {
-		resp.Diagnostics.AddError(
-			"Unexpected Resource Configure Type",
-			fmt.Sprintf("Expected *http.Client, got: %T. Please report this issue to the provider developers.", req.ProviderData),
-		)
-
-		return
-	}
-
-	r.client = client
 }
 
 func (r *TorqueIntrospectionResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
@@ -158,7 +143,7 @@ func (r *TorqueIntrospectionResource) Update(ctx context.Context, req resource.U
 func (r *TorqueIntrospectionResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
 	var data TorqueIntrospectionResourceModel
 
-	// Read Terraform prior state data into the model
+	// Read Terraform prior state data into the model.
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
 
 	if resp.Diagnostics.HasError() {
@@ -171,9 +156,9 @@ func (r *TorqueIntrospectionResource) Delete(ctx context.Context, req resource.D
 	// if err != nil {
 	//     resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to delete example, got error: %s", err))
 	//     return
-	// }
+	// }.
 }
 
 func (r *TorqueIntrospectionResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
-	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
+	resource.ImportStatePassthroughID(ctx, path.Root("display_name"), req, resp)
 }
