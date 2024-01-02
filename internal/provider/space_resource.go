@@ -27,12 +27,18 @@ type TorqueSpaceResource struct {
 
 // TorqueSpaceResourceModel describes the resource data model.
 type TorqueSpaceResourceModel struct {
-	Name              types.String `tfsdk:"name"`
-	Color             types.String `tfsdk:"color"`
-	Icon              types.String `tfsdk:"icon"`
-	AssociatedMembers types.List   `tfsdk:"space_members"`
-	AssociatedAdmins  types.List   `tfsdk:"space_admins"`
-	AssociatedAgents  types.Map    `tfsdk:"associated_kubernetes_agent"`
+	Name                       types.String           `tfsdk:"name"`
+	Color                      types.String           `tfsdk:"color"`
+	Icon                       types.String           `tfsdk:"icon"`
+	AssociatedMembers          types.List             `tfsdk:"space_members"`
+	AssociatedAdmins           types.List             `tfsdk:"space_admins"`
+	AssociatedKubernetesAgents []KubAgentRequestModel `tfsdk:"associated_kubernetes_agent"`
+}
+
+type KubAgentRequestModel struct {
+	AgentName             types.String `tfsdk:"agent_name"`
+	DefaultNamespace      types.String `tfsdk:"default_namespace"`
+	DefaultServiceAccount types.String `tfsdk:"default_service_account"`
 }
 
 func (r *TorqueSpaceResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
@@ -71,11 +77,26 @@ func (r *TorqueSpaceResource) Schema(ctx context.Context, req resource.SchemaReq
 				Computed:            false,
 				ElementType:         types.StringType,
 			},
-			"associated_kubernetes_agent": schema.MapAttribute{
+			"associated_kubernetes_agent": schema.ListNestedAttribute{
 				MarkdownDescription: "Kubernetes agent to associate to the newly create space",
 				Optional:            true,
 				Computed:            false,
-				ElementType:         types.StringType,
+				NestedObject: schema.NestedAttributeObject{
+					Attributes: map[string]schema.Attribute{
+						"agent_name": schema.StringAttribute{
+							Description: "Agent name to associate to the newly created space",
+							Required:    true,
+						},
+						"default_service_account": schema.StringAttribute{
+							Description: "Default service account to be used with the agent in the space",
+							Required:    true,
+						},
+						"default_namespace": schema.StringAttribute{
+							Description: "Default namespace to be used with the agent in the space",
+							Required:    true,
+						},
+					},
+				},
 			},
 		},
 	}
@@ -120,40 +141,15 @@ func (r *TorqueSpaceResource) Create(ctx context.Context, req resource.CreateReq
 		return
 	}
 
-	var name types.String
-	req.Config.GetAttribute(ctx, path.Root("name"), &name)
-
-	var color types.String
-	req.Config.GetAttribute(ctx, path.Root("color"), &color)
-
-	var icon types.String
-	req.Config.GetAttribute(ctx, path.Root("icon"), &icon)
-
-	var space_memebrs types.List
-	req.Config.GetAttribute(ctx, path.Root("space_members"), &space_memebrs)
-
-	var space_admins types.List
-	req.Config.GetAttribute(ctx, path.Root("space_admins"), &space_admins)
-
-	var associated_agents types.List
-	req.Config.GetAttribute(ctx, path.Root("associated_agents"), &associated_agents)
-
-	var agent types.Map
-	req.Config.GetAttribute(ctx, path.Root("associated_kubernetes_agent"), &agent)
-
-	err := r.client.CreateSpace(name.ValueString(), color.ValueString(), icon.ValueString())
+	err := r.client.CreateSpace(data.Name.ValueString(), data.Color.ValueString(), data.Icon.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create space, got error: %s", err))
 		return
 	}
 
-	data.Name = name
-	data.Color = color
-	data.Icon = icon
-
-	if !space_memebrs.IsNull() {
-		for _, member := range space_memebrs.Elements() {
-			err := r.client.AddUserToSpace(trimQuote(member.String()), "Space Member", name.ValueString())
+	if !data.AssociatedMembers.IsNull() {
+		for _, member := range data.AssociatedMembers.Elements() {
+			err := r.client.AddUserToSpace(trimQuote(member.String()), "Space Member", data.Name.ValueString())
 			if err != nil {
 				resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to attach space member to space, got error: %s", err))
 				return
@@ -161,9 +157,9 @@ func (r *TorqueSpaceResource) Create(ctx context.Context, req resource.CreateReq
 		}
 	}
 
-	if !space_admins.IsNull() {
-		for _, admin := range space_admins.Elements() {
-			err := r.client.AddUserToSpace(trimQuote(admin.String()), "Space Admin", name.ValueString())
+	if !data.AssociatedAdmins.IsNull() {
+		for _, admin := range data.AssociatedAdmins.Elements() {
+			err := r.client.AddUserToSpace(trimQuote(admin.String()), "Space Admin", data.Name.ValueString())
 			if err != nil {
 				resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to attach space admin to space, got error: %s", err))
 				return
@@ -171,17 +167,9 @@ func (r *TorqueSpaceResource) Create(ctx context.Context, req resource.CreateReq
 		}
 	}
 
-	if !agent.IsNull() {
-		elements := make(map[string]types.String, len(agent.Elements()))
-		diags := agent.ElementsAs(ctx, &elements, false)
-		resp.Diagnostics.Append(diags...)
-		if resp.Diagnostics.HasError() {
-			return
-		}
-		ns := elements["default_namespace"]
-		sa := elements["default_service_account"]
-		agent_name := elements["name"]
-		err := r.client.AddAgentToSpace(trimQuote(agent_name.String()), trimQuote(ns.String()), trimQuote(sa.String()), name.ValueString())
+	for _, associationRequest := range data.AssociatedKubernetesAgents {
+		err := r.client.AddAgentToSpace(associationRequest.AgentName.ValueString(), associationRequest.DefaultNamespace.ValueString(),
+			associationRequest.DefaultServiceAccount.ValueString(), data.Name.ValueString(), "K8S")
 		if err != nil {
 			resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to attach agent to space, got error: %s", err))
 			return

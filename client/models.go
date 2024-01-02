@@ -26,7 +26,7 @@ type Space struct {
 }
 
 type AgentSpaceAssociation struct {
-	Type string `json:"type"`
-	Ns   string `json:"default_namespace"`
-	Sa   string `json:"default_service_account"`
+	Type                  string `json:"type"`
+	DefaultNamespace      string `json:"namespace"`
+	DefaultServiceAccount string `json:"service_account"`
 }
