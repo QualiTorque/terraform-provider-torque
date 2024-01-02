@@ -41,6 +41,7 @@ func (c *Client) doRequest(req *http.Request, authToken *string) ([]byte, error)
 	}
 
 	req.Header.Set("Authorization", "Bearer "+token)
+	req.Header.Set("User-Agent", "terraform-provider-torque")
 
 	res, err := c.HTTPClient.Do(req)
 	if err != nil {

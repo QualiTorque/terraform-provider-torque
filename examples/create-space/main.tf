@@ -13,16 +13,18 @@ provider "torque" {
 }
 
 resource "torque_space_resource" "new_space" {
-  name          = "newspacetest"
-  color         = "darkGreen"
-  icon          = "flow"
-  space_members = ["admontomer@gmail.com"]
-  space_admins  = ["sgeller1980@gmail.com"]
+  name  = "newspacetest"
+  color = "darkGreen"
+  icon  = "flow"
+  # space_members = ["admontomer@gmail.com"]
+  # space_admins  = ["sgeller1980@gmail.com"]
   # associated_agents = ["tomer-test"]
-  associated_kubernetes_agent = {
-    "default_namespace" : "x",
-    "default_service_account" : "eks",
-    "name" : "tomer-test"
-  }
+  associated_kubernetes_agent = [
+    {
+      default_namespace       = "vido-sb"
+      default_service_account = "vido-sb"
+      agent_name              = "review2-aks"
+    }
+  ]
   ## TODO: associated_repos = []
 }

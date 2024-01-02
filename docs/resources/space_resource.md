@@ -21,8 +21,17 @@ Creation of a new Torque space with associated entities (users, repos, etc...)
 
 ### Optional
 
-- `associated_kubernetes_agent` (Map of String) Kubernetes agent to associate to the newly create space
+- `associated_kubernetes_agent` (Attributes List) Kubernetes agent to associate to the newly create space (see [below for nested schema](#nestedatt--associated_kubernetes_agent))
 - `color` (String) Space color to be used for the new space
 - `icon` (String) Space icon to be used
 - `space_admins` (List of String) List of space admins to be associate to the newly created space
 - `space_members` (List of String) List of space members to be associate to the newly created space
+
+<a id="nestedatt--associated_kubernetes_agent"></a>
+### Nested Schema for `associated_kubernetes_agent`
+
+Required:
+
+- `agent_name` (String) Agent name to associate to the newly created space
+- `default_namespace` (String) Default namespace to be used with the agent in the space
+- `default_service_account` (String) Default service account to be used with the agent in the space

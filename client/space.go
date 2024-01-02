@@ -57,13 +57,13 @@ func (c *Client) DeleteSpace(name string) error {
 	return nil
 }
 
-func (c *Client) AddAgentToSpace(agent string, ns string, sa string, space string) error {
+func (c *Client) AddAgentToSpace(agent string, ns string, sa string, space string, agnet_type string) error {
 	fmt.Println(c.HostURL + "api/spaces")
 
 	data := AgentSpaceAssociation{
-		Type: "K8S",
-		Ns:   ns,
-		Sa:   sa,
+		Type:                  agnet_type,
+		DefaultNamespace:      ns,
+		DefaultServiceAccount: sa,
 	}
 
 	payload, err := json.Marshal(data)
