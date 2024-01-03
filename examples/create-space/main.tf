@@ -9,7 +9,7 @@ terraform {
 provider "torque" {
   host  = "https://review2.qualilabs.net/"
   space = "Shira"
-  token = ""
+  token = var.torque_token
 }
 
 resource "torque_space_resource" "new_space" {
@@ -18,7 +18,6 @@ resource "torque_space_resource" "new_space" {
   icon  = "flow"
   # space_members = ["admontomer@gmail.com"]
   # space_admins  = ["sgeller1980@gmail.com"]
-  # associated_agents = ["tomer-test"]
   associated_kubernetes_agent = [
     {
       default_namespace       = "vido-sb"
@@ -26,5 +25,13 @@ resource "torque_space_resource" "new_space" {
       agent_name              = "review2-aks"
     }
   ]
-  ## TODO: associated_repos = []
+  associated_repos = [
+    {
+      repository_url  = "https://github.com/QualiTorque/Torque-Samples"
+      access_token    = var.repo_token
+      repository_type = "github"
+      branch          = "main"
+      repository_name = "Torque-Samples"
+    }
+  ]
 }

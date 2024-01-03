@@ -22,6 +22,7 @@ Creation of a new Torque space with associated entities (users, repos, etc...)
 ### Optional
 
 - `associated_kubernetes_agent` (Attributes List) Kubernetes agent to associate to the newly create space (see [below for nested schema](#nestedatt--associated_kubernetes_agent))
+- `associated_repos` (Attributes List) Kubernetes agent to associate to the newly create space (see [below for nested schema](#nestedatt--associated_repos))
 - `color` (String) Space color to be used for the new space
 - `icon` (String) Space icon to be used
 - `space_admins` (List of String) List of space admins to be associate to the newly created space
@@ -35,3 +36,18 @@ Required:
 - `agent_name` (String) Agent name to associate to the newly created space
 - `default_namespace` (String) Default namespace to be used with the agent in the space
 - `default_service_account` (String) Default service account to be used with the agent in the space
+
+
+<a id="nestedatt--associated_repos"></a>
+### Nested Schema for `associated_repos`
+
+Required:
+
+- `access_token` (String) Personal Access Token (PAT) to authenticate with to the repository
+- `repository_name` (String) The name of the repository to onboard in the newly created space
+- `repository_type` (String) Repository type. Available types: github, bitbucket, gitlab, azure (for Azure DevOps)
+- `repository_url` (String) Repository URL. For example: https://github.com/<org>/<repo>
+
+Optional:
+
+- `branch` (String) Repository branch to use for blueprints and automation assets
