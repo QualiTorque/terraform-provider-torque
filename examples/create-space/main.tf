@@ -28,7 +28,7 @@ resource "torque_space_resource" "new_space" {
   associated_repos = [
     {
       repository_url  = "https://github.com/QualiTorque/Torque-Samples"
-      access_token    =  var.repo_token
+      access_token    = var.repo_token
       repository_type = "github"
       branch          = "main"
       repository_name = "Torque-Samples"
