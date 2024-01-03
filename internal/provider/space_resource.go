@@ -33,12 +33,21 @@ type TorqueSpaceResourceModel struct {
 	AssociatedMembers          types.List             `tfsdk:"space_members"`
 	AssociatedAdmins           types.List             `tfsdk:"space_admins"`
 	AssociatedKubernetesAgents []KubAgentRequestModel `tfsdk:"associated_kubernetes_agent"`
+	AssociatedRepos            []RepoRequestModel     `tfsdk:"associated_repos"`
 }
 
 type KubAgentRequestModel struct {
 	AgentName             types.String `tfsdk:"agent_name"`
 	DefaultNamespace      types.String `tfsdk:"default_namespace"`
 	DefaultServiceAccount types.String `tfsdk:"default_service_account"`
+}
+
+type RepoRequestModel struct {
+	RepoName   types.String `tfsdk:"repository_name"`
+	RepoBranch types.String `tfsdk:"branch"`
+	RepoType   types.String `tfsdk:"repository_type"`
+	RepoToken  types.String `tfsdk:"access_token"`
+	RepoUrl    types.String `tfsdk:"repository_url"`
 }
 
 func (r *TorqueSpaceResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
@@ -93,6 +102,35 @@ func (r *TorqueSpaceResource) Schema(ctx context.Context, req resource.SchemaReq
 						},
 						"default_namespace": schema.StringAttribute{
 							Description: "Default namespace to be used with the agent in the space",
+							Required:    true,
+						},
+					},
+				},
+			},
+			"associated_repos": schema.ListNestedAttribute{
+				MarkdownDescription: "Kubernetes agent to associate to the newly create space",
+				Optional:            true,
+				Computed:            false,
+				NestedObject: schema.NestedAttributeObject{
+					Attributes: map[string]schema.Attribute{
+						"repository_name": schema.StringAttribute{
+							Description: "The name of the repository to onboard in the newly created space",
+							Required:    true,
+						},
+						"branch": schema.StringAttribute{
+							Description: "Repository branch to use for blueprints and automation assets",
+							Optional:    true,
+						},
+						"repository_type": schema.StringAttribute{
+							Description: "Repository type. Available types: github, bitbucket, gitlab, azure (for Azure DevOps)",
+							Required:    true,
+						},
+						"access_token": schema.StringAttribute{
+							Description: "Personal Access Token (PAT) to authenticate with to the repository",
+							Required:    true,
+						},
+						"repository_url": schema.StringAttribute{
+							Description: "Repository URL. For example: https://github.com/<org>/<repo>",
 							Required:    true,
 						},
 					},
@@ -176,6 +214,16 @@ func (r *TorqueSpaceResource) Create(ctx context.Context, req resource.CreateReq
 		}
 	}
 
+	for _, associationRepoRequest := range data.AssociatedRepos {
+		err := r.client.OnboardRepoToSpace(data.Name.ValueString(), associationRepoRequest.RepoName.ValueString(), trimQuote(associationRepoRequest.RepoType.String()),
+			associationRepoRequest.RepoUrl.ValueString(), associationRepoRequest.RepoToken.ValueString(),
+			associationRepoRequest.RepoBranch.ValueString())
+		if err != nil {
+			resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to onboard repository to space, got error: %s", err))
+			return
+		}
+	}
+
 	tflog.Trace(ctx, "Resource Created Successful!")
 
 	// Save data into Terraform state.
@@ -235,6 +283,17 @@ func (r *TorqueSpaceResource) Delete(ctx context.Context, req resource.DeleteReq
 	if resp.Diagnostics.HasError() {
 		return
 	}
+
+	// Remove repos from space.
+	for _, associationRequest := range data.AssociatedKubernetesAgents {
+		err := r.client.RemoveAgentFromSpace(associationRequest.AgentName.ValueString(), data.Name.ValueString())
+		if err != nil {
+			resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to attach agent to space, got error: %s", err))
+			return
+		}
+	}
+
+	// Delete the space.
 	err := r.client.DeleteSpace(data.Name.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to delete space, got error: %s", err))

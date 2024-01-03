@@ -30,3 +30,11 @@ type AgentSpaceAssociation struct {
 	DefaultNamespace      string `json:"namespace"`
 	DefaultServiceAccount string `json:"service_account"`
 }
+
+type RepoSpaceAssociation struct {
+	URL         string `json:"repository_url"`
+	AccessToken string `json:"access_token"`
+	Type        string `json:"repository_type"`
+	Branch      string `json:"branch"`
+	Name        string `json:"repository_name"`
+}

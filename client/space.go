@@ -87,11 +87,41 @@ func (c *Client) AddAgentToSpace(agent string, ns string, sa string, space strin
 	return nil
 }
 
-// not tested.
-func (c *Client) RemoveAgentFromSpace(agent string) error {
+func (c *Client) RemoveAgentFromSpace(agent string, space string) error {
+
+	req, err := http.NewRequest("DELETE", fmt.Sprintf("%sapi/spaces/%s/agents/%s", c.HostURL, space, agent), nil)
+	if err != nil {
+		return err
+	}
+
+	req.Header.Add("Content-Type", "application/json")
+	req.Header.Add("Accept", "application/json")
+
+	_, err = c.doRequest(req, &c.Token)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (c *Client) OnboardRepoToSpace(space_name string, repo_name string, repo_type string, repo_url string, repo_token string, repo_branch string) error {
 	fmt.Println(c.HostURL + "api/spaces")
 
-	req, err := http.NewRequest("DELETE", fmt.Sprintf("%sapi/spaces/%s/agents/%s", c.HostURL, c.Space, agent), nil)
+	data := RepoSpaceAssociation{
+		Type:        repo_type,
+		URL:         repo_url,
+		AccessToken: repo_token,
+		Branch:      repo_branch,
+		Name:        repo_name,
+	}
+
+	payload, err := json.Marshal(data)
+	if err != nil {
+		log.Fatalf("impossible to marshall agent association: %s", err)
+	}
+
+	req, err := http.NewRequest("POST", fmt.Sprintf("%sapi/spaces/%s/repositories", c.HostURL, space_name), bytes.NewReader(payload))
 	if err != nil {
 		return err
 	}
