@@ -136,3 +136,22 @@ func (c *Client) OnboardRepoToSpace(space_name string, repo_name string, repo_ty
 
 	return nil
 }
+
+func (c *Client) RemoveRepoFromSpace(space_name string, repo_name string) error {
+	fmt.Println(c.HostURL + "api/spaces")
+
+	req, err := http.NewRequest("DELETE", fmt.Sprintf("%sapi/spaces/%s/repositories?repository_name=%s", c.HostURL, space_name, repo_name), nil)
+	if err != nil {
+		return err
+	}
+
+	req.Header.Add("Content-Type", "application/json")
+	req.Header.Add("Accept", "application/json")
+
+	_, err = c.doRequest(req, &c.Token)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
