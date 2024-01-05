@@ -196,7 +196,10 @@ func (p *torqueProvider) Configure(ctx context.Context, req provider.ConfigureRe
 func (p *torqueProvider) Resources(ctx context.Context) []func() resource.Resource {
 	return []func() resource.Resource{
 		NewTorqueIntrospectionResource,
+		NewTorqueAgentSpaceAssociationResource,
+		NewTorqueSpaceRepositoryResource,
 		NewTorqueSpaceResource,
+		NewTorqueUserSpaceAssociationResource,
 	}
 }
 
