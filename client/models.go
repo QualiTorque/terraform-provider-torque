@@ -14,6 +14,19 @@ type User struct {
 	Permissions          []string `json:"permissions"`
 }
 
+type Blueprint struct {
+	BlueprintName string `json:"blueprint_name"`
+	Name          string `json:"name"`
+	DisplayName   string `json:"display_name"`
+	RepoName      string `json:"repository_name"`
+	RepoBranch    string `json:"repository_branch"`
+	Commit        string `json:"commit"`
+	Description   string `json:"description"`
+	Url           string `json:"url"`
+	ModifiedBy    string `json:"modified_by"`
+	Published     bool   `json:"enabled"`
+}
+
 type UserSpaceAssociation struct {
 	Email     string `json:"email"`
 	SpaceRole string `json:"space_role"`
@@ -37,4 +50,17 @@ type RepoSpaceAssociation struct {
 	Type        string `json:"repository_type"`
 	Branch      string `json:"branch"`
 	Name        string `json:"repository_name"`
+}
+
+type TagNameValue struct {
+	Name  string `json:"name"`
+	Value string `json:"value"`
+}
+
+type Tag struct {
+	Name           string   `json:"tag_name"`
+	Value          string   `json:"tag_value"`
+	Scope          string   `json:"tag_scope"`
+	Description    string   `json:"description"`
+	PossibleValues []string `json:"possible_values"`
 }

@@ -207,5 +207,6 @@ func (p *torqueProvider) Resources(ctx context.Context) []func() resource.Resour
 func (p *torqueProvider) DataSources(_ context.Context) []func() datasource.DataSource {
 	return []func() datasource.DataSource{
 		NewUserDataSource,
+		NewSpaceRepositoryBlueprintsDataSource,
 	}
 }

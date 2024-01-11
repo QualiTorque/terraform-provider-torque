@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"strconv"
 )
 
 func (c *Client) CreateSpace(name string, color string, icon string) error {
@@ -141,6 +142,58 @@ func (c *Client) RemoveRepoFromSpace(space_name string, repo_name string) error 
 	fmt.Println(c.HostURL + "api/spaces")
 
 	req, err := http.NewRequest("DELETE", fmt.Sprintf("%sapi/spaces/%s/repositories?repository_name=%s", c.HostURL, space_name, repo_name), nil)
+	if err != nil {
+		return err
+	}
+
+	req.Header.Add("Content-Type", "application/json")
+	req.Header.Add("Accept", "application/json")
+
+	_, err = c.doRequest(req, &c.Token)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// /api/spaces/{space_name}/blueprints.
+func (c *Client) GetSpaceBlueprints(space_name string) ([]Blueprint, error) {
+	req, err := http.NewRequest("GET", fmt.Sprintf("%sapi/spaces/%s/blueprints", c.HostURL, space_name), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	body, err := c.doRequest(req, &c.Token)
+	if err != nil {
+		return nil, err
+	}
+
+	blueprints := []Blueprint{}
+	err = json.Unmarshal(body, &blueprints)
+	if err != nil {
+		return nil, err
+	}
+
+	fmt.Println("Blueprint list length: " + strconv.Itoa(len(blueprints)))
+
+	return blueprints, nil
+}
+
+func (c *Client) SetSpaceTagValue(space_name string, tag_name string, tag_value string) error {
+	fmt.Println(c.HostURL + "api/spaces")
+
+	data := TagNameValue{
+		Name:  tag_name,
+		Value: tag_value,
+	}
+
+	payload, err := json.Marshal(data)
+	if err != nil {
+		log.Fatalf("impossible to marshall tag key value association: %s", err)
+	}
+
+	req, err := http.NewRequest("POST", fmt.Sprintf("%sapi/spaces/%s/settings/tags", c.HostURL, space_name), bytes.NewReader(payload))
 	if err != nil {
 		return err
 	}
