@@ -42,3 +42,29 @@ resource "torque_repository_space_association" "github" {
   branch          = "main"
   repository_name = "Torque-Samples"
 }
+
+resource "torque_tag" "newtag" {
+  name            = "my new tag"
+  value           = "tag value"
+  scope           = "space"
+  possible_values = ["a", "b", "c"]
+  description     = "something to say about this tag"
+}
+
+resource "torque_space_tag_value_association" "dev_space" {
+  space = "development"
+  tag   = "cost_cetner"
+  value = "Dev"
+}
+
+data "torque_space_blueprints" "blueprints" {
+  space_name = "01-Development"
+  //filter by repo
+}
+
+resource "torque_catalog_item_resource" "something" {
+    // foreach and filter if needed
+    space_name = "01-Development"
+    blueprint_name = "eks-cluster_1"
+    repository_name = "qtorque"
+}

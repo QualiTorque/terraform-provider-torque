@@ -48,7 +48,7 @@ type blueprintModel struct {
 
 // Metadata returns the data source type name.
 func (d *spaceRepoBlueprintsDataSource) Metadata(_ context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_space_repository_blueprints"
+	resp.TypeName = req.ProviderTypeName + "_space_blueprints"
 }
 
 // Schema defines the schema for the data source.

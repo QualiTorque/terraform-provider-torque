@@ -64,3 +64,8 @@ type Tag struct {
 	Description    string   `json:"description"`
 	PossibleValues []string `json:"possible_values"`
 }
+
+type CatalogItemRequest struct {
+	BlueprintName  string `json:"blueprint_name"`
+	RepositoryName string `json:"repository_name"`
+}
