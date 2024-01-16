@@ -63,8 +63,8 @@ data "torque_space_blueprints" "blueprints" {
 }
 
 resource "torque_catalog_item_resource" "something" {
-    // foreach and filter if needed
-    space_name = "01-Development"
-    blueprint_name = "eks-cluster_1"
-    repository_name = "qtorque"
+  // foreach and filter if needed
+  space_name      = "01-Development"
+  blueprint_name  = "eks-cluster_1"
+  repository_name = "qtorque"
 }
