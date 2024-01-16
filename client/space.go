@@ -209,7 +209,6 @@ func (c *Client) SetSpaceTagValue(space_name string, tag_name string, tag_value 
 	return nil
 }
 
-// publish a blueprint
 func (c *Client) PublishBlueprintInSpace(space_name string, repo_name string, blueprint_name string) error {
 	data := CatalogItemRequest{
 		BlueprintName:  blueprint_name,

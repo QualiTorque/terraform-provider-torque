@@ -18,6 +18,9 @@ func (c *Client) GetBlueprint(space_name string, name string) (Blueprint, error)
 	req.Header.Add("Accept", "application/json")
 
 	body, err := c.doRequest(req, &c.Token)
+	if err != nil {
+		return Blueprint{}, err
+	}
 
 	blueprint := Blueprint{}
 	err = json.Unmarshal(body, &blueprint)
