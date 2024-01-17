@@ -52,9 +52,9 @@ resource "torque_tag" "newtag" {
 }
 
 resource "torque_space_tag_value_association" "dev_space" {
-  space = "development"
-  tag   = "cost_cetner"
-  value = "Dev"
+  space_name  = "development"
+  tag_name    = "cost_cetner"
+  value_value = "Dev"
 }
 
 data "torque_space_blueprints" "blueprints" {
