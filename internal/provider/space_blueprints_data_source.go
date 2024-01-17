@@ -153,6 +153,7 @@ func (d *spaceRepoBlueprintsDataSource) Read(ctx context.Context, req datasource
 	}
 
 	state.SpaceName = types.StringValue(space.ValueString())
+	state.Blueprints = []blueprintModel{}
 
 	for _, blueprintItem := range blueprints_data {
 		blueprintData := blueprintModel{
