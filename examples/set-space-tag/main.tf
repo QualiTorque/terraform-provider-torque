@@ -15,5 +15,5 @@ provider "torque" {
 resource "torque_tag_resource" "dev_space" {
   name  = "mytag"
   value = "mytagvalue"
-  scope  = "space"
+  scope = "space"
 }

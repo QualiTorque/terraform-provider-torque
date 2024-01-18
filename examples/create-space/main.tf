@@ -69,18 +69,3 @@ resource "torque_catalog_item_resource" "something" {
   repository_name = "qtorque"
 }
 
-data "torque_space_tags" "tags" {
-  space_name = "something"
-}
-
-response will be 
-[
-  { 
-    "name":
-    "value"
-    "possible_values"
-    "scope"
-    "description"
-  },
-
-]

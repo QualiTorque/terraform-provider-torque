@@ -19,6 +19,10 @@ Get blueprint information for a specific repository in a space
 
 - `space_name` (String) The name of the space to use
 
+### Optional
+
+- `filter_by_repository_name` (String) The name of the repository to filter by
+
 ### Read-Only
 
 - `blueprints` (Attributes List) Blueprints in the space (see [below for nested schema](#nestedatt--blueprints))

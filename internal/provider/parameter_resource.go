@@ -49,12 +49,12 @@ func (r *TorqueParameterResource) Schema(ctx context.Context, req resource.Schem
 			},
 			"value": schema.StringAttribute{
 				MarkdownDescription: "Tag value to be set as the parameter",
-				Required:            false,
+				Optional:            true,
 				Computed:            false,
 			},
 			"sensitive": schema.StringAttribute{
 				MarkdownDescription: "Sensitive or not",
-				Required:            false,
+				Optional:            true,
 				Computed:            false,
 			},
 			"description": schema.StringAttribute{
