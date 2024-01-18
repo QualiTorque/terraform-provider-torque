@@ -155,7 +155,7 @@ func (r *TorqueSpaceParameterResource) Delete(ctx context.Context, req resource.
 	// Delete the space.
 	err := r.client.DeleteSpaceParameter(data.SpaceName.ValueString(), data.Name.ValueString())
 	if err != nil {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to delete space, got error: %s", err))
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to delete space parameter, got error: %s", err))
 		return
 	}
 

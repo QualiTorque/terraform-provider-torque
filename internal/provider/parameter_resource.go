@@ -150,7 +150,7 @@ func (r *TorqueParameterResource) Delete(ctx context.Context, req resource.Delet
 	// Delete the space.
 	err := r.client.DeleteAccountParameter(data.Name.ValueString())
 	if err != nil {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to delete space, got error: %s", err))
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to delete parameter, got error: %s", err))
 		return
 	}
 
