@@ -68,3 +68,4 @@ resource "torque_catalog_item_resource" "something" {
   blueprint_name  = "eks-cluster_1"
   repository_name = "qtorque"
 }
+
