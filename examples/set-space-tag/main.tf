@@ -12,8 +12,8 @@ provider "torque" {
   token = ""
 }
 
-resource "torque_space_tag_value_association" "dev_space" {
-  space_name = "dvir"
-  tag_name   = "test"
-  tag_value  = "Dev"
+resource "torque_tag_resource" "dev_space" {
+  name  = "mytag"
+  value = "mytagvalue"
+  scope  = "space"
 }

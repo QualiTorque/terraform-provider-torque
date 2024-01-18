@@ -58,3 +58,26 @@ func (c *Client) RemoveTag(name string) error {
 
 	return nil
 }
+
+func (c *Client) GetSpaceTags(space_name string) ([]Tag, error) {
+
+	req, err := http.NewRequest("GET", fmt.Sprintf("%sapi/spaces/%s/settings/tags", c.HostURL, space_name), nil)
+	if err != nil {
+		return []Tag{}, err
+	}
+
+	req.Header.Add("Content-Type", "application/json")
+	req.Header.Add("Accept", "application/json")
+
+	body, err := c.doRequest(req, &c.Token)
+	if err != nil {
+		return []Tag{}, err
+	}
+
+	blueprint := []Tag{}
+	err = json.Unmarshal(body, &blueprint)
+	if err != nil {
+		return []Tag{}, err
+	}
+	return blueprint, nil
+}

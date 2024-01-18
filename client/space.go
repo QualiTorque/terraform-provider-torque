@@ -254,3 +254,99 @@ func (c *Client) UnpublishBlueprintInSpace(space_name string, repo_name string, 
 
 	return nil
 }
+
+func (c *Client) AddSpaceParameter(space_name string, name string, value string, sensitive bool, description string) error {
+	data := ParameterRequest{
+		Name:        name,
+		Value:       value,
+		Sensitive:   sensitive,
+		Description: description,
+	}
+
+	payload, err := json.Marshal(data)
+	if err != nil {
+		log.Fatalf("impossible to marshall agent association: %s", err)
+	}
+
+	req, err := http.NewRequest("POST", fmt.Sprintf("%sapi/spaces/%s/settings/parameters", c.HostURL, space_name), bytes.NewReader(payload))
+	if err != nil {
+		return err
+	}
+
+	req.Header.Add("Content-Type", "application/json")
+	req.Header.Add("Accept", "application/json")
+
+	_, err = c.doRequest(req, &c.Token)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (c *Client) DeleteSpaceParameter(space_name string, parameter_name string) error {
+	fmt.Println(c.HostURL + "api/spaces")
+
+	req, err := http.NewRequest("DELETE", fmt.Sprintf("%sapi/spaces/%s/settings/parameters/%s", c.HostURL, space_name, parameter_name), nil)
+	if err != nil {
+		return err
+	}
+
+	req.Header.Add("Content-Type", "application/json")
+	req.Header.Add("Accept", "application/json")
+
+	_, err = c.doRequest(req, &c.Token)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (c *Client) AddAccountParameter(name string, value string, sensitive bool, description string) error {
+	data := ParameterRequest{
+		Name:        name,
+		Value:       value,
+		Sensitive:   sensitive,
+		Description: description,
+	}
+
+	payload, err := json.Marshal(data)
+	if err != nil {
+		log.Fatalf("impossible to marshall agent association: %s", err)
+	}
+
+	req, err := http.NewRequest("POST", fmt.Sprintf("%sapi/spaces/settings/parameters", c.HostURL), bytes.NewReader(payload))
+	if err != nil {
+		return err
+	}
+
+	req.Header.Add("Content-Type", "application/json")
+	req.Header.Add("Accept", "application/json")
+
+	_, err = c.doRequest(req, &c.Token)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (c *Client) DeleteAccountParameter(parameter_name string) error {
+	fmt.Println(c.HostURL + "api/spaces")
+
+	req, err := http.NewRequest("DELETE", fmt.Sprintf("%sapi/spaces/settings/parameters/%s", c.HostURL, parameter_name), nil)
+	if err != nil {
+		return err
+	}
+
+	req.Header.Add("Content-Type", "application/json")
+	req.Header.Add("Accept", "application/json")
+
+	_, err = c.doRequest(req, &c.Token)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}

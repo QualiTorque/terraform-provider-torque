@@ -65,7 +65,22 @@ type Tag struct {
 	PossibleValues []string `json:"possible_values"`
 }
 
+type TagDetails struct {
+	Name           string   `json:"name"`
+	Value          string   `json:"value"`
+	Scope          string   `json:"created_by"`
+	Description    string   `json:"description"`
+	PossibleValues []string `json:"possible_values"`
+}
+
 type CatalogItemRequest struct {
 	BlueprintName  string `json:"blueprint_name"`
 	RepositoryName string `json:"repository_name"`
+}
+
+type ParameterRequest struct {
+	Name        string `json:"name"`
+	Value       string `json:"value"`
+	Sensitive   bool   `json:"sensitive"`
+	Description string `json:"description"`
 }

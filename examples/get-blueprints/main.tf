@@ -7,13 +7,13 @@ terraform {
 }
 
 provider "torque" {
-  host  = "https://portal.qtorque.io/"
-  space = "01-Development"
+  host  = ""
+  space = ""
   token = ""
 }
 
 data "torque_space_blueprints" "blueprints" {
-  space_name = "01-Development"
+  space_name = ""
   //filter by repo
 }
 

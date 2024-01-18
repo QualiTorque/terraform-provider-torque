@@ -30,6 +30,7 @@ type spaceRepoBlueprintsDataSource struct {
 // userDataSourceModel maps the data source schema data.
 type spaceRepoDataSourceModel struct {
 	SpaceName  types.String     `tfsdk:"space_name"`
+	RepoFilter types.String     `tfsdk:"filter_by_repository_name"`
 	Blueprints []blueprintModel `tfsdk:"blueprints"`
 }
 
@@ -59,6 +60,10 @@ func (d *spaceRepoBlueprintsDataSource) Schema(_ context.Context, _ datasource.S
 			"space_name": schema.StringAttribute{
 				MarkdownDescription: "The name of the space to use",
 				Required:            true,
+			},
+			"filter_by_repository_name": schema.StringAttribute{
+				MarkdownDescription: "The name of the repository to filter by",
+				Optional:            true,
 			},
 			"blueprints": schema.ListNestedAttribute{
 				Description: "Blueprints in the space",
@@ -152,10 +157,22 @@ func (d *spaceRepoBlueprintsDataSource) Read(ctx context.Context, req datasource
 		return
 	}
 
+	// initialize state
 	state.SpaceName = types.StringValue(space.ValueString())
 	state.Blueprints = []blueprintModel{}
 
-	for _, blueprintItem := range blueprints_data {
+	var filteredData []client.Blueprint
+	if !state.RepoFilter.IsNull() {
+		for _, blueprintItem := range blueprints_data {
+			if blueprintItem.RepoName == state.RepoFilter.ValueString() {
+				filteredData = append(filteredData, blueprintItem)
+			}
+		}
+	} else {
+		filteredData = blueprints_data
+	}
+
+	for _, blueprintItem := range filteredData {
 		blueprintData := blueprintModel{
 			BlueprintName: types.StringValue(blueprintItem.BlueprintName),
 			Name:          types.StringValue(blueprintItem.Name),
