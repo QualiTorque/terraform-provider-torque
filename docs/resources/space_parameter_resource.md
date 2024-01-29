@@ -23,5 +23,5 @@ Creation of a new parameter is a Torque space
 ### Optional
 
 - `description` (String) Parameter description
-- `sensitive` (String) Sensitive or not
+- `sensitive` (Boolean) Sensitive or not
 - `value` (String) Tag value to be set as the parameter in the space

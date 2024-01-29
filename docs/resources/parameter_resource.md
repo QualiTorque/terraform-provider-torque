@@ -22,5 +22,5 @@ Creation of a new parameter is a Torque
 ### Optional
 
 - `description` (String) Parameter description
-- `sensitive` (String) Sensitive or not
+- `sensitive` (Boolean) Sensitive or not
 - `value` (String) Tag value to be set as the parameter
