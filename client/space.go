@@ -316,7 +316,6 @@ func (c *Client) AddAccountParameter(name string, value string, sensitive bool, 
 		log.Fatalf("impossible to marshall agent association: %s", err)
 	}
 
-	
 	req, err := http.NewRequest("POST", fmt.Sprintf("%sapi/settings/parameters", c.HostURL), bytes.NewReader(payload))
 	if err != nil {
 		return err
