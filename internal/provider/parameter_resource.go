@@ -52,7 +52,7 @@ func (r *TorqueParameterResource) Schema(ctx context.Context, req resource.Schem
 				Optional:            true,
 				Computed:            false,
 			},
-			"sensitive": schema.StringAttribute{
+			"sensitive": schema.BoolAttribute{
 				MarkdownDescription: "Sensitive or not",
 				Optional:            true,
 				Computed:            false,
