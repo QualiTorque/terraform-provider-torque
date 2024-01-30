@@ -38,7 +38,7 @@ type TorqueTagResourceModel struct {
 }
 
 func (r *TorqueTagResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
-	resp.TypeName = "torque_tag_resource"
+	resp.TypeName = "torque_tag"
 }
 
 func (r *TorqueTagResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
@@ -110,18 +110,19 @@ func (r *TorqueTagResource) Create(ctx context.Context, req resource.CreateReque
 		for _, pos_value := range data.PossibleValues.Elements() {
 			possible = append(possible, pos_value.String())
 		}
-
-		err := r.client.AddTag(data.Name.ValueString(), data.Value.ValueString(), data.Description.ValueString(), possible, data.Scope.ValueString())
-		if err != nil {
-			resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create space, got error: %s", err))
-			return
-		}
-
-		tflog.Trace(ctx, "Resource Created Successful!")
-
-		// Save data into Terraform state.
-		resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 	}
+
+	err := r.client.AddTag(data.Name.ValueString(), data.Value.ValueString(), data.Description.ValueString(), possible, data.Scope.ValueString())
+	if err != nil {
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create space, got error: %s", err))
+		return
+	}
+
+	tflog.Trace(ctx, "Resource Created Successful!")
+
+	// Save data into Terraform state.
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
+
 }
 
 func (r *TorqueTagResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {

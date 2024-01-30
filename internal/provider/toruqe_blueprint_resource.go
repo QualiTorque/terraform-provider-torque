@@ -40,7 +40,7 @@ type TorqueBlueprintResourceModel struct {
 }
 
 func (r *TorqueBlueprintResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
-	resp.TypeName = "torque_blueprint_resource"
+	resp.TypeName = "torque_blueprint"
 }
 
 func (r *TorqueBlueprintResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {

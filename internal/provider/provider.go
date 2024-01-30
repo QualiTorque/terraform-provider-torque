@@ -206,6 +206,7 @@ func (p *torqueProvider) Resources(ctx context.Context) []func() resource.Resour
 		NewTorqueTagSpaceValueAssociationResource,
 		NewTorqueParameterResource,
 		NewTorqueSpaceParameterResource,
+		NewTorqueGroupResource,
 	}
 }
 

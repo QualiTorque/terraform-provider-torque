@@ -350,3 +350,54 @@ func (c *Client) DeleteAccountParameter(parameter_name string) error {
 
 	return nil
 }
+
+func (c *Client) AddGroupToSpace(groupName string, description string, idpId string, users []string, accountRole string, spaceRole []SpaceRole) error {
+
+	data := GroupRequest{
+		Name:        groupName,
+		Description: description,
+		IdpId:       idpId,
+		Users:       users,
+		AccountRole: accountRole,
+		SpaceRoles:  spaceRole,
+	}
+
+	payload, err := json.Marshal(data)
+	if err != nil {
+		log.Fatalf("impossible to marshall group request: %s", err)
+	}
+
+	req, err := http.NewRequest("POST", fmt.Sprintf("%sapi/groups", c.HostURL), bytes.NewReader(payload))
+	if err != nil {
+		return err
+	}
+
+	req.Header.Add("Content-Type", "application/json")
+	req.Header.Add("Accept", "application/json")
+
+	_, err = c.doRequest(req, &c.Token)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (c *Client) DeleteGroup(group_name string) error {
+	fmt.Println(c.HostURL + "api/spaces")
+
+	req, err := http.NewRequest("DELETE", fmt.Sprintf("%sapi/groups/%s", c.HostURL, group_name), nil)
+	if err != nil {
+		return err
+	}
+
+	req.Header.Add("Content-Type", "application/json")
+	req.Header.Add("Accept", "application/json")
+
+	_, err = c.doRequest(req, &c.Token)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}

@@ -34,7 +34,7 @@ type TorqueParameterResourceModel struct {
 }
 
 func (r *TorqueParameterResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
-	resp.TypeName = "torque_parameter_resource"
+	resp.TypeName = "torque_parameter"
 }
 
 func (r *TorqueParameterResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {

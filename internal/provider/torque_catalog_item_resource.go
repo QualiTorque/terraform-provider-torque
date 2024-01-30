@@ -33,7 +33,7 @@ type TorqueCatalogItemResourceModel struct {
 }
 
 func (r *TorqueCatalogItemResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
-	resp.TypeName = "torque_catalog_item_resource"
+	resp.TypeName = "torque_catalog_item"
 }
 
 func (r *TorqueCatalogItemResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
