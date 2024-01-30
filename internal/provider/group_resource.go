@@ -82,7 +82,7 @@ func (r *TorqueGroupResource) Schema(ctx context.Context, req resource.SchemaReq
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
 						"space_name": schema.StringAttribute{
-							Description: "An exsiting Torque space name",
+							Description: "An existing Torque space name",
 							Computed:    false,
 							Optional:    true,
 						},
