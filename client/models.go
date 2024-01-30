@@ -84,3 +84,17 @@ type ParameterRequest struct {
 	Sensitive   bool   `json:"sensitive"`
 	Description string `json:"description"`
 }
+
+type GroupRequest struct {
+	Name        string      `json:"name"`
+	Description string      `json:"description"`
+	IdpId       string      `json:"idp_identifier"`
+	Users       []string    `json:"users"`
+	AccountRole string      `json:"account_role"`
+	SpaceRoles  []SpaceRole `json:"space_roles"`
+}
+
+type SpaceRole struct {
+	SpaceName string `json:"space_name"`
+	SpaceRole string `json:"space_role"`
+}

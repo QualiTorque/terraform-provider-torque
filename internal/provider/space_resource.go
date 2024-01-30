@@ -33,7 +33,7 @@ type TorqueSpaceResourceModel struct {
 }
 
 func (r *TorqueSpaceResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
-	resp.TypeName = "torque_space_resource"
+	resp.TypeName = "torque_space"
 }
 
 func (r *TorqueSpaceResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
