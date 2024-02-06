@@ -98,3 +98,10 @@ type SpaceRole struct {
 	SpaceName string `json:"space_name"`
 	SpaceRole string `json:"space_role"`
 }
+
+type AwsCostTaret struct {
+	Name       string `json:"name"`
+	Type       string `json:"type"`
+	ARN        string `json:"role_arn"`
+	ExternalId string `json:"external_id"`
+}

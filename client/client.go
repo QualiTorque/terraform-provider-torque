@@ -19,7 +19,7 @@ type Client struct {
 
 func NewClient(host, space, token *string) (*Client, error) {
 	c := Client{
-		HTTPClient: &http.Client{Timeout: 20 * time.Second},
+		HTTPClient: &http.Client{Timeout: 120 * time.Second},
 		HostURL:    HostURL,
 	}
 

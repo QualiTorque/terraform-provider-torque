@@ -11,7 +11,7 @@ import (
 func (c *Client) AddTag(name string, value string, description string, possible_values []string, scope string) error {
 	fmt.Println(c.HostURL + "api/spaces")
 
-	user := Tag{
+	tag := Tag{
 		Name:           name,
 		Value:          value,
 		Scope:          scope,
@@ -19,7 +19,7 @@ func (c *Client) AddTag(name string, value string, description string, possible_
 		PossibleValues: possible_values,
 	}
 
-	payload, err := json.Marshal(user)
+	payload, err := json.Marshal(tag)
 	if err != nil {
 		log.Fatalf("impossible to marshall space: %s", err)
 	}

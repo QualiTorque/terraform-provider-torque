@@ -114,7 +114,7 @@ func (r *TorqueTagResource) Create(ctx context.Context, req resource.CreateReque
 
 	err := r.client.AddTag(data.Name.ValueString(), data.Value.ValueString(), data.Description.ValueString(), possible, data.Scope.ValueString())
 	if err != nil {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create space, got error: %s", err))
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create tag, got error: %s", err))
 		return
 	}
 
