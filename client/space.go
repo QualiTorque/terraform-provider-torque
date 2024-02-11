@@ -479,3 +479,62 @@ func (c *Client) DeleteCostTarget(target_name string) error {
 
 	return nil
 }
+
+func (c *Client) GetGroup(group_name string) (GroupRequest, error) {
+	req, err := http.NewRequest("GET", fmt.Sprintf("%sapi/groups", c.HostURL), nil)
+	if err != nil {
+		return GroupRequest{}, err
+	}
+
+	body, err := c.doRequest(req, &c.Token)
+	if err != nil {
+		return GroupRequest{}, err
+	}
+
+	groups := []GroupRequest{}
+	err = json.Unmarshal(body, &groups)
+	if err != nil {
+		return GroupRequest{}, err
+	}
+
+	group := GroupRequest{}
+	for _, n := range groups {
+		if group_name == n.Name {
+			group = n
+		}
+	}
+
+	return group, nil
+}
+
+func (c *Client) UpdateGroup(groupName string, description string, idpId string, users []string, accountRole string, spaceRole []SpaceRole) error {
+
+	data := GroupRequest{
+		Name:        groupName,
+		Description: description,
+		IdpId:       idpId,
+		Users:       users,
+		AccountRole: accountRole,
+		SpaceRoles:  spaceRole,
+	}
+
+	payload, err := json.Marshal(data)
+	if err != nil {
+		log.Fatalf("impossible to marshall update group request: %s", err)
+	}
+
+	req, err := http.NewRequest("PUT", fmt.Sprintf("%sapi/groups/%s", c.HostURL, groupName), bytes.NewReader(payload))
+	if err != nil {
+		return err
+	}
+
+	req.Header.Add("Content-Type", "application/json")
+	req.Header.Add("Accept", "application/json")
+
+	_, err = c.doRequest(req, &c.Token)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}

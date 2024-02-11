@@ -8,7 +8,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/qualitorque/terraform-provider-torque/client"
 )
 
@@ -143,10 +142,7 @@ func (r *TorqueBlueprintResource) Read(ctx context.Context, req resource.ReadReq
 	}
 
 	for _, n := range results {
-		tflog.Info(ctx, "data.Name.ValueString()"+data.Name.ValueString()+", n.BlueprintName"+n.BlueprintName)
 		if data.Name.ValueString() == n.BlueprintName {
-			tflog.Info(ctx, "WiN!!!")
-			resp.Diagnostics.AddWarning("something!", "something!")
 			data.BlueprintName = types.StringValue(n.BlueprintName)
 			//data.Name = types.StringValue(n.Name)
 			data.RepoName = types.StringValue(n.RepoName)
