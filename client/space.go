@@ -361,6 +361,60 @@ func (c *Client) AddAccountParameter(name string, value string, sensitive bool, 
 	return nil
 }
 
+func (c *Client) GetSpaceParameter(space_name string, parameter_name string) (ParameterRequest, error) {
+	req, err := http.NewRequest("GET", fmt.Sprintf("%sapi/spaces/%s/settings/parameters", c.HostURL, space_name), nil)
+	if err != nil {
+		return ParameterRequest{}, err
+	}
+
+	body, err := c.doRequest(req, &c.Token)
+	if err != nil {
+		return ParameterRequest{}, err
+	}
+
+	params := []ParameterRequest{}
+	err = json.Unmarshal(body, &params)
+	if err != nil {
+		return ParameterRequest{}, err
+	}
+
+	param := ParameterRequest{}
+	for _, n := range params {
+		if parameter_name == n.Name {
+			param = n
+		}
+	}
+
+	return param, nil
+}
+
+func (c *Client) GetAccountParameter(parameter_name string) (ParameterRequest, error) {
+	req, err := http.NewRequest("GET", fmt.Sprintf("%sapi/settings/parameters", c.HostURL), nil)
+	if err != nil {
+		return ParameterRequest{}, err
+	}
+
+	body, err := c.doRequest(req, &c.Token)
+	if err != nil {
+		return ParameterRequest{}, err
+	}
+
+	params := []ParameterRequest{}
+	err = json.Unmarshal(body, &params)
+	if err != nil {
+		return ParameterRequest{}, err
+	}
+
+	param := ParameterRequest{}
+	for _, n := range params {
+		if parameter_name == n.Name {
+			param = n
+		}
+	}
+
+	return param, nil
+}
+
 func (c *Client) DeleteAccountParameter(parameter_name string) error {
 	fmt.Println(c.HostURL + "api/spaces")
 
@@ -465,6 +519,205 @@ func (c *Client) DeleteCostTarget(target_name string) error {
 	fmt.Println(c.HostURL + "api/spaces")
 
 	req, err := http.NewRequest("DELETE", fmt.Sprintf("%sapi/settings/costtargets/%s", c.HostURL, target_name), nil)
+	if err != nil {
+		return err
+	}
+
+	req.Header.Add("Content-Type", "application/json")
+	req.Header.Add("Accept", "application/json")
+
+	_, err = c.doRequest(req, &c.Token)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (c *Client) GetGroup(group_name string) (GroupRequest, error) {
+	req, err := http.NewRequest("GET", fmt.Sprintf("%sapi/groups", c.HostURL), nil)
+	if err != nil {
+		return GroupRequest{}, err
+	}
+
+	body, err := c.doRequest(req, &c.Token)
+	if err != nil {
+		return GroupRequest{}, err
+	}
+
+	groups := []GroupRequest{}
+	err = json.Unmarshal(body, &groups)
+	if err != nil {
+		return GroupRequest{}, err
+	}
+
+	group := GroupRequest{}
+	for _, n := range groups {
+		if group_name == n.Name {
+			group = n
+		}
+	}
+
+	return group, nil
+}
+
+func (c *Client) GetSpace(space_name string) (Space, error) {
+	req, err := http.NewRequest("GET", fmt.Sprintf("%sapi/spaces/%s", c.HostURL, space_name), nil)
+	if err != nil {
+		return Space{}, err
+	}
+
+	body, err := c.doRequest(req, &c.Token)
+	if err != nil {
+		return Space{}, err
+	}
+
+	space := Space{}
+	err = json.Unmarshal(body, &space)
+	if err != nil {
+		return Space{}, err
+	}
+
+	return space, nil
+}
+
+func (c *Client) GetSpaces() ([]Space, error) {
+	req, err := http.NewRequest("GET", fmt.Sprintf("%sapi/spaces", c.HostURL), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	body, err := c.doRequest(req, &c.Token)
+	if err != nil {
+		return nil, err
+	}
+
+	spaces := []Space{}
+	err = json.Unmarshal(body, &spaces)
+	if err != nil {
+		return nil, err
+	}
+
+	return spaces, nil
+}
+
+func (c *Client) UpdateAccountTag(name string, value string, description string, possible_values []string, scope string) error {
+
+	tag := Tag{
+		Name:           name,
+		Value:          value,
+		Scope:          scope,
+		Description:    description,
+		PossibleValues: possible_values,
+	}
+
+	payload, err := json.Marshal(tag)
+	if err != nil {
+		log.Fatalf("impossible to marshall update group request: %s", err)
+	}
+
+	req, err := http.NewRequest("PUT", fmt.Sprintf("%sapi/settings/tags/%s", c.HostURL, name), bytes.NewReader(payload))
+	if err != nil {
+		return err
+	}
+
+	req.Header.Add("Content-Type", "application/json")
+	req.Header.Add("Accept", "application/json")
+
+	_, err = c.doRequest(req, &c.Token)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (c *Client) UpdateAccountParameter(name string, value string, sensitive bool, description string) error {
+
+	data := ParameterRequest{
+		Name:        name,
+		Value:       value,
+		Sensitive:   sensitive,
+		Description: description,
+	}
+
+	payload, err := json.Marshal(data)
+	if err != nil {
+		log.Fatalf("impossible to marshall update group request: %s", err)
+	}
+
+	req, err := http.NewRequest("PUT", fmt.Sprintf("%sapi/settings/parameters/%s", c.HostURL, name), bytes.NewReader(payload))
+	if err != nil {
+		return err
+	}
+
+	req.Header.Add("Content-Type", "application/json")
+	req.Header.Add("Accept", "application/json")
+
+	_, err = c.doRequest(req, &c.Token)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (c *Client) UpdateGroup(groupName string, description string, idpId string, users []string, accountRole string, spaceRole []SpaceRole) error {
+
+	data := GroupRequest{
+		Name:        groupName,
+		Description: description,
+		IdpId:       idpId,
+		Users:       users,
+		AccountRole: accountRole,
+		SpaceRoles:  spaceRole,
+	}
+
+	payload, err := json.Marshal(data)
+	if err != nil {
+		log.Fatalf("impossible to marshall update group request: %s", err)
+	}
+
+	req, err := http.NewRequest("PUT", fmt.Sprintf("%sapi/groups/%s", c.HostURL, groupName), bytes.NewReader(payload))
+	if err != nil {
+		return err
+	}
+
+	req.Header.Add("Content-Type", "application/json")
+	req.Header.Add("Accept", "application/json")
+
+	_, err = c.doRequest(req, &c.Token)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+//  https://portal.qtorque.io/api/spaces/events-ms
+// {"name":"events-ms","users_count":34,"groups_count":1,"color":"darkBlue","icon":"cloud","spaceName":"events-ms"}
+// {
+// 	"name": "10-CloudShell",
+// 	"users_count": 34,
+// 	"groups_count": 1,
+// 	"color": "darkBlue",
+// 	"icon": "screen"
+// },
+
+func (c *Client) UpdateSpace(name string, color string, icon string) error {
+
+	data := Space{
+		Name:  name,
+		Color: color,
+		Icon:  icon,
+	}
+
+	payload, err := json.Marshal(data)
+	if err != nil {
+		log.Fatalf("impossible to marshall update space request: %s", err)
+	}
+
+	req, err := http.NewRequest("PUT", fmt.Sprintf("%sapi/spaces/%s", c.HostURL, name), bytes.NewReader(payload))
 	if err != nil {
 		return err
 	}

@@ -100,7 +100,7 @@ func (r *TorqueSpaceRepositoryResource) Create(ctx context.Context, req resource
 		return
 	}
 
-	err := r.client.OnboardRepoToSpace(data.SpaceName.ValueString(), data.RepoName.ValueString(), trimQuote(data.RepoType.String()),
+	err := r.client.OnboardRepoToSpace(data.SpaceName.ValueString(), data.RepoName.ValueString(), data.RepoType.ValueString(),
 		data.RepoUrl.ValueString(), data.RepoToken.ValueString(), data.RepoBranch.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to onboard repository to space, got error: %s", err))

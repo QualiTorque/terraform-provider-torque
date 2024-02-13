@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/qualitorque/terraform-provider-torque/client"
@@ -57,12 +58,14 @@ func (r *TorqueGroupResource) Schema(ctx context.Context, req resource.SchemaReq
 			"description": schema.StringAttribute{
 				MarkdownDescription: "Group description to be presented in the Torque user interface",
 				Optional:            true,
-				Computed:            false,
+				Computed:            true,
+				Default:             stringdefault.StaticString(""),
 			},
 			"idp_identifier": schema.StringAttribute{
 				MarkdownDescription: "Group association to IDP",
 				Optional:            true,
-				Computed:            false,
+				Computed:            true,
+				Default:             stringdefault.StaticString(""),
 			},
 			"users": schema.ListAttribute{
 				MarkdownDescription: "Users to include in the newly created group",
@@ -73,7 +76,8 @@ func (r *TorqueGroupResource) Schema(ctx context.Context, req resource.SchemaReq
 			"account_role": schema.StringAttribute{
 				MarkdownDescription: "In case the group should be configured in the account level, use this attribute to define the group role in the account",
 				Optional:            true,
-				Computed:            false,
+				Computed:            true,
+				Default:             stringdefault.StaticString(""),
 			},
 			"space_roles": schema.ListNestedAttribute{
 				Description: "key-value pairs of spaces and roles that the newly created group will be associated to",
@@ -99,7 +103,6 @@ func (r *TorqueGroupResource) Schema(ctx context.Context, req resource.SchemaReq
 }
 
 func (r *TorqueGroupResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
-	// Prevent panic if the provider has not been configured.
 	if req.ProviderData == nil {
 		return
 	}
@@ -155,50 +158,126 @@ func (r *TorqueGroupResource) Create(ctx context.Context, req resource.CreateReq
 
 	// Save data into Terraform state.
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
+
 }
 
 func (r *TorqueGroupResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	var data TorqueGroupResourceModel
 
-	// Read Terraform prior state data into the model.
-	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
-
+	diags := req.State.Get(ctx, &data)
+	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	// If applicable, this is a great opportunity to initialize any necessary
-	// provider client data and make a call using it.
-	// httpResp, err := r.client.Do(httpReq)
-	// if err != nil {
-	//     resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read example, got error: %s", err))
-	//     return
-	// }
+	group, err := r.client.GetGroup(data.Name.ValueString())
+	if err != nil {
+		resp.Diagnostics.AddError(
+			"Error Reading group details",
+			"Could not read Torque group name "+data.Name.ValueString()+": "+err.Error(),
+		)
+		return
+	}
 
-	// Save updated data into Terraform state.
-	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
+	// Treat HTTP 404 Not Found status as a signal to recreate resource
+	// and return early
+	if group.Name == "" {
+		tflog.Error(ctx, "Group not found in Torque")
+		resp.State.RemoveResource(ctx)
+		return
+	}
+
+	data.AccountRole = types.StringValue(group.AccountRole)
+	data.Description = types.StringValue(group.Description)
+	data.IdpId = types.StringValue(group.IdpId)
+
+	roles := []SpaceRoleModel{}
+	for _, role := range group.SpaceRoles {
+		roles = append(roles, SpaceRoleModel{
+			SpaceName: types.StringValue(role.SpaceName),
+			SpaceRole: types.StringValue(role.SpaceRole),
+		})
+	}
+
+	data.SpaceRoles = roles
+
+	data.Users, _ = types.ListValueFrom(ctx, types.StringType, group.Users)
+
+	// Set refreshed state
+	diags = resp.State.Set(ctx, &data)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
 }
 
 func (r *TorqueGroupResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+	// Retrieve values from plan
 	var data TorqueGroupResourceModel
 
-	// Read Terraform plan data into the model
-	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
-
+	diags := req.Plan.Get(ctx, &data)
+	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	// If applicable, this is a great opportunity to initialize any necessary
-	// provider client data and make a call using it.
-	// httpResp, err := r.client.Do(httpReq)
-	// if err != nil {
-	//     resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update example, got error: %s", err))
-	//     return
-	// }
+	// Generate API request body from plan
+	var roles []client.SpaceRole
+	for _, role := range data.SpaceRoles {
+		roles = append(roles, client.SpaceRole{
+			SpaceName: role.SpaceName.ValueString(),
+			SpaceRole: role.SpaceRole.ValueString(),
+		})
+	}
 
-	// Save updated data into Terraform state
-	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
+	var users []string
+	if !data.Users.IsNull() {
+		for _, user := range data.Users.Elements() {
+			users = append(users, user.String())
+		}
+	}
+
+	// Update existing order
+	err := r.client.UpdateGroup(data.Name.ValueString(), data.Description.ValueString(), data.IdpId.ValueString(),
+		users, data.AccountRole.ValueString(), roles)
+	if err != nil {
+		resp.Diagnostics.AddError(
+			"Error Updating Torque group",
+			"Could not update group, unexpected error: "+err.Error(),
+		)
+		return
+	}
+
+	group, err := r.client.GetGroup(data.Name.ValueString())
+	if err != nil {
+		resp.Diagnostics.AddError(
+			"Error Reading group details",
+			"Could not read Torque group name "+data.Name.ValueString()+": "+err.Error(),
+		)
+		return
+	}
+
+	data.AccountRole = types.StringValue(group.AccountRole)
+	data.Description = types.StringValue(group.Description)
+	data.IdpId = types.StringValue(group.IdpId)
+
+	n_roles := []SpaceRoleModel{}
+	for _, role := range group.SpaceRoles {
+		n_roles = append(n_roles, SpaceRoleModel{
+			SpaceName: types.StringValue(role.SpaceName),
+			SpaceRole: types.StringValue(role.SpaceRole),
+		})
+	}
+	data.SpaceRoles = n_roles
+
+	data.Users, _ = types.ListValueFrom(ctx, types.StringType, group.Users)
+
+	diags = resp.State.Set(ctx, data)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
 }
 
 func (r *TorqueGroupResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
