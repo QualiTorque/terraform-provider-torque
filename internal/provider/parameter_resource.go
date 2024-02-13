@@ -112,29 +112,78 @@ func (r *TorqueParameterResource) Create(ctx context.Context, req resource.Creat
 func (r *TorqueParameterResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	var data TorqueParameterResourceModel
 
-	// Read Terraform prior state data into the model.
-	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
-
+	diags := req.State.Get(ctx, &data)
+	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	// Save updated data into Terraform state.
-	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
+	parameter, err := r.client.GetAccountParameter(data.Name.ValueString())
+	if err != nil {
+		resp.Diagnostics.AddError(
+			"Error Reading group details",
+			"Could not read Torque group name "+data.Name.ValueString()+": "+err.Error(),
+		)
+		return
+	}
+
+	// Treat HTTP 404 Not Found status as a signal to recreate resource
+	// and return early
+	if parameter.Name == "" {
+		tflog.Error(ctx, "Parameter not found in Torque")
+		resp.State.RemoveResource(ctx)
+		return
+	}
+
+	data.Description = types.StringValue(parameter.Description)
+	data.Value = types.StringValue(parameter.Value)
+	data.Sensitive = types.BoolValue(parameter.Sensitive)
+
+	// Set refreshed state
+	diags = resp.State.Set(ctx, &data)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
 }
 
 func (r *TorqueParameterResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 	var data TorqueParameterResourceModel
 
-	// Read Terraform plan data into the model
-	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
-
+	diags := req.Plan.Get(ctx, &data)
+	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	// Save updated data into Terraform state
-	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
+	// Update existing order
+	err := r.client.UpdateAccountParameter(data.Name.ValueString(), data.Name.ValueString(), data.Sensitive.ValueBool(), data.Description.ValueString())
+	if err != nil {
+		resp.Diagnostics.AddError(
+			"Error Updating Torque parameter",
+			"Could not update group, unexpected error: "+err.Error(),
+		)
+		return
+	}
+
+	param, err := r.client.GetAccountParameter(data.Name.ValueString())
+	if err != nil {
+		resp.Diagnostics.AddError(
+			"Error Reading parameter details",
+			"Could not read Torque parameter name "+data.Name.ValueString()+": "+err.Error(),
+		)
+		return
+	}
+
+	data.Description = types.StringValue(param.Description)
+	data.Sensitive = types.BoolValue(param.Sensitive)
+	data.Value = types.StringValue(param.Value)
+
+	diags = resp.State.Set(ctx, data)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
 }
 
 func (r *TorqueParameterResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
