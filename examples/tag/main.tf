@@ -13,9 +13,9 @@ provider "torque" {
 }
 
 resource "torque_tag" "new_tag" {
-  name = var.tag_name
-  value      = var.tag_value
-  scope       = var.tag_scope
-  description       = var.tag_description
-  possible_values       = var.tag_possible_values
+  name            = var.tag_name
+  value           = var.tag_value
+  scope           = var.tag_scope
+  description     = var.tag_description
+  possible_values = var.tag_possible_values
 }

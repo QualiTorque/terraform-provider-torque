@@ -13,7 +13,7 @@ provider "torque" {
 }
 
 resource "torque_space_parameter" "new_parameter" {
-  space_name        = var.space_name
+  space_name  = var.space_name
   name        = var.parameter_name
   value       = var.parameter_value
   sensitive   = var.parameter_sensitive

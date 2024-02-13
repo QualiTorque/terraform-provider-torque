@@ -13,8 +13,8 @@ provider "torque" {
 }
 
 resource "torque_agent_space_association" "agent_association" {
-  space_name        = var.space_name
-  agent_name       = var.agent_name
-  service_account   = var.service_account
-  namespace   = var.namespace
+  space_name      = var.space_name
+  agent_name      = var.agent_name
+  service_account = var.service_account
+  namespace       = var.namespace
 }

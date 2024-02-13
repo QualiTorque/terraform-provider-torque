@@ -14,6 +14,6 @@ provider "torque" {
 
 resource "torque_user_space_association" "user_association" {
   space_name = var.space_name
-  user_email       = var.user_email
-  user_role       = var.user_role
+  user_email = var.user_email
+  user_role  = var.user_role
 }

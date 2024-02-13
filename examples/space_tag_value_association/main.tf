@@ -14,6 +14,6 @@ provider "torque" {
 
 resource "torque_space_tag_value_association" "tag_association" {
   space_name = var.space_name
-  tag_name       = var.tag_name
-  tag_value       = var.tag_value
+  tag_name   = var.tag_name
+  tag_value  = var.tag_value
 }

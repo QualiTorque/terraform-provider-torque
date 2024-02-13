@@ -13,9 +13,9 @@ provider "torque" {
 }
 
 resource "torque_blueprint_tag_value_association" "tag_association" {
-  space_name        = var.space_name
-  repo_name       = var.blueprint_repo_name
-  tag_name   = var.tag_name
-  tag_value = var.tag_value
+  space_name     = var.space_name
+  repo_name      = var.blueprint_repo_name
+  tag_name       = var.tag_name
+  tag_value      = var.tag_value
   blueprint_name = var.blueprint_name
 }

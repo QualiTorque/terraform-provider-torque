@@ -13,10 +13,10 @@ provider "torque" {
 }
 
 resource "torque_repository_space_association" "repository" {
-  space_name = var.space_name
-  repository_url      = var.repository_url
-  access_token       = var.access_token
-  repository_type       = var.repository_type
-  branch       = var.branch
-  repository_name       = var.repository_name
+  space_name      = var.space_name
+  repository_url  = var.repository_url
+  access_token    = var.access_token
+  repository_type = var.repository_type
+  branch          = var.branch
+  repository_name = var.repository_name
 }

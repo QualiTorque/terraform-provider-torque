@@ -5,7 +5,7 @@ variable "torque_space" {
 
 variable "torque_token" {
   type        = string
-  sensitive = true
+  sensitive   = true
   description = "Torque token (long token or short token) to be used for Torque API authneticaiton."
 }
 
