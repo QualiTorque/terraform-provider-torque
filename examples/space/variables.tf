@@ -3,7 +3,7 @@ variable "torque_space" {
   description = "Torque space to be used during Torque API authentication."
 }
 
-variable "host" {
+variable "torque_host" {
   type        = string
   default     = "https://portal.qtorque.io/"
   description = "Torque portal url"
