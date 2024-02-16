@@ -9,6 +9,12 @@ variable "torque_token" {
   description = "Torque token used to authenticate to the Torque API. Supports both short and long tokens"
 }
 
+variable "torque_host" {
+  type        = string
+  default     = "https://portal.qtorque.io/"
+  description = "Torque portal URL"
+}
+
 variable "group_name" {
   type        = string
   default     = "my-test-group"
