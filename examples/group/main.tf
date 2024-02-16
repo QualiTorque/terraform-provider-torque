@@ -7,12 +7,12 @@ terraform {
 }
 
 provider "torque" {
-  host  = "https://portal.qtorque.io/"
+  host  = var.torque_host
   space = var.torque_space
   token = var.torque_token
 }
 
-resource "torque_catalog_item" "new_group" {
+resource "torque_group" "new_group" {
   group_name     = var.group_name
   description    = var.group_description
   idp_identifier = var.group_idp_identifier
