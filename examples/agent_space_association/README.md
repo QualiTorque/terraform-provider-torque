@@ -1,3 +1,3 @@
-# Torque AWS Cost Target module
+# Torque Agent Space Association module
 
-Configuration in this directory creates a Torque AWS cost collection target.
+Configuration in this directory associate a Torque Agent to a given space.
