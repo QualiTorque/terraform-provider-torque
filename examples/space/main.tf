@@ -7,7 +7,7 @@ terraform {
 }
 
 provider "torque" {
-  host  = var.host
+  host  = var.torque_host
   space = var.torque_space
   token = var.torque_token
 }
