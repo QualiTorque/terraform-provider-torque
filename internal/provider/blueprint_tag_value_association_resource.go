@@ -26,11 +26,11 @@ type TorqueTagBlueprintValueAssociationResource struct {
 }
 
 type TorqueTagBlueprintValueAssociationResourceModel struct {
-	SpaceName     types.String `tfsdk:"space_name"`
-	RepoName      types.String `tfsdk:"repo_name"`
-	TagName       types.String `tfsdk:"tag_name"`
-	TagValue      types.String `tfsdk:"tag_value"`
-	BlueprintName types.String `tfsdk:"blueprint_name"`
+	SpaceName      types.String `tfsdk:"space_name"`
+	RepositoryName types.String `tfsdk:"repository_name"`
+	TagName        types.String `tfsdk:"tag_name"`
+	TagValue       types.String `tfsdk:"tag_value"`
+	BlueprintName  types.String `tfsdk:"blueprint_name"`
 }
 
 func (r *TorqueTagBlueprintValueAssociationResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
@@ -96,7 +96,7 @@ func (r *TorqueTagBlueprintValueAssociationResource) Create(ctx context.Context,
 	}
 
 	err := r.client.SetBlueprintTagValue(data.SpaceName.ValueString(), data.TagName.ValueString(),
-		data.TagValue.ValueString(), data.RepoName.ValueString(), data.BlueprintName.ValueString())
+		data.TagValue.ValueString(), data.RepositoryName.ValueString(), data.BlueprintName.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to set blueprint tag value in space, got error: %s", err))
 		return
