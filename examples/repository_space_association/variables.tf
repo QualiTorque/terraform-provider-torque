@@ -11,7 +11,7 @@ variable "torque_token" {
 
 variable "torque_host" {
   type        = string
-  sensitive   = true
+  default     = "https://portal.qtorque.io/"
   description = "Torque portal URL"
 }
 
