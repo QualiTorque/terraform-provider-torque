@@ -9,6 +9,12 @@ variable "torque_token" {
   description = "Torque token (long token or short token) to be used for Torque API authneticaiton."
 }
 
+variable "torque_host" {
+  type        = string
+  default     = "https://portal.qtorque.io/"
+  description = "Torque portal URL"
+}
+
 variable "space_name" {
   type        = string
   description = "Torque space where the catalog item should be published in."
