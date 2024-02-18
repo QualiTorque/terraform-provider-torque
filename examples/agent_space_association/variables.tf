@@ -14,6 +14,12 @@ variable "space_name" {
   description = "The space to be associated with the agent"
 }
 
+variable "torque_host" {
+  type        = string
+  default     = "https://portal.qtorque.io/"
+  description = "Torque portal URL"
+}
+
 variable "agent_name" {
   type        = string
   description = "The agent name to be associated with the space"
