@@ -105,3 +105,27 @@ type AwsCostTaret struct {
 	ARN        string `json:"role_arn"`
 	ExternalId string `json:"external_id"`
 }
+
+type SubscriptionsRequest struct {
+	Name                  string                                    `json:"name"`
+	Description           string                                    `json:"description"`
+	EndThreshold          int64                                     `json:"end_threshold"`
+	WorkflowStartReminder int64                                     `json:"workflow_start_reminder"`
+	Target                SubscriptionsTargetRequest                `json:"target"`
+	Events                []string                                  `json:"event_types"`
+	WorkflowEventNotifier SubscriptionsWorkflowEventNotifierRequest `json:"workflow_events_notifier"`
+	IdleReminder          []ReminderRequest                         `json:"idle_reminders"`
+}
+
+type SubscriptionsTargetRequest struct {
+	Type        string `json:"type"`
+	Description string `json:"description"`
+}
+
+type SubscriptionsWorkflowEventNotifierRequest struct {
+	NotifyOnAllWorkflows bool `json:"notify_on_all_workflows"`
+}
+
+type ReminderRequest struct {
+	TimeInHours int64 `json:"time_in_hours"`
+}
