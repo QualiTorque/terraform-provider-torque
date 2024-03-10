@@ -218,5 +218,6 @@ func (p *torqueProvider) DataSources(_ context.Context) []func() datasource.Data
 	return []func() datasource.DataSource{
 		NewUserDataSource,
 		NewSpaceRepositoryBlueprintsDataSource,
+		NewTorqueSpaceParameterDataSource,
 	}
 }
