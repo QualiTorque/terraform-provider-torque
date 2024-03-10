@@ -118,7 +118,7 @@ func (d *TorqueSpaceParameterDataSource) Read(ctx context.Context, req datasourc
 		)
 		return
 	}
-	
+
 	// initialize state
 	state.Name = types.StringValue(parameter_data.Name)
 	state.Value = types.StringValue(parameter_data.Value)
