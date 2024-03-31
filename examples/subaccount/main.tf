@@ -14,7 +14,7 @@ provider "torque" {
 
 resource "torque_account" "name" {
   parent_account = "trial-3ba8f8b0"
-  account_name   = "amir"
+  account_name   = "amir-tf1"
   password       = "Zubur123!"
-  company        = "Quali"
+  company        = "Quali1"
 }

@@ -140,25 +140,28 @@ func (r *TorqueAccountResource) Read(ctx context.Context, req resource.ReadReque
 }
 
 func (r *TorqueAccountResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var data TorqueAccountResourceModel
+	// var data TorqueAccountResourceModel
 
 	// Read Terraform plan data into the model
-	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
+	// resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
 
-	if resp.Diagnostics.HasError() {
-		return
-	}
-
-	// If applicable, this is a great opportunity to initialize any necessary
-	// provider client data and make a call using it.
-	// httpResp, err := r.client.Do(httpReq)
-	// if err != nil {
-	//     resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update example, got error: %s", err))
-	//     return
+	// if resp.Diagnostics.HasError() {
+	// 	return
 	// }
+	// // If applicable, this is a great opportunity to initialize any necessary
+	// // provider client data and make a call using it.
+	// // httpResp, err := r.client.Do(httpReq)
+	// // if err != nil {
+	// //     resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update example, got error: %s", err))
+	// //     return
+	// // }
 
-	// Save updated data into Terraform state
-	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
+	// // Save updated data into Terraform state
+	// resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
+	resp.Diagnostics.AddError(
+		"Resource updates of resource type torque_account are not permitted",
+		"Cannot change details of torque account, use terraform destroy to delete it or create a new one",
+	)
 }
 
 func (r *TorqueAccountResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
