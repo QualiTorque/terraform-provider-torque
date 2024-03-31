@@ -13,8 +13,8 @@ provider "torque" {
 }
 
 resource "torque_account" "name" {
-  parent_account = "trial-3ba8f8b0"
-  account_name   = "amir-tf1"
-  password       = "Zubur123!"
-  company        = "Quali1"
+  parent_account = var.parent_account
+  account_name   = var.account_name
+  password       = var.password
+  company        = var.company
 }

@@ -43,24 +43,25 @@ func (r *TorqueAccountResource) Metadata(ctx context.Context, req resource.Metad
 func (r *TorqueAccountResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "Creation of a new Torque account with associated entities (users, repos, etc...)",
+		MarkdownDescription: "Creation of a new Torque sub-account",
 
 		Attributes: map[string]schema.Attribute{
 			"parent_account": schema.StringAttribute{
-				MarkdownDescription: "Name of the new Account to be added to torque",
+				MarkdownDescription: "Name of the Torque parent account, which is the main account of the sub-account to be added to Torque.",
 				Required:            true,
 			},
 			"account_name": schema.StringAttribute{
-				MarkdownDescription: "Name of the new Account to be added to torque",
+				MarkdownDescription: "Name of the new Torque sub-account to be added to Torque.",
 				Required:            true,
 			},
 			"password": schema.StringAttribute{
-				MarkdownDescription: "Account value to be set as the Account value default",
+				MarkdownDescription: "Torque sub-account password.",
 				Required:            true,
 				Computed:            false,
+				Sensitive:           true,
 			},
 			"company": schema.StringAttribute{
-				MarkdownDescription: "Account scope. Possible values: account, account, blueprint, environment",
+				MarkdownDescription: "Company name which the sub-account belongs to.",
 				Required:            true,
 				Computed:            false,
 			},
