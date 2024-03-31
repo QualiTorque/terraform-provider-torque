@@ -129,3 +129,10 @@ type SubscriptionsWorkflowEventNotifierRequest struct {
 type ReminderRequest struct {
 	TimeInHours int64 `json:"time_in_hours"`
 }
+
+type Account struct {
+	ParentAccount string `json:"parent_account"`
+	AccountName   string `json:"account_name"`
+	Password      string `json:"password"`
+	Company       string `json:"company"`
+}
