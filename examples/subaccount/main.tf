@@ -7,7 +7,7 @@ terraform {
 }
 
 provider "torque" {
-  host  = "https://review1.qualilabs.net/"
+  host  = "https://portal.qtorque.io"
   space = var.torque_space
   token = var.torque_token
 }
