@@ -131,9 +131,8 @@ type ReminderRequest struct {
 }
 
 type Account struct {
-	Email     string `json:"email"`
-	FirstName string `json:"first_name"`
-	LastName  string `json:"last_name"`
-	Password  string `json:"password"`
-	Company   string `json:"company"`
+	ParentAccount string `json:"parent_account"`
+	AccountName   string `json:"account_name"`
+	Password      string `json:"password"`
+	Company       string `json:"company"`
 }
