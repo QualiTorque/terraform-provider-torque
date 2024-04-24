@@ -41,6 +41,7 @@ type Environment struct {
 	// Automation       bool   `json:"automation"`
 	// ScheduledEndTime string `json:"scheduled_end_time"`
 	Duration string `json:"duration"`
+	Id       string `json:"id"`
 	// Source           struct {
 	// 	BlueprintName  string `json:"blueprint_name"`
 	// 	RepositoryName string `json:"repository_name"`

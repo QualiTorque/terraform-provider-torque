@@ -8,8 +8,8 @@ import (
 	"net/http"
 )
 
-func (c *Client) CreateEnvironment(Space string, BlueprintName string, EnvironmentName string, Duration string) error {
-	// fmt.Println(c.HostURL + "api/spaces/" + Space + "/environments")
+func (c *Client) CreateEnvironment(Space string, BlueprintName string, EnvironmentName string, Duration string) ([]byte, error) {
+	fmt.Println(c.HostURL + "api/spaces/" + Space + "/environments")
 
 	environment := Environment{
 		BlueprintName:   BlueprintName,
@@ -24,19 +24,19 @@ func (c *Client) CreateEnvironment(Space string, BlueprintName string, Environme
 
 	req, err := http.NewRequest("POST", fmt.Sprintf("%sapi/spaces/%s/environments", c.HostURL, Space), bytes.NewReader(payload))
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	req.Header.Add("Content-Type", "application/json")
 	req.Header.Add("Accept", "application/json")
 
-	_, err = c.doRequest(req, &c.Token)
+	body, err := c.doRequest(req, &c.Token)
 
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	return nil
+	return body, nil
 }
 
 func (c *Client) TerminateEnvironment(Space string, Id string) error {

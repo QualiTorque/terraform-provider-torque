@@ -2,6 +2,7 @@ package provider
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -34,7 +35,7 @@ type TorqueEnvironmentResourceModel struct {
 	EnvironmentName types.String `tfsdk:"environment_name"`
 	BlueprintName   types.String `tfsdk:"blueprint_name"`
 	Space           types.String `tfsdk:"space"`
-	// Id               types.String         `tfsdk:"id"`
+	Id              types.String `tfsdk:"id"`
 	// OwnerEmail       types.String         `tfsdk:"owner_email"`
 	// Description      types.String         `tfsdk:"description"`
 	// Inputs           types.Map            `tfsdk:"inputs"`
@@ -147,11 +148,11 @@ func (r *TorqueEnvironmentResource) Schema(ctx context.Context, req resource.Sch
 			// 	Computed:            false,
 			// 	Optional:            true,
 			// },
-			// "id": schema.StringAttribute{
-			// 	MarkdownDescription: "A list of inputs",
-			// 	Required:            false,
-			// 	Computed:            true,
-			// },
+			"id": schema.StringAttribute{
+				MarkdownDescription: "A list of inputs",
+				Required:            false,
+				Computed:            true,
+			},
 			// "owner_email": schema.StringAttribute{
 			// 	MarkdownDescription: "A list of inputs",
 			// 	Required:            false,
@@ -196,6 +197,11 @@ func (r *TorqueEnvironmentResource) Create(ctx context.Context, req resource.Cre
 		return
 	}
 
+	body, err := r.client.CreateEnvironment(data.Space.ValueString(), data.BlueprintName.ValueString(), data.EnvironmentName.ValueString(), data.Duration.ValueString())
+	if err != nil {
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create Environment, got error: %s", err))
+		return
+	}
 	// Initialize the inputs map
 	// var inputs = make(map[string]string)
 
@@ -204,12 +210,18 @@ func (r *TorqueEnvironmentResource) Create(ctx context.Context, req resource.Cre
 	// 		inputs[key] = value.String()
 	// 	}
 	// }
-
-	err := r.client.CreateEnvironment(data.Space.ValueString(), data.BlueprintName.ValueString(), data.EnvironmentName.ValueString(), data.Duration.ValueString())
-	if err != nil {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create Environment, got error: %s", err))
+	var responseBody map[string]string
+	if err := json.Unmarshal(body, &responseBody); err != nil {
+		resp.Diagnostics.AddError("Parse Error", fmt.Sprintf("Failed to parse response body: %s", err))
 		return
 	}
+	
+	id, ok := responseBody["id"]
+	if !ok {
+		resp.Diagnostics.AddError("ID Error", "ID not found in response body or is not of type string")
+		return
+	}
+	data.Id = types.StringValue(id)
 
 	tflog.Trace(ctx, "Resource Created Successful!")
 
@@ -274,12 +286,12 @@ func (r *TorqueEnvironmentResource) Delete(ctx context.Context, req resource.Del
 		return
 	}
 
-	// Delete the account.
-	// err := r.client.TerminateEnvironment(data.Space.ValueString(), data.Id.ValueString())
-	// if err != nil {
-	// 	resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to delete Account, got error: %s", err))
-	// 	return
-	// }
+	// Terminate the Environment.
+	err := r.client.TerminateEnvironment(data.Space.ValueString(), data.Id.ValueString())
+	if err != nil {
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to delete Environment, got error: %s", err))
+		return
+	}
 
 }
 
