@@ -211,6 +211,7 @@ func (p *torqueProvider) Resources(ctx context.Context) []func() resource.Resour
 		NewTorqueTagBlueprintValueAssociationResource,
 		NewTorqueSpaceEmailNotificationResource,
 		NewTorqueAccountResource,
+		NewTorqueEnvironmentResource,
 	}
 }
 

@@ -27,6 +27,37 @@ type Blueprint struct {
 	Published     bool   `json:"enabled"`
 }
 
+type Environment struct {
+	EnvironmentName string `json:"environment_name"`
+	BlueprintName   string `json:"blueprint_name"`
+	// OwnerEmail      string            `json:"owner_email"`
+	// Description     string            `json:"description"`
+	// Inputs          map[string]string `json:"inputs"`
+	// Tags            map[string]string `json:"tags"`
+	// Collaborators   struct {
+	// 	CollaboratorsEmails []string `json:"collaborators_emails"`
+	// 	AllSpaceMembers     bool     `json:"all_space_members"`
+	// } `json:"collaborators"`
+	// Automation       bool   `json:"automation"`
+	// ScheduledEndTime string `json:"scheduled_end_time"`
+	Duration string `json:"duration"`
+	// Source           struct {
+	// 	BlueprintName  string `json:"blueprint_name"`
+	// 	RepositoryName string `json:"repository_name"`
+	// 	Branch         string `json:"branch"`
+	// 	Commit         string `json:"commit"`
+	// } `json:"source"`
+	// Workflows []struct {
+	// 	Name      string `json:"name"`
+	// 	Schedules []struct {
+	// 		Scheduler  string `json:"scheduler"`
+	// 		Overridden bool   `json:"overridden"`
+	// 	} `json:"schedules"`
+	// 	Reminder        int               `json:"reminder"`
+	// 	InputsOverrides map[string]string `json:"inputs_overrides"`
+	// } `json:"workflows"`
+}
+
 type UserSpaceAssociation struct {
 	Email     string `json:"email"`
 	SpaceRole string `json:"space_role"`
