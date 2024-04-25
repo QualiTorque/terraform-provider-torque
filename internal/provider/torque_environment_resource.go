@@ -86,7 +86,7 @@ func (r *TorqueEnvironmentResource) Schema(ctx context.Context, req resource.Sch
 				Required:            true,
 			},
 			"environment_name": schema.StringAttribute{
-				MarkdownDescription: "Name of the new Torque environment.",
+				MarkdownDescription: "The name for the newly created environment. Environment name can contain any character including special character and spaces.				",
 				Required:            true,
 			},
 			"duration": schema.StringAttribute{
@@ -101,14 +101,14 @@ func (r *TorqueEnvironmentResource) Schema(ctx context.Context, req resource.Sch
 				},
 			},
 			"inputs": schema.MapAttribute{
-				MarkdownDescription: "A list of inputs",
+				MarkdownDescription: "Dictionary of key-value string pairs that will be used as values for the blueprint inputs. In case a value is not provided the input default value will be used. If a default value is not set, a validation error will be thrown upon launch. For example: { 'region': 'eu-west-1', 'application version': '1.0.8' }",
 				ElementType:         types.StringType,
 				Required:            false,
 				Computed:            false,
 				Optional:            true,
 			},
 			"description": schema.StringAttribute{
-				MarkdownDescription: "A list of inputs",
+				MarkdownDescription: "The new environment description that will be presented in the Torque UI following the launch of the environment.				",
 				Required:            false,
 				Computed:            false,
 				Optional:            true,
@@ -181,14 +181,14 @@ func (r *TorqueEnvironmentResource) Schema(ctx context.Context, req resource.Sch
 				Computed:            true,
 			},
 			"owner_email": schema.StringAttribute{
-				MarkdownDescription: "A list of inputs",
+				MarkdownDescription: "The email of the user that should be set as the owner of the new environment. if omitted the current user will be used.				",
 				Required:            false,
 				Computed:            true,
 				Optional:            true,
 				Default:             stringdefault.StaticString("someemail@quali.com"),
 			},
 			"workflows": schema.ListNestedAttribute{
-				MarkdownDescription: "A list of inputs",
+				MarkdownDescription: "Array of workflows that will be attached and enabled on the new environment.",
 				Required:            false,
 				Computed:            false,
 				Optional:            true,

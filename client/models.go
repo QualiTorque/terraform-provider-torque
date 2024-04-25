@@ -41,14 +41,6 @@ type Environment struct {
 	Id               string            `json:"id"`
 	Source           Source            `json:"source"`
 	Workflows        []Workflow        `json:"workflows"`
-	// 	Name      string `json:"name"`
-	// 	Schedules []struct {
-	// 		Scheduler  string `json:"scheduler"`
-	// 		Overridden bool   `json:"overridden"`
-	// 	} `json:"schedules"`
-	// 	Reminder        int               `json:"reminder"`
-	// 	InputsOverrides map[string]string `json:"inputs_overrides"`
-	// }
 }
 
 type Workflow struct {
