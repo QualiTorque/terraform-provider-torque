@@ -43,6 +43,11 @@ type SourceModel struct {
 	Commit         *string `tfsdk:"commit"`
 }
 
+type WorkflowModel struct {
+	Name     types.String `tfsdk:"name"`
+	Reminder types.Int64  `tfsdk:"reminder"`
+}
+
 type TorqueEnvironmentResourceModel struct {
 	EnvironmentName  types.String        `tfsdk:"environment_name"`
 	BlueprintName    types.String        `tfsdk:"blueprint_name"`
@@ -57,6 +62,7 @@ type TorqueEnvironmentResourceModel struct {
 	ScheduledEndTime types.String        `tfsdk:"scheduled_end_time"`
 	Duration         types.String        `tfsdk:"duration"`
 	Source           *SourceModel        `tfsdk:"source"`
+	// Workflows        []WorkflowModel     `tfsdk:"workflows"`
 	// Workflows []struct {
 	// 	Name      string `tfsdk:"name"`
 	// 	Schedules []struct {
@@ -65,7 +71,7 @@ type TorqueEnvironmentResourceModel struct {
 	// 	} `tfsdk:"schedules"`
 	// 	Reminder        types.String      `tfsdk:"reminder"`
 	// 	InputsOverrides map[string]string `tfsdk:"inputs_overrides"`
-	// } `tfsdk:"workflows"`
+	// }
 }
 
 func (r *TorqueEnvironmentResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
@@ -148,28 +154,6 @@ func (r *TorqueEnvironmentResource) Schema(ctx context.Context, req resource.Sch
 						Optional: true,
 					},
 				},
-				// AttributeTypes: map[string]schema.Attribute{
-				// 	"blueprint_name": schema.StringAttribute{
-				// 		Description: "An existing Torque space name",
-				// 		Computed:    false,
-				// 		Optional:    true,
-				// 	},
-				// 	"repository_name": schema.StringAttribute{
-				// 		Description: "Space role to be used for the specific space in the group",
-				// 		Computed:    false,
-				// 		Optional:    true,
-				// 	},
-				// 	"branch": schema.StringAttribute{
-				// 		Description: "An existing Torque space name",
-				// 		Computed:    false,
-				// 		Optional:    true,
-				// 	},
-				// 	"commit": schema.StringAttribute{
-				// 		Description: "Space role to be used for the specific space in the group",
-				// 		Computed:    false,
-				// 		Optional:    true,
-				// 	},
-				// },
 			},
 			"space": schema.StringAttribute{
 				MarkdownDescription: "A list of inputs",
@@ -283,7 +267,7 @@ func (r *TorqueEnvironmentResource) Create(ctx context.Context, req resource.Cre
 			source.Commit = data.Source.Commit
 		}
 	}
-	body, err := r.client.CreateEnvironment(data.Space.ValueString(), data.BlueprintName.ValueString(), data.EnvironmentName.ValueString(), data.Duration.ValueString(),
+	body, err := r.client.CreateEnvironment(data.Space.ValueString(), data.BlueprintName.ValueString(), data.EnvironmentName.ValueString(), data.Duration.ValueString(), data.Description.ValueString(),
 		inputs, data.OwnerEmail.ValueString(), data.Automation.ValueBool(), tags, collaborators, data.ScheduledEndTime.ValueString(), source)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create Environment, got error: %s", err))

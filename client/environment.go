@@ -8,13 +8,14 @@ import (
 	"net/http"
 )
 
-func (c *Client) CreateEnvironment(Space string, BlueprintName string, EnvironmentName string, Duration string,
+func (c *Client) CreateEnvironment(Space string, BlueprintName string, EnvironmentName string, Duration string, Description string,
 	Inputs map[string]string, OwnerEmail string, Automation bool, Tags map[string]string, Collaborators Collaborators, ScheduledEndTime string, Source Source) ([]byte, error) {
 	fmt.Println(c.HostURL + "api/spaces/" + Space + "/environments")
 
 	environment := Environment{
 		BlueprintName:    BlueprintName,
 		EnvironmentName:  EnvironmentName,
+		Description:      Description,
 		Duration:         Duration,
 		Inputs:           Inputs,
 		OwnerEmail:       OwnerEmail,
