@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"strings"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -40,7 +41,7 @@ type TorqueEnvironmentResourceModel struct {
 	OwnerEmail      types.String `tfsdk:"owner_email"`
 	Description     types.String `tfsdk:"description"`
 	Inputs          types.Map    `tfsdk:"inputs"`
-	// Tags             types.Map            `tfsdk:"tags"`
+	Tags            types.Map    `tfsdk:"tags"`
 	// Collaborators    []CollaboratorsModel `tfsdk:"collaborators"`
 	Automation types.Bool `tfsdk:"automation"`
 	// ScheduledEndTime types.String         `tfsdk:"scheduled_end_time"`
@@ -98,13 +99,13 @@ func (r *TorqueEnvironmentResource) Schema(ctx context.Context, req resource.Sch
 				Computed:            false,
 				Optional:            true,
 			},
-			// "tags": schema.MapAttribute{
-			// 	MarkdownDescription: "A list of inputs",
-			// 	ElementType:         types.StringType,
-			// 	Required:            false,
-			// 	Computed:            true,
-			// 	Optional:            true,
-			// },
+			"tags": schema.MapAttribute{
+				MarkdownDescription: "Environment blueprint tags",
+				ElementType:         types.StringType,
+				Required:            false,
+				Computed:            false,
+				Optional:            true,
+			},
 			// "collaborators": schema.ListNestedAttribute{
 			// 	Description: "key-value pairs of spaces and roles that the newly created group will be associated to",
 			// 	Computed:    false,
@@ -207,10 +208,17 @@ func (r *TorqueEnvironmentResource) Create(ctx context.Context, req resource.Cre
 			inputs[key] = value.String()
 		}
 	}
+	var tags = make(map[string]string)
+
+	if !data.Tags.IsNull() {
+		for key, value := range data.Tags.Elements() {
+			tags[key] = strings.Replace(value.String(), "\"", "", -1)
+		}
+	}
 	// if data.OwnerEmail.IsNull() {
 	// 	data.OwnerEmail = basetypes.NewStringValue("amir.r@quali.com") // need to implement and get a way to know the env owner
 	// }
-	body, err := r.client.CreateEnvironment(data.Space.ValueString(), data.BlueprintName.ValueString(), data.EnvironmentName.ValueString(), data.Duration.ValueString(), inputs, data.OwnerEmail.ValueString(), data.Automation.ValueBool())
+	body, err := r.client.CreateEnvironment(data.Space.ValueString(), data.BlueprintName.ValueString(), data.EnvironmentName.ValueString(), data.Duration.ValueString(), inputs, data.OwnerEmail.ValueString(), data.Automation.ValueBool(), tags)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create Environment, got error: %s", err))
 		return

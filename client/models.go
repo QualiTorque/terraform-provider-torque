@@ -33,7 +33,7 @@ type Environment struct {
 	OwnerEmail      string            `json:"owner_email"`
 	Description     string            `json:"description"`
 	Inputs          map[string]string `json:"inputs"`
-	// Tags            map[string]string `json:"tags"`
+	Tags            map[string]string `json:"tags"`
 	// Collaborators   struct {
 	// 	CollaboratorsEmails []string `json:"collaborators_emails"`
 	// 	AllSpaceMembers     bool     `json:"all_space_members"`
