@@ -8,6 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/qualitorque/terraform-provider-torque/client"
@@ -36,12 +37,12 @@ type TorqueEnvironmentResourceModel struct {
 	BlueprintName   types.String `tfsdk:"blueprint_name"`
 	Space           types.String `tfsdk:"space"`
 	Id              types.String `tfsdk:"id"`
-	// OwnerEmail       types.String         `tfsdk:"owner_email"`
-	// Description      types.String         `tfsdk:"description"`
-	// Inputs           types.Map            `tfsdk:"inputs"`
+	OwnerEmail      types.String `tfsdk:"owner_email"`
+	Description     types.String `tfsdk:"description"`
+	Inputs          types.Map    `tfsdk:"inputs"`
 	// Tags             types.Map            `tfsdk:"tags"`
 	// Collaborators    []CollaboratorsModel `tfsdk:"collaborators"`
-	// Automation       types.Bool           `tfsdk:"automation"`
+	Automation types.Bool `tfsdk:"automation"`
 	// ScheduledEndTime types.String         `tfsdk:"scheduled_end_time"`
 	Duration types.String `tfsdk:"duration"`
 	// Source           struct {
@@ -84,19 +85,19 @@ func (r *TorqueEnvironmentResource) Schema(ctx context.Context, req resource.Sch
 				Required:            true,
 				Computed:            false,
 			},
-			// "inputs": schema.MapAttribute{
-			// 	MarkdownDescription: "A list of inputs",
-			// 	ElementType:         types.StringType,
-			// 	Required:            false,
-			// 	Computed:            false,
-			// 	Optional:            true,
-			// },
-			// "description": schema.StringAttribute{
-			// 	MarkdownDescription: "A list of inputs",
-			// 	Required:            false,
-			// 	Computed:            false,
-			// 	Optional:            true,
-			// },
+			"inputs": schema.MapAttribute{
+				MarkdownDescription: "A list of inputs",
+				ElementType:         types.StringType,
+				Required:            false,
+				Computed:            false,
+				Optional:            true,
+			},
+			"description": schema.StringAttribute{
+				MarkdownDescription: "A list of inputs",
+				Required:            false,
+				Computed:            false,
+				Optional:            true,
+			},
 			// "tags": schema.MapAttribute{
 			// 	MarkdownDescription: "A list of inputs",
 			// 	ElementType:         types.StringType,
@@ -142,22 +143,24 @@ func (r *TorqueEnvironmentResource) Schema(ctx context.Context, req resource.Sch
 			// 	Computed:            true,
 			// 	Optional:            true,
 			// },
-			// "automation": schema.BoolAttribute{
-			// 	MarkdownDescription: "A list of inputs",
-			// 	Required:            false,
-			// 	Computed:            false,
-			// 	Optional:            true,
-			// },
+			"automation": schema.BoolAttribute{
+				MarkdownDescription: "Indicates if the environment was launched from automation using integrated pipeline tool, For example: Jenkins, GitHub Actions and GitLal CI.",
+				Required:            false,
+				Computed:            false,
+				Optional:            true,
+			},
 			"id": schema.StringAttribute{
 				MarkdownDescription: "A list of inputs",
 				Required:            false,
 				Computed:            true,
 			},
-			// "owner_email": schema.StringAttribute{
-			// 	MarkdownDescription: "A list of inputs",
-			// 	Required:            false,
-			// 	Computed:            true,
-			// },
+			"owner_email": schema.StringAttribute{
+				MarkdownDescription: "A list of inputs",
+				Required:            false,
+				Computed:            true,
+				Optional:            true,
+				Default:             stringdefault.StaticString("someemail@quali.com"),
+			},
 			// "workflows": schema.StringAttribute{
 			// 	MarkdownDescription: "A list of inputs",
 			// 	Required:            false,
@@ -196,32 +199,44 @@ func (r *TorqueEnvironmentResource) Create(ctx context.Context, req resource.Cre
 	if resp.Diagnostics.HasError() {
 		return
 	}
+	// Initialize the inputs map
+	var inputs = make(map[string]string)
 
-	body, err := r.client.CreateEnvironment(data.Space.ValueString(), data.BlueprintName.ValueString(), data.EnvironmentName.ValueString(), data.Duration.ValueString())
+	if !data.Inputs.IsNull() {
+		for key, value := range data.Inputs.Elements() {
+			inputs[key] = value.String()
+		}
+	}
+	// if data.OwnerEmail.IsNull() {
+	// 	data.OwnerEmail = basetypes.NewStringValue("amir.r@quali.com") // need to implement and get a way to know the env owner
+	// }
+	body, err := r.client.CreateEnvironment(data.Space.ValueString(), data.BlueprintName.ValueString(), data.EnvironmentName.ValueString(), data.Duration.ValueString(), inputs, data.OwnerEmail.ValueString(), data.Automation.ValueBool())
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create Environment, got error: %s", err))
 		return
 	}
-	// Initialize the inputs map
-	// var inputs = make(map[string]string)
 
-	// if !data.Inputs.IsNull() {
-	// 	for key, value := range data.Inputs.Elements() {
-	// 		inputs[key] = value.String()
-	// 	}
-	// }
 	var responseBody map[string]string
 	if err := json.Unmarshal(body, &responseBody); err != nil {
 		resp.Diagnostics.AddError("Parse Error", fmt.Sprintf("Failed to parse response body: %s", err))
 		return
 	}
-	
+
 	id, ok := responseBody["id"]
 	if !ok {
 		resp.Diagnostics.AddError("ID Error", "ID not found in response body or is not of type string")
 		return
 	}
 	data.Id = types.StringValue(id)
+
+	// owner_email, ok := responseBody["owner_email"]
+	// if !ok {
+	// 	resp.Diagnostics.AddError("Owner email error", "Owner does not exist")
+	// 	return
+	// }
+	// if owner_email != "" {
+	// 	data.OwnerEmail = types.StringValue(owner_email)
+	// }
 
 	tflog.Trace(ctx, "Resource Created Successful!")
 
