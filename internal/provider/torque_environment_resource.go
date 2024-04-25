@@ -35,16 +35,16 @@ type CollaboratorsModel struct {
 }
 
 type TorqueEnvironmentResourceModel struct {
-	EnvironmentName types.String       `tfsdk:"environment_name"`
-	BlueprintName   types.String       `tfsdk:"blueprint_name"`
-	Space           types.String       `tfsdk:"space"`
-	Id              types.String       `tfsdk:"id"`
-	OwnerEmail      types.String       `tfsdk:"owner_email"`
-	Description     types.String       `tfsdk:"description"`
-	Inputs          types.Map          `tfsdk:"inputs"`
-	Tags            types.Map          `tfsdk:"tags"`
-	Collaborators   CollaboratorsModel `tfsdk:"collaborators"`
-	Automation      types.Bool         `tfsdk:"automation"`
+	EnvironmentName types.String        `tfsdk:"environment_name"`
+	BlueprintName   types.String        `tfsdk:"blueprint_name"`
+	Space           types.String        `tfsdk:"space"`
+	Id              types.String        `tfsdk:"id"`
+	OwnerEmail      types.String        `tfsdk:"owner_email"`
+	Description     types.String        `tfsdk:"description"`
+	Inputs          types.Map           `tfsdk:"inputs"`
+	Tags            types.Map           `tfsdk:"tags"`
+	Collaborators   *CollaboratorsModel `tfsdk:"collaborators"`
+	Automation      types.Bool          `tfsdk:"automation"`
 	// ScheduledEndTime types.String         `tfsdk:"scheduled_end_time"`
 	Duration types.String `tfsdk:"duration"`
 	// Source           struct {
@@ -208,15 +208,15 @@ func (r *TorqueEnvironmentResource) Create(ctx context.Context, req resource.Cre
 			tags[key] = strings.Replace(value.String(), "\"", "", -1)
 		}
 	}
-
-	var emails []string
-	for _, val := range data.Collaborators.CollaboratorsEmails.Elements() {
-		emails = append(emails, strings.Replace(val.String(), "\"", "", -1))
-	}
-
 	var collaborators client.Collaborators
-	collaborators.AllSpaceMembers = data.Collaborators.AllSpaceMembers.ValueBool()
-	collaborators.CollaboratorsEmails = emails
+	if data.Collaborators != nil {
+		var emails []string
+		for _, val := range data.Collaborators.CollaboratorsEmails.Elements() {
+			emails = append(emails, strings.Replace(val.String(), "\"", "", -1))
+		}
+		collaborators.AllSpaceMembers = data.Collaborators.AllSpaceMembers.ValueBool()
+		collaborators.CollaboratorsEmails = emails
+	}
 
 	body, err := r.client.CreateEnvironment(data.Space.ValueString(), data.BlueprintName.ValueString(), data.EnvironmentName.ValueString(), data.Duration.ValueString(), inputs, data.OwnerEmail.ValueString(), data.Automation.ValueBool(), tags, collaborators)
 	if err != nil {
