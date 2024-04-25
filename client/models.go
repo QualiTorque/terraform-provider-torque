@@ -39,12 +39,7 @@ type Environment struct {
 	ScheduledEndTime string            `json:"scheduled_end_time"`
 	Duration         string            `json:"duration"`
 	Id               string            `json:"id"`
-	// Source           struct {
-	// 	BlueprintName  string `json:"blueprint_name"`
-	// 	RepositoryName string `json:"repository_name"`
-	// 	Branch         string `json:"branch"`
-	// 	Commit         string `json:"commit"`
-	// } `json:"source"`
+	Source           Source            `json:"source"`
 	// Workflows []struct {
 	// 	Name      string `json:"name"`
 	// 	Schedules []struct {
@@ -54,6 +49,13 @@ type Environment struct {
 	// 	Reminder        int               `json:"reminder"`
 	// 	InputsOverrides map[string]string `json:"inputs_overrides"`
 	// } `json:"workflows"`
+}
+
+type Source struct {
+	BlueprintName  *string `tfsdk:"blueprint_name"`
+	RepositoryName *string `tfsdk:"repository_name"`
+	Branch         *string `tfsdk:"branch"`
+	Commit         *string `tfsdk:"commit"`
 }
 
 type Collaborators struct {

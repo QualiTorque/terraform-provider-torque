@@ -36,11 +36,11 @@ type CollaboratorsModel struct {
 	AllSpaceMembers     types.Bool `tfsdk:"all_space_members"`
 }
 
-type Source struct {
-	BlueprintName  types.String `tfsdk:"blueprint_name"`
-	RepositoryName types.String `tfsdk:"repository_name"`
-	Branch         types.String `tfsdk:"branch"`
-	Commit         types.String `tfsdk:"commit"`
+type SourceModel struct {
+	BlueprintName  *string `tfsdk:"blueprint_name"`
+	RepositoryName *string `tfsdk:"repository_name"`
+	Branch         *string `tfsdk:"branch"`
+	Commit         *string `tfsdk:"commit"`
 }
 
 type TorqueEnvironmentResourceModel struct {
@@ -56,7 +56,7 @@ type TorqueEnvironmentResourceModel struct {
 	Automation       types.Bool          `tfsdk:"automation"`
 	ScheduledEndTime types.String        `tfsdk:"scheduled_end_time"`
 	Duration         types.String        `tfsdk:"duration"`
-	// Source           *Source             `tfsdk:"source"`
+	Source           *SourceModel        `tfsdk:"source"`
 	// Workflows []struct {
 	// 	Name      string `tfsdk:"name"`
 	// 	Schedules []struct {
@@ -129,12 +129,48 @@ func (r *TorqueEnvironmentResource) Schema(ctx context.Context, req resource.Sch
 					"all_space_members": types.BoolType,
 				},
 			},
-			// "source": schema.StringAttribute{
-			// 	MarkdownDescription: "A list of inputs",
-			// 	Required:            false,
-			// 	Computed:            false,
-			// 	Optional:            true,
-			// },
+			"source": schema.SingleNestedAttribute{
+				MarkdownDescription: "Additional details about the blueprint repository to be used. By default, this information is taken from the repository already confiured in the space.",
+				Required:            false,
+				Computed:            false,
+				Optional:            true,
+				Attributes: map[string]schema.Attribute{
+					"blueprint_name": schema.StringAttribute{
+						Optional: true,
+					},
+					"repository_name": schema.StringAttribute{
+						Optional: true,
+					},
+					"branch": schema.StringAttribute{
+						Optional: true,
+					},
+					"commit": schema.StringAttribute{
+						Optional: true,
+					},
+				},
+				// AttributeTypes: map[string]schema.Attribute{
+				// 	"blueprint_name": schema.StringAttribute{
+				// 		Description: "An existing Torque space name",
+				// 		Computed:    false,
+				// 		Optional:    true,
+				// 	},
+				// 	"repository_name": schema.StringAttribute{
+				// 		Description: "Space role to be used for the specific space in the group",
+				// 		Computed:    false,
+				// 		Optional:    true,
+				// 	},
+				// 	"branch": schema.StringAttribute{
+				// 		Description: "An existing Torque space name",
+				// 		Computed:    false,
+				// 		Optional:    true,
+				// 	},
+				// 	"commit": schema.StringAttribute{
+				// 		Description: "Space role to be used for the specific space in the group",
+				// 		Computed:    false,
+				// 		Optional:    true,
+				// 	},
+				// },
+			},
 			"space": schema.StringAttribute{
 				MarkdownDescription: "A list of inputs",
 				Required:            false,
@@ -142,7 +178,7 @@ func (r *TorqueEnvironmentResource) Schema(ctx context.Context, req resource.Sch
 				Optional:            true,
 			},
 			"scheduled_end_time": schema.StringAttribute{
-				MarkdownDescription: "A list of inputs",
+				MarkdownDescription: "Environment scheduled end time in ISO 8601 format For example, 2021-10-06T08:27:05.215Z. NOTE: Environment request cannot include both 'duration' and 'scheduled_end_time' fields.",
 				Computed:            false,
 				Optional:            true,
 				Validators: []validator.String{
@@ -232,8 +268,23 @@ func (r *TorqueEnvironmentResource) Create(ctx context.Context, req resource.Cre
 		collaborators.AllSpaceMembers = data.Collaborators.AllSpaceMembers.ValueBool()
 		collaborators.CollaboratorsEmails = emails
 	}
-
-	body, err := r.client.CreateEnvironment(data.Space.ValueString(), data.BlueprintName.ValueString(), data.EnvironmentName.ValueString(), data.Duration.ValueString(), inputs, data.OwnerEmail.ValueString(), data.Automation.ValueBool(), tags, collaborators, data.ScheduledEndTime.ValueString())
+	var source client.Source
+	if data.Source != nil {
+		if data.Source.BlueprintName != nil {
+			source.BlueprintName = data.Source.BlueprintName
+		}
+		if data.Source.RepositoryName != nil {
+			source.RepositoryName = data.Source.RepositoryName
+		}
+		if data.Source.Branch != nil {
+			source.Branch = data.Source.Branch
+		}
+		if data.Source.Commit != nil {
+			source.Commit = data.Source.Commit
+		}
+	}
+	body, err := r.client.CreateEnvironment(data.Space.ValueString(), data.BlueprintName.ValueString(), data.EnvironmentName.ValueString(), data.Duration.ValueString(),
+		inputs, data.OwnerEmail.ValueString(), data.Automation.ValueBool(), tags, collaborators, data.ScheduledEndTime.ValueString(), source)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create Environment, got error: %s", err))
 		return
