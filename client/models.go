@@ -40,7 +40,7 @@ type Environment struct {
 	Duration         string            `json:"duration"`
 	Id               string            `json:"id"`
 	Source           Source            `json:"source"`
-	// Workflows []struct {
+	Workflows        []Workflow        `json:"workflows"`
 	// 	Name      string `json:"name"`
 	// 	Schedules []struct {
 	// 		Scheduler  string `json:"scheduler"`
@@ -48,7 +48,19 @@ type Environment struct {
 	// 	} `json:"schedules"`
 	// 	Reminder        int               `json:"reminder"`
 	// 	InputsOverrides map[string]string `json:"inputs_overrides"`
-	// } `json:"workflows"`
+	// }
+}
+
+type Workflow struct {
+	Name            string            `json:"name"`
+	Schedules       []Schedule        `json:"schedules"`
+	Reminder        int64             `json:"reminder"`
+	InputsOverrides map[string]string `json:"inputs_overrides"`
+}
+
+type Schedule struct {
+	Scheduler  string `json:"scheduler"`
+	Overridden bool   `json:"overridden"`
 }
 
 type Source struct {

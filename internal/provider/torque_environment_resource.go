@@ -44,8 +44,10 @@ type SourceModel struct {
 }
 
 type WorkflowModel struct {
-	Name     types.String `tfsdk:"name"`
-	Reminder types.Int64  `tfsdk:"reminder"`
+	Name            types.String `tfsdk:"name"`
+	Schedules       types.List   `json:"schedules"`
+	Reminder        types.Int64  `tfsdk:"reminder"`
+	InputsOverrides types.Map    `json:"inputs_overrides"`
 }
 
 type TorqueEnvironmentResourceModel struct {
@@ -62,16 +64,7 @@ type TorqueEnvironmentResourceModel struct {
 	ScheduledEndTime types.String        `tfsdk:"scheduled_end_time"`
 	Duration         types.String        `tfsdk:"duration"`
 	Source           *SourceModel        `tfsdk:"source"`
-	// Workflows        []WorkflowModel     `tfsdk:"workflows"`
-	// Workflows []struct {
-	// 	Name      string `tfsdk:"name"`
-	// 	Schedules []struct {
-	// 		Scheduler  string     `tfsdk:"scheduler"`
-	// 		Overridden types.Bool `tfsdk:"overridden"`
-	// 	} `tfsdk:"schedules"`
-	// 	Reminder        types.String      `tfsdk:"reminder"`
-	// 	InputsOverrides map[string]string `tfsdk:"inputs_overrides"`
-	// }
+	Workflows        []WorkflowModel     `tfsdk:"workflows"`
 }
 
 func (r *TorqueEnvironmentResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
@@ -190,12 +183,52 @@ func (r *TorqueEnvironmentResource) Schema(ctx context.Context, req resource.Sch
 				Optional:            true,
 				Default:             stringdefault.StaticString("someemail@quali.com"),
 			},
-			// "workflows": schema.StringAttribute{
-			// 	MarkdownDescription: "A list of inputs",
-			// 	Required:            false,
-			// 	Computed:            false,
-			// 	Optional:            true,
-			// },
+			"workflows": schema.ListNestedAttribute{
+				MarkdownDescription: "A list of inputs",
+				Required:            false,
+				Computed:            false,
+				Optional:            true,
+				NestedObject: schema.NestedAttributeObject{
+					Attributes: map[string]schema.Attribute{
+						"name": schema.StringAttribute{
+							Description: "An existing Torque space name",
+							Computed:    false,
+							Optional:    true,
+						},
+						"schedules": schema.NestedAttributeObject{
+							Attributes: map[string]schema.Attribute{
+								Description: "Space role to be used for the specific space in the group",
+								Computed:    false,
+								Optional:    true,
+								Attributes: map[string]schema.Attribute{
+									"scheduler": schema.StringAttribute{
+										Description: "An existing Torque space name",
+										Computed:    false,
+										Optional:    true,
+									},
+									"overriden": schema.BoolAttribute{
+										Description: "An existing Torque space name",
+										Computed:    false,
+										Optional:    true,
+									},
+								},
+							},
+						},
+						"reminder": schema.Int64Attribute{
+							Description: "Space role to be used for the specific space in the group",
+							Computed:    false,
+							Optional:    true,
+						},
+						"input_overrides": schema.MapAttribute{
+							MarkdownDescription: "A list of inputs",
+							ElementType:         types.StringType,
+							Required:            false,
+							Computed:            false,
+							Optional:            true,
+						},
+					},
+				},
+			},
 		},
 	}
 }
