@@ -6,11 +6,13 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/qualitorque/terraform-provider-torque/client"
@@ -34,25 +36,27 @@ type CollaboratorsModel struct {
 	AllSpaceMembers     types.Bool `tfsdk:"all_space_members"`
 }
 
+type Source struct {
+	BlueprintName  types.String `tfsdk:"blueprint_name"`
+	RepositoryName types.String `tfsdk:"repository_name"`
+	Branch         types.String `tfsdk:"branch"`
+	Commit         types.String `tfsdk:"commit"`
+}
+
 type TorqueEnvironmentResourceModel struct {
-	EnvironmentName types.String        `tfsdk:"environment_name"`
-	BlueprintName   types.String        `tfsdk:"blueprint_name"`
-	Space           types.String        `tfsdk:"space"`
-	Id              types.String        `tfsdk:"id"`
-	OwnerEmail      types.String        `tfsdk:"owner_email"`
-	Description     types.String        `tfsdk:"description"`
-	Inputs          types.Map           `tfsdk:"inputs"`
-	Tags            types.Map           `tfsdk:"tags"`
-	Collaborators   *CollaboratorsModel `tfsdk:"collaborators"`
-	Automation      types.Bool          `tfsdk:"automation"`
-	// ScheduledEndTime types.String         `tfsdk:"scheduled_end_time"`
-	Duration types.String `tfsdk:"duration"`
-	// Source           struct {
-	// 	BlueprintName  types.String `tfsdk:"blueprint_name"`
-	// 	RepositoryName types.String `tfsdk:"repository_name"`
-	// 	Branch         types.String `tfsdk:"branch"`
-	// 	Commit         types.String `tfsdk:"commit"`
-	// } `tfsdk:"source"`
+	EnvironmentName  types.String        `tfsdk:"environment_name"`
+	BlueprintName    types.String        `tfsdk:"blueprint_name"`
+	Space            types.String        `tfsdk:"space"`
+	Id               types.String        `tfsdk:"id"`
+	OwnerEmail       types.String        `tfsdk:"owner_email"`
+	Description      types.String        `tfsdk:"description"`
+	Inputs           types.Map           `tfsdk:"inputs"`
+	Tags             types.Map           `tfsdk:"tags"`
+	Collaborators    *CollaboratorsModel `tfsdk:"collaborators"`
+	Automation       types.Bool          `tfsdk:"automation"`
+	ScheduledEndTime types.String        `tfsdk:"scheduled_end_time"`
+	Duration         types.String        `tfsdk:"duration"`
+	// Source           *Source             `tfsdk:"source"`
 	// Workflows []struct {
 	// 	Name      string `tfsdk:"name"`
 	// 	Schedules []struct {
@@ -84,8 +88,14 @@ func (r *TorqueEnvironmentResource) Schema(ctx context.Context, req resource.Sch
 			},
 			"duration": schema.StringAttribute{
 				MarkdownDescription: "Duration of environment",
-				Required:            true,
+				Optional:            true,
 				Computed:            false,
+				Validators: []validator.String{
+					// Validate only this attribute or other_attr is configured.
+					stringvalidator.ExactlyOneOf(path.Expressions{
+						path.MatchRoot("scheduled_end_time"),
+					}...),
+				},
 			},
 			"inputs": schema.MapAttribute{
 				MarkdownDescription: "A list of inputs",
@@ -131,12 +141,17 @@ func (r *TorqueEnvironmentResource) Schema(ctx context.Context, req resource.Sch
 				Computed:            false,
 				Optional:            true,
 			},
-			// "scheduled_end_time": schema.StringAttribute{
-			// 	MarkdownDescription: "A list of inputs",
-			// 	Required:            false,
-			// 	Computed:            true,
-			// 	Optional:            true,
-			// },
+			"scheduled_end_time": schema.StringAttribute{
+				MarkdownDescription: "A list of inputs",
+				Computed:            false,
+				Optional:            true,
+				Validators: []validator.String{
+					// Validate only this attribute or other_attr is configured.
+					stringvalidator.ExactlyOneOf(path.Expressions{
+						path.MatchRoot("duration"),
+					}...),
+				},
+			},
 			"automation": schema.BoolAttribute{
 				MarkdownDescription: "Indicates if the environment was launched from automation using integrated pipeline tool, For example: Jenkins, GitHub Actions and GitLal CI.",
 				Required:            false,
@@ -218,7 +233,7 @@ func (r *TorqueEnvironmentResource) Create(ctx context.Context, req resource.Cre
 		collaborators.CollaboratorsEmails = emails
 	}
 
-	body, err := r.client.CreateEnvironment(data.Space.ValueString(), data.BlueprintName.ValueString(), data.EnvironmentName.ValueString(), data.Duration.ValueString(), inputs, data.OwnerEmail.ValueString(), data.Automation.ValueBool(), tags, collaborators)
+	body, err := r.client.CreateEnvironment(data.Space.ValueString(), data.BlueprintName.ValueString(), data.EnvironmentName.ValueString(), data.Duration.ValueString(), inputs, data.OwnerEmail.ValueString(), data.Automation.ValueBool(), tags, collaborators, data.ScheduledEndTime.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create Environment, got error: %s", err))
 		return

@@ -28,17 +28,17 @@ type Blueprint struct {
 }
 
 type Environment struct {
-	EnvironmentName string            `json:"environment_name"`
-	BlueprintName   string            `json:"blueprint_name"`
-	OwnerEmail      string            `json:"owner_email"`
-	Description     string            `json:"description"`
-	Inputs          map[string]string `json:"inputs"`
-	Tags            map[string]string `json:"tags"`
-	Collaborators   Collaborators     `json:"collaborators"`
-	Automation      bool              `json:"automation"`
-	// ScheduledEndTime string `json:"scheduled_end_time"`
-	Duration string `json:"duration"`
-	Id       string `json:"id"`
+	EnvironmentName  string            `json:"environment_name"`
+	BlueprintName    string            `json:"blueprint_name"`
+	OwnerEmail       string            `json:"owner_email"`
+	Description      string            `json:"description"`
+	Inputs           map[string]string `json:"inputs"`
+	Tags             map[string]string `json:"tags"`
+	Collaborators    Collaborators     `json:"collaborators"`
+	Automation       bool              `json:"automation"`
+	ScheduledEndTime string            `json:"scheduled_end_time"`
+	Duration         string            `json:"duration"`
+	Id               string            `json:"id"`
 	// Source           struct {
 	// 	BlueprintName  string `json:"blueprint_name"`
 	// 	RepositoryName string `json:"repository_name"`
