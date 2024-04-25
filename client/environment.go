@@ -9,7 +9,7 @@ import (
 )
 
 func (c *Client) CreateEnvironment(Space string, BlueprintName string, EnvironmentName string, Duration string, Description string,
-	Inputs map[string]string, OwnerEmail string, Automation bool, Tags map[string]string, Collaborators Collaborators, ScheduledEndTime string, Source Source) ([]byte, error) {
+	Inputs map[string]string, OwnerEmail string, Automation bool, Tags map[string]string, Collaborators Collaborators, ScheduledEndTime string, Source Source, Workflows []Workflow) ([]byte, error) {
 	fmt.Println(c.HostURL + "api/spaces/" + Space + "/environments")
 
 	environment := Environment{
@@ -24,6 +24,7 @@ func (c *Client) CreateEnvironment(Space string, BlueprintName string, Environme
 		Collaborators:    Collaborators,
 		ScheduledEndTime: ScheduledEndTime,
 		Source:           Source,
+		Workflows:        Workflows,
 	}
 
 	payload, err := json.Marshal(environment)

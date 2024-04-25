@@ -44,10 +44,14 @@ type SourceModel struct {
 }
 
 type WorkflowModel struct {
-	Name            types.String `tfsdk:"name"`
-	Schedules       types.List   `json:"schedules"`
-	Reminder        types.Int64  `tfsdk:"reminder"`
-	InputsOverrides types.Map    `json:"inputs_overrides"`
+	Name            types.String    `tfsdk:"name"`
+	Schedules       []ScheduleModel `tfsdk:"schedules"`
+	Reminder        types.Int64     `tfsdk:"reminder"`
+	InputsOverrides types.Map       `tfsdk:"inputs_overrides"`
+}
+type ScheduleModel struct {
+	Scheduler  types.String `tfsdk:"scheduler"`
+	Overridden types.Bool   `tfsdk:"overridden"`
 }
 
 type TorqueEnvironmentResourceModel struct {
@@ -195,18 +199,18 @@ func (r *TorqueEnvironmentResource) Schema(ctx context.Context, req resource.Sch
 							Computed:    false,
 							Optional:    true,
 						},
-						"schedules": schema.NestedAttributeObject{
-							Attributes: map[string]schema.Attribute{
-								Description: "Space role to be used for the specific space in the group",
-								Computed:    false,
-								Optional:    true,
+						"schedules": schema.ListNestedAttribute{
+							Required: false,
+							Computed: false,
+							Optional: true,
+							NestedObject: schema.NestedAttributeObject{
 								Attributes: map[string]schema.Attribute{
 									"scheduler": schema.StringAttribute{
 										Description: "An existing Torque space name",
 										Computed:    false,
 										Optional:    true,
 									},
-									"overriden": schema.BoolAttribute{
+									"overridden": schema.BoolAttribute{
 										Description: "An existing Torque space name",
 										Computed:    false,
 										Optional:    true,
@@ -219,7 +223,7 @@ func (r *TorqueEnvironmentResource) Schema(ctx context.Context, req resource.Sch
 							Computed:    false,
 							Optional:    true,
 						},
-						"input_overrides": schema.MapAttribute{
+						"inputs_overrides": schema.MapAttribute{
 							MarkdownDescription: "A list of inputs",
 							ElementType:         types.StringType,
 							Required:            false,
@@ -266,7 +270,7 @@ func (r *TorqueEnvironmentResource) Create(ctx context.Context, req resource.Cre
 
 	if !data.Inputs.IsNull() {
 		for key, value := range data.Inputs.Elements() {
-			inputs[key] = value.String()
+			inputs[key] = strings.Replace(value.String(), "\"", "", -1)
 		}
 	}
 	var tags = make(map[string]string)
@@ -300,8 +304,30 @@ func (r *TorqueEnvironmentResource) Create(ctx context.Context, req resource.Cre
 			source.Commit = data.Source.Commit
 		}
 	}
+	var workflows []client.Workflow
+	var inputs_overrides = make(map[string]string)
+	var schedules []client.Schedule
+	if len(data.Workflows) > 0 {
+		for _, workflow := range data.Workflows {
+			if len(workflow.Schedules) > 0 {
+				for _, schedule := range workflow.Schedules {
+					schedules = append(schedules, client.Schedule{
+						Scheduler:  schedule.Scheduler.ValueString(),
+						Overridden: schedule.Overridden.ValueBool(),
+					})
+				}
+			}
+			workflows = append(workflows, client.Workflow{
+				Name:            workflow.Name.ValueString(),
+				Reminder:        workflow.Reminder.ValueInt64(),
+				InputsOverrides: inputs_overrides,
+				Schedules:       schedules,
+			})
+		}
+	}
+
 	body, err := r.client.CreateEnvironment(data.Space.ValueString(), data.BlueprintName.ValueString(), data.EnvironmentName.ValueString(), data.Duration.ValueString(), data.Description.ValueString(),
-		inputs, data.OwnerEmail.ValueString(), data.Automation.ValueBool(), tags, collaborators, data.ScheduledEndTime.ValueString(), source)
+		inputs, data.OwnerEmail.ValueString(), data.Automation.ValueBool(), tags, collaborators, data.ScheduledEndTime.ValueString(), source, workflows)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create Environment, got error: %s", err))
 		return
