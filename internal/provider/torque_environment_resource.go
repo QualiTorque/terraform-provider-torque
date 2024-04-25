@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -34,16 +35,16 @@ type CollaboratorsModel struct {
 }
 
 type TorqueEnvironmentResourceModel struct {
-	EnvironmentName types.String `tfsdk:"environment_name"`
-	BlueprintName   types.String `tfsdk:"blueprint_name"`
-	Space           types.String `tfsdk:"space"`
-	Id              types.String `tfsdk:"id"`
-	OwnerEmail      types.String `tfsdk:"owner_email"`
-	Description     types.String `tfsdk:"description"`
-	Inputs          types.Map    `tfsdk:"inputs"`
-	Tags            types.Map    `tfsdk:"tags"`
-	// Collaborators    []CollaboratorsModel `tfsdk:"collaborators"`
-	Automation types.Bool `tfsdk:"automation"`
+	EnvironmentName types.String       `tfsdk:"environment_name"`
+	BlueprintName   types.String       `tfsdk:"blueprint_name"`
+	Space           types.String       `tfsdk:"space"`
+	Id              types.String       `tfsdk:"id"`
+	OwnerEmail      types.String       `tfsdk:"owner_email"`
+	Description     types.String       `tfsdk:"description"`
+	Inputs          types.Map          `tfsdk:"inputs"`
+	Tags            types.Map          `tfsdk:"tags"`
+	Collaborators   CollaboratorsModel `tfsdk:"collaborators"`
+	Automation      types.Bool         `tfsdk:"automation"`
 	// ScheduledEndTime types.String         `tfsdk:"scheduled_end_time"`
 	Duration types.String `tfsdk:"duration"`
 	// Source           struct {
@@ -106,26 +107,18 @@ func (r *TorqueEnvironmentResource) Schema(ctx context.Context, req resource.Sch
 				Computed:            false,
 				Optional:            true,
 			},
-			// "collaborators": schema.ListNestedAttribute{
-			// 	Description: "key-value pairs of spaces and roles that the newly created group will be associated to",
-			// 	Computed:    false,
-			// 	Optional:    true,
-			// 	NestedObject: schema.NestedAttributeObject{
-			// 		Attributes: map[string]schema.Attribute{
-			// 			"collaborators_emails": schema.StringAttribute{
-			// 				Description: "An existing Torque space name",
-			// 				Computed:    false,
-			// 				Optional:    true,
-			// 			},
-			// 			"all_space_members": schema.BoolAttribute{
-			// 				Description: "Space role to be used for the specific space in the group",
-			// 				Computed:    false,
-			// 				Optional:    true,
-			// 			},
-			// 		},
-			// 	},
-			// },
-
+			"collaborators": schema.ObjectAttribute{
+				Description: "key-value pairs of spaces and roles that the newly created group will be associated to",
+				Computed:    false,
+				Optional:    true,
+				Required:    false,
+				AttributeTypes: map[string]attr.Type{
+					"collaborators_emails": types.ListType{
+						ElemType: types.StringType,
+					},
+					"all_space_members": types.BoolType,
+				},
+			},
 			// "source": schema.StringAttribute{
 			// 	MarkdownDescription: "A list of inputs",
 			// 	Required:            false,
@@ -215,10 +208,17 @@ func (r *TorqueEnvironmentResource) Create(ctx context.Context, req resource.Cre
 			tags[key] = strings.Replace(value.String(), "\"", "", -1)
 		}
 	}
-	// if data.OwnerEmail.IsNull() {
-	// 	data.OwnerEmail = basetypes.NewStringValue("amir.r@quali.com") // need to implement and get a way to know the env owner
-	// }
-	body, err := r.client.CreateEnvironment(data.Space.ValueString(), data.BlueprintName.ValueString(), data.EnvironmentName.ValueString(), data.Duration.ValueString(), inputs, data.OwnerEmail.ValueString(), data.Automation.ValueBool(), tags)
+
+	var emails []string
+	for _, val := range data.Collaborators.CollaboratorsEmails.Elements() {
+		emails = append(emails, strings.Replace(val.String(), "\"", "", -1))
+	}
+
+	var collaborators client.Collaborators
+	collaborators.AllSpaceMembers = data.Collaborators.AllSpaceMembers.ValueBool()
+	collaborators.CollaboratorsEmails = emails
+
+	body, err := r.client.CreateEnvironment(data.Space.ValueString(), data.BlueprintName.ValueString(), data.EnvironmentName.ValueString(), data.Duration.ValueString(), inputs, data.OwnerEmail.ValueString(), data.Automation.ValueBool(), tags, collaborators)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create Environment, got error: %s", err))
 		return
