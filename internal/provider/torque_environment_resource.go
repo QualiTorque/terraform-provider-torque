@@ -215,7 +215,7 @@ func (r *TorqueEnvironmentResource) Schema(ctx context.Context, req resource.Sch
 										Optional:            true,
 									},
 									"overridden": schema.BoolAttribute{
-										MarkdownDescription: "Specify if the workflow schedule can be overriden at launch",
+										MarkdownDescription: "Specify if the workflow schedule can be overridden at launch",
 										Computed:            false,
 										Optional:            true,
 									},

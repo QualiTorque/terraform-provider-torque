@@ -73,5 +73,5 @@ Optional:
 
 Optional:
 
-- `overridden` (Boolean) Specify if the workflow schedule can be overriden at launch
+- `overridden` (Boolean) Specify if the workflow schedule can be overridden at launch
 - `scheduler` (String) The CRON expression that schedules this workflow
