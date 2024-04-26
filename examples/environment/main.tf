@@ -13,14 +13,16 @@ provider "torque" {
 }
 
 resource "torque_environment" "name" {
-  environment_name = "blabla"
-  blueprint_name   = "Hello World"
-  duration         = "PT2H"
-  space            = "Workshop"
-  inputs = {
-    "name" : "amir",
-  }
-  # owner_email = "amir.r@quali.com"
-  automation  = true
-  description = "Created by Terraform"
+  environment_name = var.environment_name
+  blueprint_name   = var.blueprint_name
+  duration         = var.duration
+  space            = var.space
+  inputs           = var.inputs
+  collaborators    = var.collaborators
+  owner_email      = var.owner_email
+  automation       = var.automation
+  description      = var.description
+  tags             = var.tags
+  workflows        = var.workflows
+  blueprint_source = var.blueprint_source
 }

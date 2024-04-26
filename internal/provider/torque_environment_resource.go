@@ -36,7 +36,7 @@ type CollaboratorsModel struct {
 	AllSpaceMembers     types.Bool `tfsdk:"all_space_members"`
 }
 
-type SourceModel struct {
+type BlueprintSourceModel struct {
 	BlueprintName  *string `tfsdk:"blueprint_name"`
 	RepositoryName *string `tfsdk:"repository_name"`
 	Branch         *string `tfsdk:"branch"`
@@ -55,20 +55,20 @@ type ScheduleModel struct {
 }
 
 type TorqueEnvironmentResourceModel struct {
-	EnvironmentName  types.String        `tfsdk:"environment_name"`
-	BlueprintName    types.String        `tfsdk:"blueprint_name"`
-	Space            types.String        `tfsdk:"space"`
-	Id               types.String        `tfsdk:"id"`
-	OwnerEmail       types.String        `tfsdk:"owner_email"`
-	Description      types.String        `tfsdk:"description"`
-	Inputs           types.Map           `tfsdk:"inputs"`
-	Tags             types.Map           `tfsdk:"tags"`
-	Collaborators    *CollaboratorsModel `tfsdk:"collaborators"`
-	Automation       types.Bool          `tfsdk:"automation"`
-	ScheduledEndTime types.String        `tfsdk:"scheduled_end_time"`
-	Duration         types.String        `tfsdk:"duration"`
-	Source           *SourceModel        `tfsdk:"source"`
-	Workflows        []WorkflowModel     `tfsdk:"workflows"`
+	EnvironmentName  types.String          `tfsdk:"environment_name"`
+	BlueprintName    types.String          `tfsdk:"blueprint_name"`
+	Space            types.String          `tfsdk:"space"`
+	Id               types.String          `tfsdk:"id"`
+	OwnerEmail       types.String          `tfsdk:"owner_email"`
+	Description      types.String          `tfsdk:"description"`
+	Inputs           types.Map             `tfsdk:"inputs"`
+	Tags             types.Map             `tfsdk:"tags"`
+	Collaborators    *CollaboratorsModel   `tfsdk:"collaborators"`
+	Automation       types.Bool            `tfsdk:"automation"`
+	ScheduledEndTime types.String          `tfsdk:"scheduled_end_time"`
+	Duration         types.String          `tfsdk:"duration"`
+	BlueprintSource  *BlueprintSourceModel `tfsdk:"blueprint_source"`
+	Workflows        []WorkflowModel       `tfsdk:"workflows"`
 }
 
 func (r *TorqueEnvironmentResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
@@ -86,11 +86,11 @@ func (r *TorqueEnvironmentResource) Schema(ctx context.Context, req resource.Sch
 				Required:            true,
 			},
 			"environment_name": schema.StringAttribute{
-				MarkdownDescription: "The name for the newly created environment. Environment name can contain any character including special character and spaces.				",
+				MarkdownDescription: "The name for the newly created environment. Environment name can contain any character including special character and spaces.",
 				Required:            true,
 			},
 			"duration": schema.StringAttribute{
-				MarkdownDescription: "Duration of environment",
+				MarkdownDescription: "Environment duration time in ISO 8601 format: 'P{days}DT{hours}H{minutes}M{seconds}S]]' For example, P0DT2H3M4S. NOTE: Environment request cannot include both 'duration' and 'scheduled_end_time' fields.",
 				Optional:            true,
 				Computed:            false,
 				Validators: []validator.String{
@@ -108,23 +108,23 @@ func (r *TorqueEnvironmentResource) Schema(ctx context.Context, req resource.Sch
 				Optional:            true,
 			},
 			"description": schema.StringAttribute{
-				MarkdownDescription: "The new environment description that will be presented in the Torque UI following the launch of the environment.				",
+				MarkdownDescription: "The new environment description that will be presented in the Torque UI following the launch of the environment.",
 				Required:            false,
 				Computed:            false,
 				Optional:            true,
 			},
 			"tags": schema.MapAttribute{
-				MarkdownDescription: "Environment blueprint tags",
+				MarkdownDescription: "Environment blueprint tags /// Dictionary of key-value string pairs that will be used to tag deployed resources in the environment. In case a configured tag value is not provided the tag default value will be used. Note that tags that were configured in the account and space level will be set regardless of this field. For example: { 'activity_type': 'demo'}",
 				ElementType:         types.StringType,
 				Required:            false,
 				Computed:            false,
 				Optional:            true,
 			},
 			"collaborators": schema.ObjectAttribute{
-				Description: "key-value pairs of spaces and roles that the newly created group will be associated to",
-				Computed:    false,
-				Optional:    true,
-				Required:    false,
+				MarkdownDescription: "Object of collaborators to add to the environment. Provide collaborators_emails list of strings representing emails of users in the account or set all_space_users to true to add everyone in the space",
+				Computed:            false,
+				Optional:            true,
+				Required:            false,
 				AttributeTypes: map[string]attr.Type{
 					"collaborators_emails": types.ListType{
 						ElemType: types.StringType,
@@ -132,28 +132,32 @@ func (r *TorqueEnvironmentResource) Schema(ctx context.Context, req resource.Sch
 					"all_space_members": types.BoolType,
 				},
 			},
-			"source": schema.SingleNestedAttribute{
+			"blueprint_source": schema.SingleNestedAttribute{
 				MarkdownDescription: "Additional details about the blueprint repository to be used. By default, this information is taken from the repository already confiured in the space.",
 				Required:            false,
 				Computed:            false,
 				Optional:            true,
 				Attributes: map[string]schema.Attribute{
 					"blueprint_name": schema.StringAttribute{
-						Optional: true,
+						Optional:            true,
+						MarkdownDescription: "Sandbox blueprint name",
 					},
 					"repository_name": schema.StringAttribute{
-						Optional: true,
+						Optional:            true,
+						MarkdownDescription: "The name of the repo to be used. This repository should be on-boarded to the space prior to launching the environment. In case you want to launch a 'Stored in Torque' Blueprint, you should set this field to 'qtorque'",
 					},
 					"branch": schema.StringAttribute{
-						Optional: true,
+						Optional:            true,
+						MarkdownDescription: "Use this field to provide a branch from which the blueprint yaml will be launched",
 					},
 					"commit": schema.StringAttribute{
-						Optional: true,
+						Optional:            true,
+						MarkdownDescription: "Use this field to provide a specific commit id from which the blueprint yaml will be launched",
 					},
 				},
 			},
 			"space": schema.StringAttribute{
-				MarkdownDescription: "A list of inputs",
+				MarkdownDescription: "The space where this environment will be launched",
 				Required:            false,
 				Computed:            false,
 				Optional:            true,
@@ -176,12 +180,12 @@ func (r *TorqueEnvironmentResource) Schema(ctx context.Context, req resource.Sch
 				Optional:            true,
 			},
 			"id": schema.StringAttribute{
-				MarkdownDescription: "A list of inputs",
+				MarkdownDescription: "Id of the environment",
 				Required:            false,
 				Computed:            true,
 			},
 			"owner_email": schema.StringAttribute{
-				MarkdownDescription: "The email of the user that should be set as the owner of the new environment. if omitted the current user will be used.				",
+				MarkdownDescription: "The email of the user that should be set as the owner of the new environment. if omitted the current user will be used.",
 				Required:            false,
 				Computed:            true,
 				Optional:            true,
@@ -195,7 +199,7 @@ func (r *TorqueEnvironmentResource) Schema(ctx context.Context, req resource.Sch
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
 						"name": schema.StringAttribute{
-							Description: "An existing Torque space name",
+							Description: "Name of existing and enabled workflow in the space",
 							Computed:    false,
 							Optional:    true,
 						},
@@ -206,25 +210,25 @@ func (r *TorqueEnvironmentResource) Schema(ctx context.Context, req resource.Sch
 							NestedObject: schema.NestedAttributeObject{
 								Attributes: map[string]schema.Attribute{
 									"scheduler": schema.StringAttribute{
-										Description: "An existing Torque space name",
-										Computed:    false,
-										Optional:    true,
+										MarkdownDescription: "The CRON expression that schedules this workflow",
+										Computed:            false,
+										Optional:            true,
 									},
 									"overridden": schema.BoolAttribute{
-										Description: "An existing Torque space name",
-										Computed:    false,
-										Optional:    true,
+										MarkdownDescription: "Specify if the workflow schedule can be overriden at launch",
+										Computed:            false,
+										Optional:            true,
 									},
 								},
 							},
 						},
 						"reminder": schema.Int64Attribute{
-							Description: "Space role to be used for the specific space in the group",
-							Computed:    false,
-							Optional:    true,
+							MarkdownDescription: "",
+							Computed:            false,
+							Optional:            true,
 						},
 						"inputs_overrides": schema.MapAttribute{
-							MarkdownDescription: "A list of inputs",
+							MarkdownDescription: "Dictionary of key-value string pairs that can override the blueprint inputs ",
 							ElementType:         types.StringType,
 							Required:            false,
 							Computed:            false,
@@ -289,19 +293,19 @@ func (r *TorqueEnvironmentResource) Create(ctx context.Context, req resource.Cre
 		collaborators.AllSpaceMembers = data.Collaborators.AllSpaceMembers.ValueBool()
 		collaborators.CollaboratorsEmails = emails
 	}
-	var source client.Source
-	if data.Source != nil {
-		if data.Source.BlueprintName != nil {
-			source.BlueprintName = data.Source.BlueprintName
+	var blueprint_source client.BlueprintSource
+	if data.BlueprintSource != nil {
+		if data.BlueprintSource.BlueprintName != nil {
+			blueprint_source.BlueprintName = data.BlueprintSource.BlueprintName
 		}
-		if data.Source.RepositoryName != nil {
-			source.RepositoryName = data.Source.RepositoryName
+		if data.BlueprintSource.RepositoryName != nil {
+			blueprint_source.RepositoryName = data.BlueprintSource.RepositoryName
 		}
-		if data.Source.Branch != nil {
-			source.Branch = data.Source.Branch
+		if data.BlueprintSource.Branch != nil {
+			blueprint_source.Branch = data.BlueprintSource.Branch
 		}
-		if data.Source.Commit != nil {
-			source.Commit = data.Source.Commit
+		if data.BlueprintSource.Commit != nil {
+			blueprint_source.Commit = data.BlueprintSource.Commit
 		}
 	}
 	var workflows []client.Workflow
@@ -327,7 +331,7 @@ func (r *TorqueEnvironmentResource) Create(ctx context.Context, req resource.Cre
 	}
 
 	body, err := r.client.CreateEnvironment(data.Space.ValueString(), data.BlueprintName.ValueString(), data.EnvironmentName.ValueString(), data.Duration.ValueString(), data.Description.ValueString(),
-		inputs, data.OwnerEmail.ValueString(), data.Automation.ValueBool(), tags, collaborators, data.ScheduledEndTime.ValueString(), source, workflows)
+		inputs, data.OwnerEmail.ValueString(), data.Automation.ValueBool(), tags, collaborators, data.ScheduledEndTime.ValueString(), blueprint_source, workflows)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create Environment, got error: %s", err))
 		return

@@ -39,7 +39,7 @@ type Environment struct {
 	ScheduledEndTime string            `json:"scheduled_end_time"`
 	Duration         string            `json:"duration"`
 	Id               string            `json:"id"`
-	Source           Source            `json:"source"`
+	BlueprintSource  BlueprintSource   `json:"blueprint_source"`
 	Workflows        []Workflow        `json:"workflows"`
 }
 
@@ -55,7 +55,7 @@ type Schedule struct {
 	Overridden bool   `json:"overridden"`
 }
 
-type Source struct {
+type BlueprintSource struct {
 	BlueprintName  *string `tfsdk:"blueprint_name"`
 	RepositoryName *string `tfsdk:"repository_name"`
 	Branch         *string `tfsdk:"branch"`
