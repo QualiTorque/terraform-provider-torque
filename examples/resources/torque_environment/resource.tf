@@ -17,9 +17,9 @@ resource "torque_environment" "name" {
   blueprint_name   = var.blueprint_name
   duration         = var.duration
   space            = var.space
+  owner_email      = var.owner_email
   inputs           = var.inputs
   collaborators    = var.collaborators
-  owner_email      = var.owner_email
   automation       = var.automation
   description      = var.description
   tags             = var.tags
