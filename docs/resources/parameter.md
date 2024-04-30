@@ -30,7 +30,7 @@ provider "torque" {
 resource "torque_parameter" "new_parameter" {
   name        = "parameter_name"
   value       = "parameter_value"
-  sensitive   = "parameter_sensitive"
+  sensitive   = true
   description = "parameter_description"
 }
 ```
