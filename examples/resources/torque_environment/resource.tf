@@ -8,21 +8,45 @@ terraform {
 
 provider "torque" {
   host  = "https://portal.qtorque.io/"
-  space = var.torque_space
-  token = var.torque_token
+  space = "space"
+  token = "111111111111"
 }
-
 resource "torque_environment" "name" {
-  environment_name = var.environment_name
-  blueprint_name   = var.blueprint_name
-  duration         = var.duration
-  space            = var.space
-  owner_email      = var.owner_email
-  inputs           = var.inputs
-  collaborators    = var.collaborators
-  automation       = var.automation
-  description      = var.description
-  tags             = var.tags
-  workflows        = var.workflows
-  blueprint_source = var.blueprint_source
+  space          = "space"
+  blueprint_name = "blueprint"
+  duration       = "PT2H"
+  automation     = false
+  description    = "value"
+  inputs = {
+    "name" = "value"
+  }
+  environment_name = "hello"
+  owner_email      = "owner@email.com"
+  tags = {
+    "activity_type" = "development"
+  }
+  workflows = [{
+    name = "workflow"
+    schedules = [{
+      scheduler  = " 5 0 * 8 *"
+      overridden = false
+    }]
+    inputs_overrides = {
+      "input1" = "value1"
+    }
+    reminder = 3
+  }]
+
+  collaborators = {
+    collaborators_emails = ["collaborator@email.com"]
+    all_space_members    = false
+  }
+
+  blueprint_source = {
+    blueprint_name  = "blueprint"
+    repository_name = "my repository"
+    branch          = "master"
+    commit          = "commit"
+  }
+
 }
