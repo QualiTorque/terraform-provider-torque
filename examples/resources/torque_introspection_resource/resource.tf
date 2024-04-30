@@ -14,5 +14,5 @@ provider "torque" {
 resource "torque_introspection_resource" "example" {
   display_name       = "resource_name"
   image              = "resource_image"
-  introspection_data = "resource_data"
+  introspection_data = { "data1" : "value1" }
 }

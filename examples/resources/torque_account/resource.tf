@@ -16,5 +16,5 @@ resource "torque_account" "name" {
   parent_account = "torque_parent_account"
   account_name   = "my_sub_account"
   password       = "password"
-  company        = "var.company"
+  company        = "my company"
 }

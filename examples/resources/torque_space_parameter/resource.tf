@@ -16,6 +16,6 @@ resource "torque_space_parameter" "new_parameter" {
   space_name  = "space"
   name        = "parameter_name"
   value       = "parameter_value"
-  sensitive   = "parameter_sensitive"
+  sensitive   = true
   description = "parameter_description"
 }
