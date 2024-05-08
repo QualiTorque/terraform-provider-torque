@@ -52,6 +52,17 @@ type RepoSpaceAssociation struct {
 	Name        string `json:"repository_name"`
 }
 
+type CodeCommitRepoSpaceAssociation struct {
+	URL        string `json:"repository_url"`
+	RoleArn    string `json:"role_arn"`
+	Region     string `json:"aws_region"`
+	Branch     string `json:"branch"`
+	Name       string `json:"repository_name"`
+	ExternalId string `json:"external_id"`
+	Username   string `json:"username"`
+	Password   string `json:"password"`
+}
+
 type TagNameValue struct {
 	Name  string `json:"name"`
 	Value string `json:"value"`
