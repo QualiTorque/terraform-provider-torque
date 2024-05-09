@@ -17,8 +17,8 @@ resource "torque_codecommit_repository_space_association" "repository" {
   aws_region      = var.aws_region
   role_arn        = var.role_arn
   external_id     = var.external_id
-  username        = var.username
-  password        = var.password
+  git_username    = var.git_username
+  git_password    = var.git_password
   branch          = var.branch
   repository_name = var.repository_name
   repository_url  = var.repository_url

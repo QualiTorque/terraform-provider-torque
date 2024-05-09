@@ -31,8 +31,8 @@ type TorqueSpaceCodeCommitRepositoryResourceModel struct {
 	RoleArn        types.String `tfsdk:"role_arn"`
 	AwsRegion      types.String `tfsdk:"aws_region"`
 	ExternalId     types.String `tfsdk:"external_id"`
-	Username       types.String `tfsdk:"username"`
-	Password       types.String `tfsdk:"password"`
+	Username       types.String `tfsdk:"git_username"`
+	Password       types.String `tfsdk:"git_password"`
 	Branch         types.String `tfsdk:"branch"`
 	RepositoryName types.String `tfsdk:"repository_name"`
 }
@@ -43,7 +43,7 @@ func (r *TorqueSpaceCodeCommitRepositoryResource) Metadata(ctx context.Context, 
 
 func (r *TorqueSpaceCodeCommitRepositoryResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Onboard a new repository into an existing space",
+		MarkdownDescription: "Onboard a new CodeCommit repository into an existing space",
 
 		Attributes: map[string]schema.Attribute{
 			"space_name": schema.StringAttribute{
@@ -51,35 +51,35 @@ func (r *TorqueSpaceCodeCommitRepositoryResource) Schema(ctx context.Context, re
 				Required:            true,
 			},
 			"repository_url": schema.StringAttribute{
-				Description: "Repository URL. For example: https://github.com/<org>/<repo>",
+				Description: "Repository URL. For example: https://git-codecommit.eu-west-1.amazonaws.com/v1/repos/repo",
 				Required:    true,
 			},
 			"role_arn": schema.StringAttribute{
-				Description: "Repository type. Available types: github, bitbucket, gitlab, azure (for Azure DevOps)",
+				Description: "AWS Role ARN for Torque to use which has permissions to connect to CodeCommit",
 				Required:    true,
 			},
 			"aws_region": schema.StringAttribute{
-				Description: "Repository type. Available types: github, bitbucket, gitlab, azure (for Azure DevOps)",
+				Description: "AWS Region that hosts the CodeCommit Repository, i.e eu-west-1",
 				Required:    true,
 			},
 			"external_id": schema.StringAttribute{
-				Description: "Repository type. Available types: github, bitbucket, gitlab, azure (for Azure DevOps)",
+				Description: "External ID used in the IAM role trust policy.",
 				Required:    true,
 			},
-			"username": schema.StringAttribute{
-				Description: "Repository type. Available types: github, bitbucket, gitlab, azure (for Azure DevOps)",
+			"git_username": schema.StringAttribute{
+				Description: "Git Username",
 				Required:    true,
 			},
-			"password": schema.StringAttribute{
-				Description: "Repository type. Available types: github, bitbucket, gitlab, azure (for Azure DevOps)",
+			"git_password": schema.StringAttribute{
+				Description: "Git Password",
 				Required:    true,
 			},
 			"branch": schema.StringAttribute{
 				Description: "Repository branch to use for blueprints and automation assets",
-				Optional:    true,
+				Required:    true,
 			},
 			"repository_name": schema.StringAttribute{
-				Description: "The name of the repository to onboard in the newly created space",
+				Description: "The name of the CodeCommit repository to onboard",
 				Required:    true,
 			},
 		},
@@ -185,7 +185,7 @@ func (r *TorqueSpaceCodeCommitRepositoryResource) Delete(ctx context.Context, re
 	// Remove repo from space.
 	err := r.client.RemoveRepoFromSpace(data.SpaceName.ValueString(), data.RepositoryName.ValueString())
 	if err != nil {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to attach agent to space, got error: %s", err))
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to remove repository from space, got error: %s", err))
 		return
 	}
 

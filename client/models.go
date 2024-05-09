@@ -59,8 +59,8 @@ type CodeCommitRepoSpaceAssociation struct {
 	Branch     string `json:"branch"`
 	Name       string `json:"repository_name"`
 	ExternalId string `json:"external_id"`
-	Username   string `json:"username"`
-	Password   string `json:"password"`
+	Username   string `json:"git_username"`
+	Password   string `json:"git_password"`
 }
 
 type TagNameValue struct {

@@ -30,12 +30,12 @@ variable "external_id" {
   description = "External ID"
 }
 
-variable "username" {
+variable "git_username" {
   type        = string
   description = "Username"
 }
 
-variable "password" {
+variable "git_password" {
   type        = string
   description = "Password"
 }
