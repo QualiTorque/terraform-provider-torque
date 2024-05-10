@@ -107,7 +107,7 @@ func (c *Client) RemoveAgentFromSpace(agent string, space string) error {
 }
 
 func (c *Client) OnboardCodeCommitRepoToSpace(space_name string, repository_name string, role_arn string, repository_url string, aws_region string,
-	repository_branch string, external_id string, username string, password string) error {
+	repository_branch string, external_id string, git_username string, git_password string) error {
 	fmt.Println(c.HostURL + "api/spaces")
 
 	data := CodeCommitRepoSpaceAssociation{
@@ -117,8 +117,8 @@ func (c *Client) OnboardCodeCommitRepoToSpace(space_name string, repository_name
 		Branch:     repository_branch,
 		Name:       repository_name,
 		ExternalId: external_id,
-		Username:   username,
-		Password:   password,
+		Username:   git_username,
+		Password:   git_password,
 	}
 
 	payload, err := json.Marshal(data)
