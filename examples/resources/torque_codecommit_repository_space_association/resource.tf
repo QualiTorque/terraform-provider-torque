@@ -7,19 +7,20 @@ terraform {
 }
 
 provider "torque" {
-  host  = var.host
-  space = var.space
-  token = var.token
+  host  = "https://portal.qtorque.io/"
+  space = "space"
+  token = "111111111111"
 }
 
 resource "torque_codecommit_repository_space_association" "repository" {
-  space_name      = var.space
-  aws_region      = var.aws_region
-  role_arn        = var.role_arn
-  external_id     = var.external_id
-  git_username    = var.git_username
-  git_password    = var.git_password
-  branch          = var.branch
-  repository_name = var.repository_name
-  repository_url  = var.repository_url
+  space           = "space"
+  token           = "token"
+  aws_region      = "eu-west-1"
+  external_id     = "external_id"
+  role_arn        = "arn:aws:iam::111111111111:role/role"
+  git_username    = "CodeCommituser-at-111111111111"
+  git_password    = "password"
+  branch          = "main"
+  repository_name = "codecommit-repo"
+  repository_url  = "https://git-codecommit.eu-west-1.amazonaws.com/v1/repos/repo"
 }
