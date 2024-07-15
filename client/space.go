@@ -142,6 +142,38 @@ func (c *Client) OnboardCodeCommitRepoToSpace(space_name string, repository_name
 	return nil
 }
 
+func (c *Client) OnboardGitlabEnterpriseRepoToSpace(space_name string, base_url string, repository_name string, repository_url string, token string, branch string) error {
+	fmt.Println(c.HostURL + "api/spaces")
+
+	data := GitlabEnterpriseRepoSpaceAssociation{
+		BaseUrl: base_url,
+		Name:    repository_name,
+		URL:     repository_url,
+		Token:   token,
+		Branch:  branch,
+	}
+
+	payload, err := json.Marshal(data)
+	if err != nil {
+		log.Fatalf("impossible to marshall agent association: %s", err)
+	}
+
+	req, err := http.NewRequest("POST", fmt.Sprintf("%sapi/spaces/%s/repositories/gitlabEnterprise", c.HostURL, space_name), bytes.NewReader(payload))
+	if err != nil {
+		return err
+	}
+
+	req.Header.Add("Content-Type", "application/json")
+	req.Header.Add("Accept", "application/json")
+
+	_, err = c.doRequest(req, &c.Token)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (c *Client) OnboardRepoToSpace(space_name string, repo_name string, repo_type string, repo_url string, repo_token string, repo_branch string) error {
 	fmt.Println(c.HostURL + "api/spaces")
 

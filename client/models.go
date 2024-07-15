@@ -52,6 +52,14 @@ type RepoSpaceAssociation struct {
 	Name        string `json:"repository_name"`
 }
 
+type GitlabEnterpriseRepoSpaceAssociation struct {
+	BaseUrl string `json:"base_url"`
+	Name    string `json:"repository_name"`
+	URL     string `json:"repository_url"`
+	Token   string `json:"token"`
+	Branch  string `json:"branch"`
+}
+
 type CodeCommitRepoSpaceAssociation struct {
 	URL        string `json:"repository_url"`
 	RoleArn    string `json:"role_arn"`
