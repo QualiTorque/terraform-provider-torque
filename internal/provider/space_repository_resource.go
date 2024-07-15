@@ -56,7 +56,7 @@ func (r *TorqueSpaceRepositoryResource) Schema(ctx context.Context, req resource
 				Required:    true,
 			},
 			"repository_type": schema.StringAttribute{
-				Description: "Repository type. Available types: github, bitbucket, gitlab, azure (for Azure DevOps). For CodeCommit, Please use torque_codecommit_repository_space_association resource",
+				Description: "Repository type. Available types: github, bitbucket, gitlab, azure (for Azure DevOps). For CodeCommit, Please use torque_codecommit_repository_space_association resource. For Gitlab Enterprise please use torque_gitlab_enterprise_repository_space_association resource",
 				Required:    true,
 			},
 			"branch": schema.StringAttribute{
