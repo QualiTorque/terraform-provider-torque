@@ -207,29 +207,8 @@ func (d *environmentDataSource) Read(ctx context.Context, req datasource.ReadReq
 	var space_name types.String
 	var id types.String
 
-	// diags1 := req.Config.GetAttribute(ctx, path.Root("space_name"), &space_name)
-	// resp.Diagnostics.Append(diags1...)
-	// if resp.Diagnostics.HasError() {
-	// 	return
-	// }
-
-	// diags2 := req.Config.GetAttribute(ctx, path.Root("environment_id"), &environment_id)
-	// resp.Diagnostics.Append(diags2...)
-	// if resp.Diagnostics.HasError() {
-	// 	return
-	// }
-
-	// var data environmentDataSourceModel
-	// var space_name types.String
-
-	// diags := req.State.Get(ctx, &data)
-	// resp.Diagnostics.Append(diags...)
-	// if resp.Diagnostics.HasError() {
-	// 	return
-	// }
-
 	diags := req.Config.GetAttribute(ctx, path.Root("space_name"), &space_name)
-	diags = req.Config.GetAttribute(ctx, path.Root("id"), &id)
+	diags = append(diags, req.Config.GetAttribute(ctx, path.Root("id"), &id)...)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -279,7 +258,6 @@ func (d *environmentDataSource) Read(ctx context.Context, req datasource.ReadReq
 		}
 		state.Outputs = append(state.Outputs, outputData)
 	}
-	// state.Inputs = types.ListValue(string, environment_data.Details.Definition.Inputs)
 
 	diags = resp.State.Set(ctx, &state)
 	resp.Diagnostics.Append(diags...)
