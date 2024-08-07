@@ -29,21 +29,44 @@ type environmentDataSource struct {
 
 // environmentDataSourceModel maps the data source schema data.
 type environmentDataSourceModel struct {
-	ReadOnly      types.Bool            `tfsdk:"read_only"`
-	SpaceName     types.String          `tfsdk:"space_name"`
-	EnvironmentId types.String          `tfsdk:"environment_id"`
-	IsWorkflow    types.Bool            `tfsdk:"is_workflow"`
-	Owner         environmentOwnerModel `tfsdk:"owner"`
+	SpaceName     types.String `tfsdk:"space_name"`
+	Id            types.String `tfsdk:"id"`
+	IsEAC         types.Bool   `tfsdk:"is_eac"`
+	LastUsed      types.String `tfsdk:"last_used"`
+	BlueprintName types.String `tfsdk:"blueprint_name"`
+	OwnerEmail    types.String `tfsdk:"owner_email"`
 }
 
-type environmentOwnerModel struct {
-	FirstName        types.Bool   `tfsdk:"first_name"`
-	LastName         types.String `tfsdk:"last_name"`
-	Timezone         types.String `tfsdk:"timezone"`
-	Email            types.Bool   `tfsdk:"email"`
-	JoinDate         types.Bool   `tfsdk:"join_date"`
-	DisplayFirstName types.String `tfsdk:"display_first_name"`
-	DisplayLastName  types.String `tfsdk:"display_last_name"`
+type EnvironmentOwnerModel struct {
+	OwnerEmail types.String `tfsdk:"email"`
+}
+
+type EnvironmentDetailsModel struct {
+	Id             types.String               `tfsdk:"id"`
+	ComputedStatus types.String               `tfsdk:"computed_status"`
+	Definition     EnvironmentDefinitionModel `tfsdk:"definition"`
+}
+
+type EnvironmentDefinitionModel struct {
+	Metadata EnvironmentMetadataModel `tfsdk:"metadata"`
+}
+
+type EnvironmentMetadataModel struct {
+	BlueprintName types.String `tfsdk:"blueprint_name"`
+}
+
+type EnvironmentDetailTagsModel struct {
+	Tags []TagModel `tfsdk:"tags"`
+}
+
+type TagModel struct {
+	Name  types.String `tfsdk:"name"`
+	Value types.String `tfsdk:"value"`
+}
+
+type CollaboratorsModel struct {
+	CollaboratorsEmails types.List `tfsdk:"collaborators_emails"`
+	AllSpaceMembers     types.Bool `tfsdk:"all_space_members"`
 }
 
 // Metadata returns the data source type name.
@@ -60,22 +83,25 @@ func (d *environmentDataSource) Schema(_ context.Context, _ datasource.SchemaReq
 				MarkdownDescription: "Space",
 				Required:            true,
 			},
-			"environment_id": schema.StringAttribute{
+			"id": schema.StringAttribute{
 				MarkdownDescription: "Environment ID",
 				Required:            true,
 			},
-			"read_only": schema.BoolAttribute{
-				MarkdownDescription: "Determines if user can perform actions on environment or not",
+			"blueprint_name": schema.StringAttribute{
+				MarkdownDescription: "Blueprint Name",
 				Computed:            true,
 			},
-			"is_workflow": schema.BoolAttribute{
-				MarkdownDescription: "Determines if the blueprint is a workflow",
+			"is_eac": schema.BoolAttribute{
+				MarkdownDescription: "Is environment source is Env-as-Code",
 				Computed:            true,
 			},
-			"owner": schema.ObjectAttribute{
-				Description: "Environment Owner",
-				Computed:    true,
-				NestedAttributeObject: 
+			"last_used": schema.StringAttribute{
+				MarkdownDescription: "Last time environment was used",
+				Computed:            true,
+			},
+			"owner_email": schema.StringAttribute{
+				MarkdownDescription: "Last time environment was used",
+				Computed:            true,
 			},
 		},
 	}
@@ -104,7 +130,7 @@ func (d *environmentDataSource) Configure(_ context.Context, req datasource.Conf
 func (d *environmentDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var state environmentDataSourceModel
 	var space_name types.String
-	var environment_id types.String
+	var id types.String
 
 	// diags1 := req.Config.GetAttribute(ctx, path.Root("space_name"), &space_name)
 	// resp.Diagnostics.Append(diags1...)
@@ -126,14 +152,15 @@ func (d *environmentDataSource) Read(ctx context.Context, req datasource.ReadReq
 	// if resp.Diagnostics.HasError() {
 	// 	return
 	// }
+
 	diags := req.Config.GetAttribute(ctx, path.Root("space_name"), &space_name)
-	diags = req.Config.GetAttribute(ctx, path.Root("environment_id"), &environment_id)
+	diags = req.Config.GetAttribute(ctx, path.Root("id"), &id)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	environment_data, err := d.client.GetEnvironmentDetails(space_name.ValueString(), environment_id.ValueString())
+	environment_data, err := d.client.GetEnvironmentDetails(space_name.ValueString(), id.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to Read Torque environment",
@@ -142,9 +169,12 @@ func (d *environmentDataSource) Read(ctx context.Context, req datasource.ReadReq
 		return
 	}
 
-	state.ReadOnly = types.BoolValue(environment_data.ReadOnly)
-	state.IsWorkflow = types.BoolValue(environment_data.IsWorkflow)
-	state.EnvironmentId = environment_id
+	state.LastUsed = types.StringValue(environment_data.LastUsed)
+	state.IsEAC = types.BoolValue(environment_data.IsEAC)
+	state.BlueprintName = types.StringValue(environment_data.Details.Definition.Metadata.BlueprintName)
+	state.OwnerEmail = types.StringValue(environment_data.Owner.OwnerEmail)
+	state.Id = types.StringValue(environment_data.Details.Id)
+
 	diags = resp.State.Set(ctx, &state)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {

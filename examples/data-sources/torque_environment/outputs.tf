@@ -1,11 +1,19 @@
-output "read_only" {
-  value = data.torque_environment.env.read_only
-}
-
-output "workflow" {
-  value = data.torque_environment.env.is_workflow
-}
-
 output "id" {
-  value = data.torque_environment.env.environment_id
+  value = data.torque_environment.env.id
+}
+
+output "last_used" {
+  value = data.torque_environment.env.last_used
+}
+
+output "owner" {
+  value = data.torque_environment.env.owner_email
+}
+
+output "is_eac" {
+  value = data.torque_environment.env.is_eac
+}
+
+output "blueprint_name" {
+  value = data.torque_environment.env.blueprint_name
 }

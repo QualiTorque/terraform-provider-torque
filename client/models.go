@@ -160,4 +160,26 @@ type Environment struct {
 	ReadOnly      bool   `json:"read_only"`
 	IsWorkflow    bool   `json:"is_workflow"`
 	EnvironmentId string `json:"environment_id"`
+	LastUsed      string `json:"last_used"`
+	IsEAC         bool   `json:"eac_synced"`
+	Details       EnvironmentDetails `json:"details"`
+	Owner         EnvironmentOwner   `json:"owner"`
+}
+
+type EnvironmentDetails struct {
+	Id             string                `json:"id"`
+	ComputedStatus string                `json:"computed_status"`
+	Definition     EnvironmentDefinition `json:"definition"`
+}
+
+type EnvironmentDefinition struct {
+	Metadata EnvironmentMetadata `json:"metadata"`
+}
+
+type EnvironmentMetadata struct {
+	BlueprintName string `json:"blueprint_name"`
+}
+
+type EnvironmentOwner struct {
+	OwnerEmail string `json:"email"`
 }

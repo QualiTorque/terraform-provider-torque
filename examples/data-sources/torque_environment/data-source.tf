@@ -13,6 +13,6 @@ provider "torque" {
 }
 
 data "torque_environment" "env" {
-  space_name     = var.torque_space
-  environment_id = var.environment_id
+  space_name = var.torque_space
+  id         = var.environment_id
 }
