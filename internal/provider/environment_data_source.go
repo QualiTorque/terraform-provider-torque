@@ -29,10 +29,21 @@ type environmentDataSource struct {
 
 // environmentDataSourceModel maps the data source schema data.
 type environmentDataSourceModel struct {
-	ReadOnly      types.Bool   `tfsdk:"read_only"`
-	SpaceName     types.String `tfsdk:"space_name"`
-	EnvironmentId types.String `tfsdk:"environment_id"`
-	IsWorkflow    types.Bool   `tfsdk:"is_workflow"`
+	ReadOnly      types.Bool            `tfsdk:"read_only"`
+	SpaceName     types.String          `tfsdk:"space_name"`
+	EnvironmentId types.String          `tfsdk:"environment_id"`
+	IsWorkflow    types.Bool            `tfsdk:"is_workflow"`
+	Owner         environmentOwnerModel `tfsdk:"owner"`
+}
+
+type environmentOwnerModel struct {
+	FirstName        types.Bool   `tfsdk:"first_name"`
+	LastName         types.String `tfsdk:"last_name"`
+	Timezone         types.String `tfsdk:"timezone"`
+	Email            types.Bool   `tfsdk:"email"`
+	JoinDate         types.Bool   `tfsdk:"join_date"`
+	DisplayFirstName types.String `tfsdk:"display_first_name"`
+	DisplayLastName  types.String `tfsdk:"display_last_name"`
 }
 
 // Metadata returns the data source type name.
@@ -60,6 +71,11 @@ func (d *environmentDataSource) Schema(_ context.Context, _ datasource.SchemaReq
 			"is_workflow": schema.BoolAttribute{
 				MarkdownDescription: "Determines if the blueprint is a workflow",
 				Computed:            true,
+			},
+			"owner": schema.ObjectAttribute{
+				Description: "Environment Owner",
+				Computed:    true,
+				NestedAttributeObject: 
 			},
 		},
 	}
@@ -128,7 +144,7 @@ func (d *environmentDataSource) Read(ctx context.Context, req datasource.ReadReq
 
 	state.ReadOnly = types.BoolValue(environment_data.ReadOnly)
 	state.IsWorkflow = types.BoolValue(environment_data.IsWorkflow)
-
+	state.EnvironmentId = environment_id
 	diags = resp.State.Set(ctx, &state)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {

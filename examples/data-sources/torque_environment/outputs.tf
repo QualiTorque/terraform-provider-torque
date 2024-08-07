@@ -5,3 +5,7 @@ output "read_only" {
 output "workflow" {
   value = data.torque_environment.env.is_workflow
 }
+
+output "id" {
+  value = data.torque_environment.env.environment_id
+}

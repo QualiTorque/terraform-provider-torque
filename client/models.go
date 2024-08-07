@@ -157,6 +157,7 @@ type Account struct {
 }
 
 type Environment struct {
-	ReadOnly   bool `json:"read_only"`
-	IsWorkflow bool `json:"is_workflow"`
+	ReadOnly      bool   `json:"read_only"`
+	IsWorkflow    bool   `json:"is_workflow"`
+	EnvironmentId string `json:"environment_id"`
 }
