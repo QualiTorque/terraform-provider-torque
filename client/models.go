@@ -157,29 +157,50 @@ type Account struct {
 }
 
 type Environment struct {
-	ReadOnly      bool   `json:"read_only"`
-	IsWorkflow    bool   `json:"is_workflow"`
-	EnvironmentId string `json:"environment_id"`
-	LastUsed      string `json:"last_used"`
-	IsEAC         bool   `json:"eac_synced"`
-	Details       EnvironmentDetails `json:"details"`
-	Owner         EnvironmentOwner   `json:"owner"`
+	ReadOnly      bool                 `json:"read_only"`
+	IsWorkflow    bool                 `json:"is_workflow"`
+	EnvironmentId string               `json:"environment_id"`
+	LastUsed      string               `json:"last_used"`
+	IsEAC         bool                 `json:"eac_synced"`
+	Details       EnvironmentDetails   `json:"details"`
+	Owner         EnvironmentOwner     `json:"owner"`
+	Initiator     EnvironmentInitiator `json:"initiator"`
 }
 
 type EnvironmentDetails struct {
 	Id             string                `json:"id"`
 	ComputedStatus string                `json:"computed_status"`
 	Definition     EnvironmentDefinition `json:"definition"`
+	State          EnvironmentState      `json:"state"`
 }
 
 type EnvironmentDefinition struct {
 	Metadata EnvironmentMetadata `json:"metadata"`
+	Inputs   []KeyValuePair      `json:"inputs"`
+	Tags     []KeyValuePair      `json:"tags"`
+}
+
+type EnvironmentState struct {
+	Outputs []KeyValuePair `json:"outputs"`
+	IsEac   bool           `json:"eac_synced"`
+}
+
+type KeyValuePair struct {
+	Name  string `json:"name"`
+	Value string `json:"value"`
 }
 
 type EnvironmentMetadata struct {
-	BlueprintName string `json:"blueprint_name"`
+	Name                    string `json:"name"`
+	BlueprintName           string `json:"blueprint_name"`
+	BlueprintCommit         string `json:"blueprint_commit"`
+	BlueprintRepositoryName string `json:"repository_name"`
 }
 
 type EnvironmentOwner struct {
 	OwnerEmail string `json:"email"`
+}
+
+type EnvironmentInitiator struct {
+	InitiatorEmail string `json:"email"`
 }

@@ -11,8 +11,7 @@ provider "torque" {
   space = var.torque_space
   token = var.torque_token
 }
-
 data "torque_environment" "env" {
   space_name = var.torque_space
-  id         = var.environment_id
+  id         = var.id
 }

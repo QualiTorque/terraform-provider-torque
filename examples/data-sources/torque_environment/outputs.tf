@@ -17,3 +17,28 @@ output "is_eac" {
 output "blueprint_name" {
   value = data.torque_environment.env.blueprint_name
 }
+
+output "initiator" {
+  value = data.torque_environment.env.initiator_email
+}
+
+output "inputs" {
+  value = data.torque_environment.env.inputs
+}
+
+output "tags" {
+  value = data.torque_environment.env.tags
+}
+
+output "outputs" {
+  value = data.torque_environment.env.outputs
+}
+output "blueprint_commit" {
+  value = data.torque_environment.env.blueprint_commit
+}
+output "blueprint_repository_name" {
+  value = data.torque_environment.env.blueprint_repository_name
+}
+output "name" {
+  value = data.torque_environment.env.name
+}

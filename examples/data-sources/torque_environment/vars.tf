@@ -9,7 +9,7 @@ variable "torque_token" {
   description = "Torque token (long token or short token) to be used for Torque API authneticaiton."
 }
 
-variable "environment_id" {
+variable "id" {
   type        = string
-  description = "Torque space to be used during Torque API authentication."
+  description = "The toruqe environment id."
 }
