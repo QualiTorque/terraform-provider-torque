@@ -155,3 +155,8 @@ type Account struct {
 	Password      string `json:"password"`
 	Company       string `json:"company"`
 }
+
+type Environment struct {
+	ReadOnly   bool `json:"read_only"`
+	IsWorkflow bool `json:"is_workflow"`
+}
