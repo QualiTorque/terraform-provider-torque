@@ -48,7 +48,7 @@ data "torque_environment" "env" {
 - `blueprint_repository_name` (String) Name of the blueprint's repository
 - `collaborators` (Attributes List) Environment collaborators (see [below for nested schema](#nestedatt--collaborators))
 - `end_time` (String) Datetime string representing the time the environment has ended (if ended)
-- `errors` (Attributes List) List of error messages that might have occured during the environment lifecycle (see [below for nested schema](#nestedatt--errors))
+- `errors` (Attributes List) List of error messages that might have occurred during the environment lifecycle (see [below for nested schema](#nestedatt--errors))
 - `grains` (Attributes List) List of grains that compose the environment, like Terraform, shell scripts, Ansible etc. (see [below for nested schema](#nestedatt--grains))
 - `initiator_email` (String) Email address of the person who initiated (launched) this environment
 - `inputs` (Attributes List) Actual inputs and their values that the environment was launched with (see [below for nested schema](#nestedatt--inputs))
