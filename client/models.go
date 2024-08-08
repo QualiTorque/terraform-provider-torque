@@ -157,14 +157,15 @@ type Account struct {
 }
 
 type Environment struct {
-	ReadOnly      bool                 `json:"read_only"`
-	IsWorkflow    bool                 `json:"is_workflow"`
-	EnvironmentId string               `json:"environment_id"`
-	LastUsed      string               `json:"last_used"`
-	IsEAC         bool                 `json:"eac_synced"`
-	Details       EnvironmentDetails   `json:"details"`
-	Owner         EnvironmentOwner     `json:"owner"`
-	Initiator     EnvironmentInitiator `json:"initiator"`
+	ReadOnly          bool                         `json:"read_only"`
+	IsWorkflow        bool                         `json:"is_workflow"`
+	EnvironmentId     string                       `json:"environment_id"`
+	LastUsed          string                       `json:"last_used"`
+	IsEAC             bool                         `json:"eac_synced"`
+	Details           EnvironmentDetails           `json:"details"`
+	Owner             EnvironmentOwner             `json:"owner"`
+	Initiator         EnvironmentInitiator         `json:"initiator"`
+	CollaboratorsInfo EnvironmentCollaboratorsInfo `json:"collaborators_info"`
 }
 
 type EnvironmentDetails struct {
@@ -172,6 +173,7 @@ type EnvironmentDetails struct {
 	ComputedStatus string                `json:"computed_status"`
 	Definition     EnvironmentDefinition `json:"definition"`
 	State          EnvironmentState      `json:"state"`
+	// EnvironmentCollaborators EnvironmentCollaborators `json:"collaborators_info"`
 }
 
 type EnvironmentDefinition struct {
@@ -213,4 +215,13 @@ type EnvironmentOwner struct {
 
 type EnvironmentInitiator struct {
 	InitiatorEmail string `json:"email"`
+}
+
+type EnvironmentCollaboratorsInfo struct {
+	Collaborators   []EnvironmentCollaborator `json:"collaborators"`
+	AllSpaceMembers bool                      `json:"all_space_members"`
+}
+
+type EnvironmentCollaborator struct {
+	Email     string `json:"email"`
 }

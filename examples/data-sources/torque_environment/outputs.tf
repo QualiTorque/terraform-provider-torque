@@ -55,3 +55,7 @@ output "end_time" {
 output "errors" {
   value = data.torque_environment.env.errors
 }
+
+output "collaborators" {
+  value = data.torque_environment.env.collaborators
+}

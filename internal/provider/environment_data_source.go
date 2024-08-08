@@ -40,6 +40,7 @@ type environmentDataSourceModel struct {
 	Status                  types.String        `tfsdk:"status"`
 	OwnerEmail              types.String        `tfsdk:"owner_email"`
 	InitiatorEmail          types.String        `tfsdk:"initiator_email"`
+	CollaboratorsEmails     []collaboratorModel `tfsdk:"collaborators"`
 	StartTime               types.String        `tfsdk:"start_time"`
 	EndTime                 types.String        `tfsdk:"end_time"`
 	Errors                  []errorModel        `tfsdk:"errors"`
@@ -55,6 +56,10 @@ type keyValuePairModel struct {
 
 type errorModel struct {
 	Message types.String `tfsdk:"name"`
+}
+
+type collaboratorModel struct {
+	Email types.String `tfsdk:"email"`
 }
 type EnvironmentOwnerModel struct {
 	OwnerEmail types.String `tfsdk:"email"`
@@ -83,10 +88,10 @@ type EnvironmentMetadataModel struct {
 // 	Value types.String `tfsdk:"value"`
 // }
 
-type CollaboratorsModel struct {
-	CollaboratorsEmails types.List `tfsdk:"collaborators_emails"`
-	AllSpaceMembers     types.Bool `tfsdk:"all_space_members"`
-}
+// type collaboratorsModel struct {
+// 	Collaborators   types.List `tfsdk:"collaborators"`
+// 	AllSpaceMembers types.Bool `tfsdk:"all_space_members"`
+// }
 
 // Metadata returns the data source type name.
 func (d *environmentDataSource) Metadata(_ context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
@@ -126,7 +131,18 @@ func (d *environmentDataSource) Schema(_ context.Context, _ datasource.SchemaReq
 				MarkdownDescription: "Name of the blueprint's repository",
 				Computed:            true,
 			},
-
+			"collaborators": schema.ListNestedAttribute{
+				Description: "Environment Inputs",
+				Computed:    true,
+				NestedObject: schema.NestedAttributeObject{
+					Attributes: map[string]schema.Attribute{
+						"email": schema.StringAttribute{
+							Description: "Collaborator's email",
+							Computed:    true,
+						},
+					},
+				},
+			},
 			"is_eac": schema.BoolAttribute{
 				MarkdownDescription: "Is environment source is Env-as-Code",
 				Computed:            true,
@@ -272,6 +288,13 @@ func (d *environmentDataSource) Read(ctx context.Context, req datasource.ReadReq
 	state.Tags = []keyValuePairModel{}
 	state.Outputs = []keyValuePairModel{}
 	state.Errors = []errorModel{}
+
+	for _, collaboratorItem := range environment_data.CollaboratorsInfo.Collaborators {
+		collaboratorData := collaboratorModel{
+			Email: types.StringValue(collaboratorItem.Email),
+		}
+		state.CollaboratorsEmails = append(state.CollaboratorsEmails, collaboratorData)
+	}
 
 	for _, inputItem := range environment_data.Details.Definition.Inputs {
 		inputData := keyValuePairModel{
