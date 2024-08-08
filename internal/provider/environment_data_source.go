@@ -102,20 +102,6 @@ type EnvironmentMetadataModel struct {
 	BlueprintName types.String `tfsdk:"blueprint_name"`
 }
 
-// type EnvironmentDetailTagsModel struct {
-// 	Tags []TagModel `tfsdk:"tags"`
-// }
-
-// type TagModel struct {
-// 	Name  types.String `tfsdk:"name"`
-// 	Value types.String `tfsdk:"value"`
-// }
-
-// type collaboratorsModel struct {
-// 	Collaborators   types.List `tfsdk:"collaborators"`
-// 	AllSpaceMembers types.Bool `tfsdk:"all_space_members"`
-// }
-
 // Metadata returns the data source type name.
 func (d *environmentDataSource) Metadata(_ context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_environment"
@@ -127,23 +113,23 @@ func (d *environmentDataSource) Schema(_ context.Context, _ datasource.SchemaReq
 		Description: "Get environment details.",
 		Attributes: map[string]schema.Attribute{
 			"space_name": schema.StringAttribute{
-				MarkdownDescription: "Space",
+				MarkdownDescription: "Torque's space this environment is in",
 				Required:            true,
 			},
 			"id": schema.StringAttribute{
-				MarkdownDescription: "Environment ID",
+				MarkdownDescription: "Environment ID (15 alphanumeric characters)",
 				Required:            true,
 			},
 			"name": schema.StringAttribute{
-				MarkdownDescription: "Environment Name",
+				MarkdownDescription: "Name of the environment",
 				Computed:            true,
 			},
 			"blueprint_name": schema.StringAttribute{
-				MarkdownDescription: "Blueprint Name",
+				MarkdownDescription: "Name of the blueprint that was used to launch this environment from",
 				Computed:            true,
 			},
 			"blueprint_commit": schema.StringAttribute{
-				MarkdownDescription: "Blueprint Commit",
+				MarkdownDescription: "Short commit of the blueprint that was used to launch this environment from",
 				Computed:            true,
 			},
 			"blueprint_repository_name": schema.StringAttribute{
@@ -151,11 +137,11 @@ func (d *environmentDataSource) Schema(_ context.Context, _ datasource.SchemaReq
 				Computed:            true,
 			},
 			"status": schema.StringAttribute{
-				MarkdownDescription: "Name of the blueprint's repository",
+				MarkdownDescription: "Environment status",
 				Computed:            true,
 			},
 			"collaborators": schema.ListNestedAttribute{
-				Description: "Environment Inputs",
+				Description: "Environment collaborators",
 				Computed:    true,
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
@@ -171,15 +157,15 @@ func (d *environmentDataSource) Schema(_ context.Context, _ datasource.SchemaReq
 				Computed:            true,
 			},
 			"last_used": schema.StringAttribute{
-				MarkdownDescription: "Last time environment was used",
+				MarkdownDescription: "Last time environment was accessed",
 				Computed:            true,
 			},
 			"start_time": schema.StringAttribute{
-				MarkdownDescription: "Last time environment was used",
+				MarkdownDescription: "Datetime string reprenting the time this nvironment was launched",
 				Computed:            true,
 			},
 			"end_time": schema.StringAttribute{
-				MarkdownDescription: "Last time environment was used",
+				MarkdownDescription: "Datetime time represnting the time the environment has ended if it ended",
 				Computed:            true,
 			},
 			"owner_email": schema.StringAttribute{
@@ -187,7 +173,7 @@ func (d *environmentDataSource) Schema(_ context.Context, _ datasource.SchemaReq
 				Computed:            true,
 			},
 			"initiator_email": schema.StringAttribute{
-				MarkdownDescription: "Email address of the person who initiated this environment",
+				MarkdownDescription: "Email address of the person who initiated (launched) this environment",
 				Computed:            true,
 			},
 			"raw_json": schema.StringAttribute{
@@ -204,24 +190,24 @@ func (d *environmentDataSource) Schema(_ context.Context, _ datasource.SchemaReq
 							Computed:    true,
 						},
 						"kind": schema.StringAttribute{
-							Description: "Grain Kind",
+							Description: "Grain's Kind",
 							Computed:    true,
 						},
 						"id": schema.StringAttribute{
-							Description: "Grain's name",
+							Description: "Grain's id",
 							Computed:    true,
 						},
 						"path": schema.StringAttribute{
-							Description: "Grain Kind",
+							Description: "Grain's path in the repository (store)",
 							Computed:    true,
 						},
 						"state": schema.SingleNestedAttribute{
-							MarkdownDescription: "Additional details about the blueprint repository to be used. By default, this information is taken from the repository already confiured in the space.",
+							MarkdownDescription: "Additional details about the environment state.",
 							Computed:            true,
 							Attributes: map[string]schema.Attribute{
 								"current_state": schema.StringAttribute{
 									Optional:            true,
-									MarkdownDescription: "Sandbox blueprint name",
+									MarkdownDescription: "Grain's state",
 								},
 							},
 						},
@@ -230,23 +216,23 @@ func (d *environmentDataSource) Schema(_ context.Context, _ datasource.SchemaReq
 							NestedObject: schema.NestedAttributeObject{
 								Attributes: map[string]schema.Attribute{
 									"store": schema.StringAttribute{
-										MarkdownDescription: "The CRON expression that schedules this workflow",
+										MarkdownDescription: "The store (repository) of this grain",
 										Computed:            true,
 									},
 									"path": schema.StringAttribute{
-										MarkdownDescription: "Specify if the workflow schedule can be overridden at launch",
+										MarkdownDescription: "The path in the repository (store)",
 										Computed:            true,
 									},
 									"branch": schema.StringAttribute{
-										MarkdownDescription: "The CRON expression that schedules this workflow",
+										MarkdownDescription: "The branch used as the source",
 										Computed:            true,
 									},
 									"commit": schema.StringAttribute{
-										MarkdownDescription: "Specify if the workflow schedule can be overridden at launch",
+										MarkdownDescription: "The commit used as the sorce",
 										Computed:            true,
 									},
 									"is_last_commit": schema.BoolAttribute{
-										MarkdownDescription: "Specify if the workflow schedule can be overridden at launch",
+										MarkdownDescription: "Specify whether the commit is the latest of the source",
 										Computed:            true,
 									},
 								},
@@ -374,7 +360,7 @@ func (d *environmentDataSource) Read(ctx context.Context, req datasource.ReadReq
 	state.Id = types.StringValue(environment_data.Details.Id)
 	state.InitiatorEmail = types.StringValue(environment_data.Initiator.InitiatorEmail)
 	state.RawJson = types.StringValue(raw_json)
-	
+
 	state.Inputs = []keyValuePairModel{}
 	state.Tags = []keyValuePairModel{}
 	state.Outputs = []keyValuePairModel{}

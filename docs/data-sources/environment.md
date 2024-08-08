@@ -37,28 +37,28 @@ data "torque_environment" "env" {
 
 ### Required
 
-- `id` (String) Environment ID
-- `space_name` (String) Space
+- `id` (String) Environment ID (15 alphanumeric characters)
+- `space_name` (String) Torque's space this environment is in
 
 ### Read-Only
 
-- `blueprint_commit` (String) Blueprint Commit
-- `blueprint_name` (String) Blueprint Name
+- `blueprint_commit` (String) Short commit of the blueprint that was used to launch this environment from
+- `blueprint_name` (String) Name of the blueprint that was used to launch this environment from
 - `blueprint_repository_name` (String) Name of the blueprint's repository
-- `collaborators` (Attributes List) Environment Inputs (see [below for nested schema](#nestedatt--collaborators))
-- `end_time` (String) Last time environment was used
+- `collaborators` (Attributes List) Environment collaborators (see [below for nested schema](#nestedatt--collaborators))
+- `end_time` (String) Datetime time represnting the time the environment has ended if it ended
 - `errors` (Attributes List) Environment Errors (see [below for nested schema](#nestedatt--errors))
 - `grains` (Attributes List) Environment Inputs (see [below for nested schema](#nestedatt--grains))
-- `initiator_email` (String) Email address of the person who initiated this environment
+- `initiator_email` (String) Email address of the person who initiated (launched) this environment
 - `inputs` (Attributes List) Environment Inputs (see [below for nested schema](#nestedatt--inputs))
 - `is_eac` (Boolean) Is environment source is Env-as-Code
-- `last_used` (String) Last time environment was used
-- `name` (String) Environment Name
+- `last_used` (String) Last time environment was accessed
+- `name` (String) Name of the environment
 - `outputs` (Attributes List) Environment Inputs (see [below for nested schema](#nestedatt--outputs))
 - `owner_email` (String) Email address of the person who owns this environment
 - `raw_json` (String) Raw JSON response
-- `start_time` (String) Last time environment was used
-- `status` (String) Name of the blueprint's repository
+- `start_time` (String) Datetime string reprenting the time this nvironment was launched
+- `status` (String) Environment status
 - `tags` (Attributes List) Environment Tags (see [below for nested schema](#nestedatt--tags))
 
 <a id="nestedatt--collaborators"></a>
@@ -82,23 +82,23 @@ Read-Only:
 
 Read-Only:
 
-- `id` (String) Grain's name
-- `kind` (String) Grain Kind
+- `id` (String) Grain's id
+- `kind` (String) Grain's Kind
 - `name` (String) Grain's name
-- `path` (String) Grain Kind
+- `path` (String) Grain's path in the repository (store)
 - `sources` (Attributes List) (see [below for nested schema](#nestedatt--grains--sources))
-- `state` (Attributes) Additional details about the blueprint repository to be used. By default, this information is taken from the repository already confiured in the space. (see [below for nested schema](#nestedatt--grains--state))
+- `state` (Attributes) Additional details about the environment state. (see [below for nested schema](#nestedatt--grains--state))
 
 <a id="nestedatt--grains--sources"></a>
 ### Nested Schema for `grains.sources`
 
 Read-Only:
 
-- `branch` (String) The CRON expression that schedules this workflow
-- `commit` (String) Specify if the workflow schedule can be overridden at launch
-- `is_last_commit` (Boolean) Specify if the workflow schedule can be overridden at launch
-- `path` (String) Specify if the workflow schedule can be overridden at launch
-- `store` (String) The CRON expression that schedules this workflow
+- `branch` (String) The branch used as the source
+- `commit` (String) The commit used as the sorce
+- `is_last_commit` (Boolean) Specify whether the commit is the latest of the source
+- `path` (String) The path in the repository (store)
+- `store` (String) The store (repository) of this grain
 
 
 <a id="nestedatt--grains--state"></a>
@@ -106,7 +106,7 @@ Read-Only:
 
 Optional:
 
-- `current_state` (String) Sandbox blueprint name
+- `current_state` (String) Grain's state
 
 
 
