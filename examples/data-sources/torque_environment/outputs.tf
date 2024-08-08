@@ -59,3 +59,7 @@ output "errors" {
 output "collaborators" {
   value = data.torque_environment.env.collaborators
 }
+
+output "raw_json" {
+  value = data.torque_environment.env.raw_json
+}

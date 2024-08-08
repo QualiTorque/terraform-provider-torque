@@ -47,6 +47,7 @@ type environmentDataSourceModel struct {
 	Inputs                  []keyValuePairModel `tfsdk:"inputs"`
 	Outputs                 []keyValuePairModel `tfsdk:"outputs"`
 	Tags                    []keyValuePairModel `tfsdk:"tags"`
+	RawJson                 types.String        `tfsdk:"raw_json"`
 }
 
 type keyValuePairModel struct {
@@ -167,6 +168,10 @@ func (d *environmentDataSource) Schema(_ context.Context, _ datasource.SchemaReq
 				MarkdownDescription: "Email address of the person who initiated this environment",
 				Computed:            true,
 			},
+			"raw_json": schema.StringAttribute{
+				MarkdownDescription: "Raw JSON response",
+				Computed:            true,
+			},
 			"inputs": schema.ListNestedAttribute{
 				Description: "Environment Inputs",
 				Computed:    true,
@@ -263,7 +268,7 @@ func (d *environmentDataSource) Read(ctx context.Context, req datasource.ReadReq
 		return
 	}
 
-	environment_data, err := d.client.GetEnvironmentDetails(space_name.ValueString(), id.ValueString())
+	environment_data, raw_json, err := d.client.GetEnvironmentDetails(space_name.ValueString(), id.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to Read Torque environment",
@@ -288,7 +293,7 @@ func (d *environmentDataSource) Read(ctx context.Context, req datasource.ReadReq
 	state.Tags = []keyValuePairModel{}
 	state.Outputs = []keyValuePairModel{}
 	state.Errors = []errorModel{}
-
+	state.RawJson = types.StringValue(raw_json)
 	for _, collaboratorItem := range environment_data.CollaboratorsInfo.Collaborators {
 		collaboratorData := collaboratorModel{
 			Email: types.StringValue(collaboratorItem.Email),
