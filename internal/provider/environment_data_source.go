@@ -164,7 +164,7 @@ func (d *environmentDataSource) Schema(_ context.Context, _ datasource.SchemaReq
 				Computed:            true,
 			},
 			"grains": schema.ListNestedAttribute{
-				Description: "Environment Inputs",
+				Description: "List of grains that compose the environment, like Terraform, shell scripts, Ansible etc.",
 				Computed:    true,
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
@@ -225,7 +225,7 @@ func (d *environmentDataSource) Schema(_ context.Context, _ datasource.SchemaReq
 				},
 			},
 			"inputs": schema.ListNestedAttribute{
-				Description: "Environment Inputs",
+				Description: "Actual inputs and their values that the environment was launched with",
 				Computed:    true,
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
@@ -242,7 +242,7 @@ func (d *environmentDataSource) Schema(_ context.Context, _ datasource.SchemaReq
 			},
 
 			"outputs": schema.ListNestedAttribute{
-				Description: "Environment Inputs",
+				Description: "Environment Outputs",
 				Computed:    true,
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
@@ -274,7 +274,7 @@ func (d *environmentDataSource) Schema(_ context.Context, _ datasource.SchemaReq
 				},
 			},
 			"errors": schema.ListNestedAttribute{
-				Description: "Environment Errors",
+				Description: "List of error messages that might have occured during the environment lifecycle",
 				Computed:    true,
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{

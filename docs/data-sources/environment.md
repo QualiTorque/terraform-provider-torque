@@ -48,14 +48,14 @@ data "torque_environment" "env" {
 - `blueprint_repository_name` (String) Name of the blueprint's repository
 - `collaborators` (Attributes List) Environment collaborators (see [below for nested schema](#nestedatt--collaborators))
 - `end_time` (String) Datetime string representing the time the environment has ended (if ended)
-- `errors` (Attributes List) Environment Errors (see [below for nested schema](#nestedatt--errors))
-- `grains` (Attributes List) Environment Inputs (see [below for nested schema](#nestedatt--grains))
+- `errors` (Attributes List) List of error messages that might have occured during the environment lifecycle (see [below for nested schema](#nestedatt--errors))
+- `grains` (Attributes List) List of grains that compose the environment, like Terraform, shell scripts, Ansible etc. (see [below for nested schema](#nestedatt--grains))
 - `initiator_email` (String) Email address of the person who initiated (launched) this environment
-- `inputs` (Attributes List) Environment Inputs (see [below for nested schema](#nestedatt--inputs))
+- `inputs` (Attributes List) Actual inputs and their values that the environment was launched with (see [below for nested schema](#nestedatt--inputs))
 - `is_eac` (Boolean) Is environment source is Env-as-Code
 - `last_used` (String) Last time environment was accessed
 - `name` (String) Name of the environment
-- `outputs` (Attributes List) Environment Inputs (see [below for nested schema](#nestedatt--outputs))
+- `outputs` (Attributes List) Environment Outputs (see [below for nested schema](#nestedatt--outputs))
 - `owner_email` (String) Email address of the person who owns this environment
 - `raw_json` (String) Raw JSON response
 - `start_time` (String) Datetime string representing the time this nvironment was launched
