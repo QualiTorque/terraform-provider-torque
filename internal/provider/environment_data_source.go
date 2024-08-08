@@ -274,7 +274,7 @@ func (d *environmentDataSource) Schema(_ context.Context, _ datasource.SchemaReq
 				},
 			},
 			"errors": schema.ListNestedAttribute{
-				Description: "List of error messages that might have occured during the environment lifecycle",
+				Description: "List of error messages that might have occurred during the environment lifecycle",
 				Computed:    true,
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
