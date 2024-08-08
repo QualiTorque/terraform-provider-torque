@@ -43,6 +43,7 @@ type environmentDataSourceModel struct {
 	CollaboratorsEmails     []collaboratorModel `tfsdk:"collaborators"`
 	StartTime               types.String        `tfsdk:"start_time"`
 	EndTime                 types.String        `tfsdk:"end_time"`
+	Grains                  []grainModel        `tfsdk:"grains"`
 	Errors                  []errorModel        `tfsdk:"errors"`
 	Inputs                  []keyValuePairModel `tfsdk:"inputs"`
 	Outputs                 []keyValuePairModel `tfsdk:"outputs"`
@@ -53,6 +54,24 @@ type environmentDataSourceModel struct {
 type keyValuePairModel struct {
 	Name  types.String `tfsdk:"name"`
 	Value types.String `tfsdk:"value"`
+}
+
+type grainModel struct {
+	Name    types.String        `tfsdk:"name"`
+	Kind    types.String        `tfsdk:"kind"`
+	Id      types.String        `tfsdk:"id"`
+	Path    types.String        `tfsdk:"path"`
+	State   grainStateModel     `tfsdk:"state"`
+	Sources []grainSourcesModel `tfsdk:"sources"`
+}
+
+type grainStateModel struct {
+	CurrentState types.String `tfsdk:"current_state"`
+}
+
+type grainSourcesModel struct {
+	Store types.String `tfsdk:"store"`
+	Path  types.String `tfsdk:"path"`
 }
 
 type errorModel struct {
@@ -172,6 +191,57 @@ func (d *environmentDataSource) Schema(_ context.Context, _ datasource.SchemaReq
 				MarkdownDescription: "Raw JSON response",
 				Computed:            true,
 			},
+			"grains": schema.ListNestedAttribute{
+				Description: "Environment Inputs",
+				Computed:    true,
+				NestedObject: schema.NestedAttributeObject{
+					Attributes: map[string]schema.Attribute{
+						"name": schema.StringAttribute{
+							Description: "Grain's name",
+							Computed:    true,
+						},
+						"kind": schema.StringAttribute{
+							Description: "Grain Kind",
+							Computed:    true,
+						},
+						"id": schema.StringAttribute{
+							Description: "Grain's name",
+							Computed:    true,
+						},
+						"path": schema.StringAttribute{
+							Description: "Grain Kind",
+							Computed:    true,
+						},
+						"state": schema.SingleNestedAttribute{
+							MarkdownDescription: "Additional details about the blueprint repository to be used. By default, this information is taken from the repository already confiured in the space.",
+							Computed:            true,
+							Attributes: map[string]schema.Attribute{
+								"current_state": schema.StringAttribute{
+									Optional:            true,
+									MarkdownDescription: "Sandbox blueprint name",
+								},
+							},
+						},
+						"sources": schema.ListNestedAttribute{
+							Computed: true,
+							NestedObject: schema.NestedAttributeObject{
+								Attributes: map[string]schema.Attribute{
+									"store": schema.StringAttribute{
+										MarkdownDescription: "The CRON expression that schedules this workflow",
+										Computed:            false,
+										Optional:            true,
+									},
+									"path": schema.BoolAttribute{
+										MarkdownDescription: "Specify if the workflow schedule can be overridden at launch",
+										Computed:            false,
+										Optional:            true,
+									},
+								},
+							},
+						},
+					},
+				},
+			},
 			"inputs": schema.ListNestedAttribute{
 				Description: "Environment Inputs",
 				Computed:    true,
@@ -188,6 +258,7 @@ func (d *environmentDataSource) Schema(_ context.Context, _ datasource.SchemaReq
 					},
 				},
 			},
+
 			"outputs": schema.ListNestedAttribute{
 				Description: "Environment Inputs",
 				Computed:    true,
@@ -294,6 +365,15 @@ func (d *environmentDataSource) Read(ctx context.Context, req datasource.ReadReq
 	state.Outputs = []keyValuePairModel{}
 	state.Errors = []errorModel{}
 	state.RawJson = types.StringValue(raw_json)
+	for _, grainItem := range environment_data.Details.State.Grains {
+		grainData := grainModel{
+			Name: types.StringValue(grainItem.Name),
+			Kind: types.StringValue(grainItem.Kind),
+			Id:   types.StringValue(grainItem.Id),
+			Path: types.StringValue(grainItem.Path),
+		}
+		state.Grains = append(state.Grains, grainData)
+	}
 	for _, collaboratorItem := range environment_data.CollaboratorsInfo.Collaborators {
 		collaboratorData := collaboratorModel{
 			Email: types.StringValue(collaboratorItem.Email),

@@ -187,6 +187,7 @@ type EnvironmentState struct {
 	IsEac     bool           `json:"eac_synced"`
 	Execution Execution      `json:"execution"`
 	Errors    []Error        `json:"errors"`
+	Grains    []Grain        `json:"grains"`
 }
 
 type KeyValuePair struct {
@@ -223,5 +224,23 @@ type EnvironmentCollaboratorsInfo struct {
 }
 
 type EnvironmentCollaborator struct {
-	Email     string `json:"email"`
+	Email string `json:"email"`
+}
+
+type Grain struct {
+	Name    string         `json:"name"`
+	Kind    string         `json:"kind"`
+	Id      string         `json:"id"`
+	Path    string         `json:"path"`
+	State   GrainState     `json:"state"`
+	Sources []GrainSources `json:"sources"`
+}
+
+type GrainState struct {
+	CurrentState string `json:"current_state"`
+}
+
+type GrainSources struct {
+	Store string `json:"store"`
+	Path  string `json:"path"`
 }
