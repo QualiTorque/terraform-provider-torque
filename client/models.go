@@ -247,3 +247,16 @@ type GrainSource struct {
 	Commit       string `json:"commit"`
 	IsLastCommit bool   `json:"is_last_commit"`
 }
+
+type IntrospectionItem struct {
+	GrainPath        string         `json:"grain_path"`
+	GrainType        string         `json:"grain_type"`
+	ResourceName     string         `json:"resource_name"`
+	ResourceType     string         `json:"resource_type"`
+	ResourceCategory string         `json:"resource_category"`
+	Status           string         `json:"status"`
+	Alias            string         `json:"alias"`
+	HasRunningAction string         `json:"has_running_action"`
+	Attributes       []KeyValuePair `json:"attributes"`
+	CustomIcon       string         `json:"custom_icon"`
+}
