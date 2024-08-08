@@ -254,9 +254,9 @@ type IntrospectionItem struct {
 	ResourceName     string         `json:"resource_name"`
 	ResourceType     string         `json:"resource_type"`
 	ResourceCategory string         `json:"resource_category"`
-	Status           string         `json:"status"`
+	Status           string        `json:"status"`
 	Alias            string         `json:"alias"`
-	HasRunningAction string         `json:"has_running_action"`
+	HasRunningAction bool           `json:"has_running_action"`
 	Attributes       []KeyValuePair `json:"attributes"`
-	CustomIcon       string         `json:"custom_icon"`
+	CustomIcon       string        `json:"custom_icon"`
 }
