@@ -37,8 +37,12 @@ type environmentDataSourceModel struct {
 	BlueprintName           types.String        `tfsdk:"blueprint_name"`
 	BlueprintCommit         types.String        `tfsdk:"blueprint_commit"`
 	BlueprintRepositoryName types.String        `tfsdk:"blueprint_repository_name"`
+	Status                  types.String        `tfsdk:"status"`
 	OwnerEmail              types.String        `tfsdk:"owner_email"`
 	InitiatorEmail          types.String        `tfsdk:"initiator_email"`
+	StartTime               types.String        `tfsdk:"start_time"`
+	EndTime                 types.String        `tfsdk:"end_time"`
+	Errors                  []errorModel        `tfsdk:"errors"`
 	Inputs                  []keyValuePairModel `tfsdk:"inputs"`
 	Outputs                 []keyValuePairModel `tfsdk:"outputs"`
 	Tags                    []keyValuePairModel `tfsdk:"tags"`
@@ -47,6 +51,10 @@ type environmentDataSourceModel struct {
 type keyValuePairModel struct {
 	Name  types.String `tfsdk:"name"`
 	Value types.String `tfsdk:"value"`
+}
+
+type errorModel struct {
+	Message types.String `tfsdk:"name"`
 }
 type EnvironmentOwnerModel struct {
 	OwnerEmail types.String `tfsdk:"email"`
@@ -114,11 +122,24 @@ func (d *environmentDataSource) Schema(_ context.Context, _ datasource.SchemaReq
 				MarkdownDescription: "Name of the blueprint's repository",
 				Computed:            true,
 			},
+			"status": schema.StringAttribute{
+				MarkdownDescription: "Name of the blueprint's repository",
+				Computed:            true,
+			},
+
 			"is_eac": schema.BoolAttribute{
 				MarkdownDescription: "Is environment source is Env-as-Code",
 				Computed:            true,
 			},
 			"last_used": schema.StringAttribute{
+				MarkdownDescription: "Last time environment was used",
+				Computed:            true,
+			},
+			"start_time": schema.StringAttribute{
+				MarkdownDescription: "Last time environment was used",
+				Computed:            true,
+			},
+			"end_time": schema.StringAttribute{
 				MarkdownDescription: "Last time environment was used",
 				Computed:            true,
 			},
@@ -178,6 +199,18 @@ func (d *environmentDataSource) Schema(_ context.Context, _ datasource.SchemaReq
 					},
 				},
 			},
+			"errors": schema.ListNestedAttribute{
+				Description: "Environment Errors",
+				Computed:    true,
+				NestedObject: schema.NestedAttributeObject{
+					Attributes: map[string]schema.Attribute{
+						"message": schema.StringAttribute{
+							Description: "Error Message",
+							Computed:    true,
+						},
+					},
+				},
+			},
 		},
 	}
 }
@@ -230,11 +263,15 @@ func (d *environmentDataSource) Read(ctx context.Context, req datasource.ReadReq
 	state.BlueprintCommit = types.StringValue(environment_data.Details.Definition.Metadata.BlueprintCommit)
 	state.BlueprintRepositoryName = types.StringValue(environment_data.Details.Definition.Metadata.BlueprintRepositoryName)
 	state.OwnerEmail = types.StringValue(environment_data.Owner.OwnerEmail)
+	state.Status = types.StringValue(environment_data.Details.ComputedStatus)
+	state.StartTime = types.StringValue(environment_data.Details.State.Execution.StartTime)
+	state.EndTime = types.StringValue(environment_data.Details.State.Execution.EndTime)
 	state.Id = types.StringValue(environment_data.Details.Id)
 	state.InitiatorEmail = types.StringValue(environment_data.Initiator.InitiatorEmail)
 	state.Inputs = []keyValuePairModel{}
 	state.Tags = []keyValuePairModel{}
 	state.Outputs = []keyValuePairModel{}
+	state.Errors = []errorModel{}
 
 	for _, inputItem := range environment_data.Details.Definition.Inputs {
 		inputData := keyValuePairModel{
@@ -257,6 +294,13 @@ func (d *environmentDataSource) Read(ctx context.Context, req datasource.ReadReq
 			Value: types.StringValue(outputItem.Value),
 		}
 		state.Outputs = append(state.Outputs, outputData)
+	}
+
+	for _, errorItem := range environment_data.Details.State.Errors {
+		errorData := errorModel{
+			Message: types.StringValue(errorItem.Message),
+		}
+		state.Errors = append(state.Errors, errorData)
 	}
 
 	diags = resp.State.Set(ctx, &state)

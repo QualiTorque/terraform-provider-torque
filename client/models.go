@@ -181,13 +181,23 @@ type EnvironmentDefinition struct {
 }
 
 type EnvironmentState struct {
-	Outputs []KeyValuePair `json:"outputs"`
-	IsEac   bool           `json:"eac_synced"`
+	Outputs   []KeyValuePair `json:"outputs"`
+	IsEac     bool           `json:"eac_synced"`
+	Execution Execution      `json:"execution"`
+	Errors    []Error        `json:"errors"`
 }
 
 type KeyValuePair struct {
 	Name  string `json:"name"`
 	Value string `json:"value"`
+}
+type Error struct {
+	Message string `json:"message"`
+}
+
+type Execution struct {
+	StartTime string `json:"start_time"`
+	EndTime   string `json:"end_time"`
 }
 
 type EnvironmentMetadata struct {

@@ -42,3 +42,16 @@ output "blueprint_repository_name" {
 output "name" {
   value = data.torque_environment.env.name
 }
+output "status" {
+  value = data.torque_environment.env.status
+}
+output "start_time" {
+  value = data.torque_environment.env.start_time
+}
+output "end_time" {
+  value = data.torque_environment.env.end_time
+}
+
+output "errors" {
+  value = data.torque_environment.env.errors
+}
