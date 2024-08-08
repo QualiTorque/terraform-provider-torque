@@ -144,11 +144,11 @@ func (d *environmentDataSource) Schema(_ context.Context, _ datasource.SchemaReq
 				Computed:            true,
 			},
 			"start_time": schema.StringAttribute{
-				MarkdownDescription: "Datetime string reprenting the time this nvironment was launched",
+				MarkdownDescription: "Datetime string representing the time this nvironment was launched",
 				Computed:            true,
 			},
 			"end_time": schema.StringAttribute{
-				MarkdownDescription: "Datetime string represnting the time the environment has ended (if ended)",
+				MarkdownDescription: "Datetime string representing the time the environment has ended (if ended)",
 				Computed:            true,
 			},
 			"owner_email": schema.StringAttribute{

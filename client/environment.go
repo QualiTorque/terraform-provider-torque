@@ -12,8 +12,6 @@ func (c *Client) GetEnvironmentDetails(spaceName string, environmentId string) (
 	if err != nil {
 		return nil, "", err
 	}
-	// req.Header.Add("Content-Type", "application/json")
-	// req.Header.Add("Accept", "application/json")
 
 	body, err := c.doRequest(req, &c.Token)
 	if err != nil {

@@ -47,7 +47,7 @@ data "torque_environment" "env" {
 - `blueprint_name` (String) Name of the blueprint that was used to launch this environment from
 - `blueprint_repository_name` (String) Name of the blueprint's repository
 - `collaborators` (Attributes List) Environment collaborators (see [below for nested schema](#nestedatt--collaborators))
-- `end_time` (String) Datetime string represnting the time the environment has ended (if ended)
+- `end_time` (String) Datetime string representing the time the environment has ended (if ended)
 - `errors` (Attributes List) Environment Errors (see [below for nested schema](#nestedatt--errors))
 - `grains` (Attributes List) Environment Inputs (see [below for nested schema](#nestedatt--grains))
 - `initiator_email` (String) Email address of the person who initiated (launched) this environment
@@ -58,7 +58,7 @@ data "torque_environment" "env" {
 - `outputs` (Attributes List) Environment Inputs (see [below for nested schema](#nestedatt--outputs))
 - `owner_email` (String) Email address of the person who owns this environment
 - `raw_json` (String) Raw JSON response
-- `start_time` (String) Datetime string reprenting the time this nvironment was launched
+- `start_time` (String) Datetime string representing the time this nvironment was launched
 - `status` (String) Environment status
 - `tags` (Attributes List) Environment Tags (see [below for nested schema](#nestedatt--tags))
 
