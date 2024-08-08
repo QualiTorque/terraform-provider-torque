@@ -155,3 +155,95 @@ type Account struct {
 	Password      string `json:"password"`
 	Company       string `json:"company"`
 }
+
+type Environment struct {
+	ReadOnly          bool                         `json:"read_only"`
+	IsWorkflow        bool                         `json:"is_workflow"`
+	EnvironmentId     string                       `json:"environment_id"`
+	LastUsed          string                       `json:"last_used"`
+	IsEAC             bool                         `json:"eac_synced"`
+	Details           EnvironmentDetails           `json:"details"`
+	Owner             EnvironmentOwner             `json:"owner"`
+	Initiator         EnvironmentInitiator         `json:"initiator"`
+	CollaboratorsInfo EnvironmentCollaboratorsInfo `json:"collaborators_info"`
+}
+
+type EnvironmentDetails struct {
+	Id             string                `json:"id"`
+	ComputedStatus string                `json:"computed_status"`
+	Definition     EnvironmentDefinition `json:"definition"`
+	State          EnvironmentState      `json:"state"`
+}
+
+type EnvironmentDefinition struct {
+	Metadata EnvironmentMetadata `json:"metadata"`
+	Inputs   []KeyValuePair      `json:"inputs"`
+	Tags     []KeyValuePair      `json:"tags"`
+}
+
+type EnvironmentState struct {
+	Outputs   []KeyValuePair `json:"outputs"`
+	IsEac     bool           `json:"eac_synced"`
+	Execution Execution      `json:"execution"`
+	Errors    []Error        `json:"errors"`
+	Grains    []Grain        `json:"grains"`
+}
+
+type KeyValuePair struct {
+	Name  string `json:"name"`
+	Value string `json:"value"`
+}
+type Error struct {
+	Message string `json:"message"`
+}
+
+type Execution struct {
+	StartTime string `json:"start_time"`
+	EndTime   string `json:"end_time"`
+}
+
+type EnvironmentMetadata struct {
+	Name                    string `json:"name"`
+	BlueprintName           string `json:"blueprint_name"`
+	BlueprintCommit         string `json:"blueprint_commit"`
+	BlueprintRepositoryName string `json:"repository_name"`
+	SpaceName               string `json:"space_name"`
+}
+
+type EnvironmentOwner struct {
+	OwnerEmail string `json:"email"`
+}
+
+type EnvironmentInitiator struct {
+	InitiatorEmail string `json:"email"`
+}
+
+type EnvironmentCollaboratorsInfo struct {
+	Collaborators   []EnvironmentCollaborator `json:"collaborators"`
+	AllSpaceMembers bool                      `json:"all_space_members"`
+}
+
+type EnvironmentCollaborator struct {
+	Email string `json:"email"`
+}
+
+type Grain struct {
+	Name    string        `json:"name"`
+	Kind    string        `json:"kind"`
+	Id      string        `json:"id"`
+	Path    string        `json:"path"`
+	State   GrainState    `json:"state"`
+	Sources []GrainSource `json:"sources"`
+}
+
+type GrainState struct {
+	CurrentState string `json:"current_state"`
+}
+
+type GrainSource struct {
+	Store        string `json:"store"`
+	Path         string `json:"path"`
+	Branch       string `json:"branch"`
+	Commit       string `json:"commit"`
+	IsLastCommit bool   `json:"is_last_commit"`
+}
