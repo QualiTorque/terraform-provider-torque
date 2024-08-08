@@ -57,21 +57,24 @@ type keyValuePairModel struct {
 }
 
 type grainModel struct {
-	Name    types.String        `tfsdk:"name"`
-	Kind    types.String        `tfsdk:"kind"`
-	Id      types.String        `tfsdk:"id"`
-	Path    types.String        `tfsdk:"path"`
-	State   grainStateModel     `tfsdk:"state"`
-	Sources []grainSourcesModel `tfsdk:"sources"`
+	Name    types.String       `tfsdk:"name"`
+	Kind    types.String       `tfsdk:"kind"`
+	Id      types.String       `tfsdk:"id"`
+	Path    types.String       `tfsdk:"path"`
+	State   grainStateModel    `tfsdk:"state"`
+	Sources []grainSourceModel `tfsdk:"sources"`
 }
 
 type grainStateModel struct {
 	CurrentState types.String `tfsdk:"current_state"`
 }
 
-type grainSourcesModel struct {
-	Store types.String `tfsdk:"store"`
-	Path  types.String `tfsdk:"path"`
+type grainSourceModel struct {
+	Store        types.String `tfsdk:"store"`
+	Path         types.String `tfsdk:"path"`
+	Branch       types.String `tfsdk:"branch"`
+	Commit       types.String `tfsdk:"commit"`
+	IsLastCommit types.Bool   `tfsdk:"is_last_commit"`
 }
 
 type errorModel struct {
@@ -228,13 +231,23 @@ func (d *environmentDataSource) Schema(_ context.Context, _ datasource.SchemaReq
 								Attributes: map[string]schema.Attribute{
 									"store": schema.StringAttribute{
 										MarkdownDescription: "The CRON expression that schedules this workflow",
-										Computed:            false,
-										Optional:            true,
+										Computed:            true,
 									},
-									"path": schema.BoolAttribute{
+									"path": schema.StringAttribute{
 										MarkdownDescription: "Specify if the workflow schedule can be overridden at launch",
-										Computed:            false,
-										Optional:            true,
+										Computed:            true,
+									},
+									"branch": schema.StringAttribute{
+										MarkdownDescription: "The CRON expression that schedules this workflow",
+										Computed:            true,
+									},
+									"commit": schema.StringAttribute{
+										MarkdownDescription: "Specify if the workflow schedule can be overridden at launch",
+										Computed:            true,
+									},
+									"is_last_commit": schema.BoolAttribute{
+										MarkdownDescription: "Specify if the workflow schedule can be overridden at launch",
+										Computed:            true,
 									},
 								},
 							},
@@ -360,18 +373,34 @@ func (d *environmentDataSource) Read(ctx context.Context, req datasource.ReadReq
 	state.EndTime = types.StringValue(environment_data.Details.State.Execution.EndTime)
 	state.Id = types.StringValue(environment_data.Details.Id)
 	state.InitiatorEmail = types.StringValue(environment_data.Initiator.InitiatorEmail)
+	state.RawJson = types.StringValue(raw_json)
+	
 	state.Inputs = []keyValuePairModel{}
 	state.Tags = []keyValuePairModel{}
 	state.Outputs = []keyValuePairModel{}
 	state.Errors = []errorModel{}
-	state.RawJson = types.StringValue(raw_json)
+	
 	for _, grainItem := range environment_data.Details.State.Grains {
 		grainData := grainModel{
 			Name: types.StringValue(grainItem.Name),
 			Kind: types.StringValue(grainItem.Kind),
 			Id:   types.StringValue(grainItem.Id),
 			Path: types.StringValue(grainItem.Path),
+			State: grainStateModel{
+				CurrentState: types.StringValue(grainItem.State.CurrentState),
+			},
 		}
+		for _, grainSource := range grainItem.Sources {
+			grainSourceData := grainSourceModel{
+				Store:        types.StringValue(grainSource.Store),
+				Path:         types.StringValue(grainSource.Path),
+				Branch:       types.StringValue(grainSource.Branch),
+				Commit:       types.StringValue(grainSource.Commit),
+				IsLastCommit: types.BoolValue(grainSource.IsLastCommit),
+			}
+			grainData.Sources = append(grainData.Sources, grainSourceData)
+		}
+
 		state.Grains = append(state.Grains, grainData)
 	}
 	for _, collaboratorItem := range environment_data.CollaboratorsInfo.Collaborators {

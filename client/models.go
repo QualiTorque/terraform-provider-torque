@@ -228,19 +228,22 @@ type EnvironmentCollaborator struct {
 }
 
 type Grain struct {
-	Name    string         `json:"name"`
-	Kind    string         `json:"kind"`
-	Id      string         `json:"id"`
-	Path    string         `json:"path"`
-	State   GrainState     `json:"state"`
-	Sources []GrainSources `json:"sources"`
+	Name    string        `json:"name"`
+	Kind    string        `json:"kind"`
+	Id      string        `json:"id"`
+	Path    string        `json:"path"`
+	State   GrainState    `json:"state"`
+	Sources []GrainSource `json:"sources"`
 }
 
 type GrainState struct {
 	CurrentState string `json:"current_state"`
 }
 
-type GrainSources struct {
-	Store string `json:"store"`
-	Path  string `json:"path"`
+type GrainSource struct {
+	Store        string `json:"store"`
+	Path         string `json:"path"`
+	Branch       string `json:"branch"`
+	Commit       string `json:"commit"`
+	IsLastCommit bool   `json:"is_last_commit"`
 }
