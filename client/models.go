@@ -173,7 +173,6 @@ type EnvironmentDetails struct {
 	ComputedStatus string                `json:"computed_status"`
 	Definition     EnvironmentDefinition `json:"definition"`
 	State          EnvironmentState      `json:"state"`
-	// EnvironmentCollaborators EnvironmentCollaborators `json:"collaborators_info"`
 }
 
 type EnvironmentDefinition struct {
@@ -208,6 +207,7 @@ type EnvironmentMetadata struct {
 	BlueprintName           string `json:"blueprint_name"`
 	BlueprintCommit         string `json:"blueprint_commit"`
 	BlueprintRepositoryName string `json:"repository_name"`
+	SpaceName               string `json:"space_name"`
 }
 
 type EnvironmentOwner struct {

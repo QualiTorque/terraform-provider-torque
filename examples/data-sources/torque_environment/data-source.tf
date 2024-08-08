@@ -8,10 +8,11 @@ terraform {
 
 provider "torque" {
   host  = "https://portal.qtorque.io/"
-  space = var.torque_space
-  token = var.torque_token
+  space = "api_space"
+  token = "111111111111"
 }
+
 data "torque_environment" "env" {
-  space_name = var.torque_space
-  id         = var.id
+  space_name = "target_space"
+  id         = "JL4kgRgxT3Vo"
 }

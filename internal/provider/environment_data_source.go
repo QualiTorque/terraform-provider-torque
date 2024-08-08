@@ -84,23 +84,6 @@ type errorModel struct {
 type collaboratorModel struct {
 	Email types.String `tfsdk:"email"`
 }
-type EnvironmentOwnerModel struct {
-	OwnerEmail types.String `tfsdk:"email"`
-}
-
-type EnvironmentDetailsModel struct {
-	Id             types.String               `tfsdk:"id"`
-	ComputedStatus types.String               `tfsdk:"computed_status"`
-	Definition     EnvironmentDefinitionModel `tfsdk:"definition"`
-}
-
-type EnvironmentDefinitionModel struct {
-	Metadata EnvironmentMetadataModel `tfsdk:"metadata"`
-}
-
-type EnvironmentMetadataModel struct {
-	BlueprintName types.String `tfsdk:"blueprint_name"`
-}
 
 // Metadata returns the data source type name.
 func (d *environmentDataSource) Metadata(_ context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
@@ -165,7 +148,7 @@ func (d *environmentDataSource) Schema(_ context.Context, _ datasource.SchemaReq
 				Computed:            true,
 			},
 			"end_time": schema.StringAttribute{
-				MarkdownDescription: "Datetime time represnting the time the environment has ended if it ended",
+				MarkdownDescription: "Datetime string represnting the time the environment has ended (if ended)",
 				Computed:            true,
 			},
 			"owner_email": schema.StringAttribute{
@@ -348,6 +331,7 @@ func (d *environmentDataSource) Read(ctx context.Context, req datasource.ReadReq
 	}
 
 	state.Name = types.StringValue(environment_data.Details.Definition.Metadata.Name)
+	state.SpaceName = types.StringValue(environment_data.Details.Definition.Metadata.SpaceName)
 	state.LastUsed = types.StringValue(environment_data.LastUsed)
 	state.IsEAC = types.BoolValue(environment_data.Details.State.IsEac)
 	state.BlueprintName = types.StringValue(environment_data.Details.Definition.Metadata.BlueprintName)
@@ -361,6 +345,7 @@ func (d *environmentDataSource) Read(ctx context.Context, req datasource.ReadReq
 	state.InitiatorEmail = types.StringValue(environment_data.Initiator.InitiatorEmail)
 	state.RawJson = types.StringValue(raw_json)
 
+	state.CollaboratorsEmails = []collaboratorModel{}
 	state.Inputs = []keyValuePairModel{}
 	state.Tags = []keyValuePairModel{}
 	state.Outputs = []keyValuePairModel{}

@@ -23,12 +23,13 @@ terraform {
 
 provider "torque" {
   host  = "https://portal.qtorque.io/"
-  space = var.torque_space
-  token = var.torque_token
+  space = "api_space"
+  token = "111111111111"
 }
+
 data "torque_environment" "env" {
-  space_name = var.torque_space
-  id         = var.id
+  space_name = "target_space"
+  id         = "JL4kgRgxT3Vo"
 }
 ```
 
@@ -46,7 +47,7 @@ data "torque_environment" "env" {
 - `blueprint_name` (String) Name of the blueprint that was used to launch this environment from
 - `blueprint_repository_name` (String) Name of the blueprint's repository
 - `collaborators` (Attributes List) Environment collaborators (see [below for nested schema](#nestedatt--collaborators))
-- `end_time` (String) Datetime time represnting the time the environment has ended if it ended
+- `end_time` (String) Datetime string represnting the time the environment has ended (if ended)
 - `errors` (Attributes List) Environment Errors (see [below for nested schema](#nestedatt--errors))
 - `grains` (Attributes List) Environment Inputs (see [below for nested schema](#nestedatt--grains))
 - `initiator_email` (String) Email address of the person who initiated (launched) this environment
