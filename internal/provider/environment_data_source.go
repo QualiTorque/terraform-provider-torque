@@ -365,7 +365,7 @@ func (d *environmentDataSource) Read(ctx context.Context, req datasource.ReadReq
 	state.Tags = []keyValuePairModel{}
 	state.Outputs = []keyValuePairModel{}
 	state.Errors = []errorModel{}
-	
+
 	for _, grainItem := range environment_data.Details.State.Grains {
 		grainData := grainModel{
 			Name: types.StringValue(grainItem.Name),
