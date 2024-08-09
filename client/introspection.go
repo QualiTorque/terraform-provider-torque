@@ -25,6 +25,6 @@ func (c *Client) GetIntrospectionDetails(spaceName string, environmentId string)
 		return nil, err
 	}
 
-	// Return the introspection details and the raw JSON body as a string
+	// Return the introspection details 
 	return introspection, nil
 }
