@@ -23,4 +23,4 @@ Get Account Parameter details.
 
 - `description` (String) Parameter description
 - `sensitive` (Boolean) Whether the parameter is sensitive or not.
-- `value` (String) Parameter Value, will be an empty string if the parameter is sensitive
+- `value` (String) Parameter Value. Value will be an empty string if the parameter is sensitive

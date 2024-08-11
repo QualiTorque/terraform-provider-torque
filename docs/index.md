@@ -26,5 +26,5 @@ provider "torque" {
 ### Optional
 
 - `host` (String) URI for Torque API. May also be provided via TORQUE_HOST environment variable.
-- `space` (String) Space for Torque API. May also be provided via TORUQE_SPACE environment variable.
+- `space` (String) Space for Torque API. May also be provided via TORQUE_SPACE environment variable.
 - `token` (String, Sensitive) Token for Torque API. May also be provided via TORUQE_TOKEN environment variable.
