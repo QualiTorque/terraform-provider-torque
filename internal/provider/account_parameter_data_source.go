@@ -37,7 +37,7 @@ type accountParameterDataSourceModel struct {
 
 // Metadata returns the data source type name.
 func (d *accountParameterDataSource) Metadata(_ context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_account_parameter"
+	resp.TypeName = req.ProviderTypeName + "_parameter"
 }
 
 // Schema defines the schema for the data source.
