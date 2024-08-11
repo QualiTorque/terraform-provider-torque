@@ -12,6 +12,6 @@ provider "torque" {
   token = "111111111111"
 }
 
-data "torque_account_parameter" "parameter" {
+data "torque_parameter" "parameter" {
   name = "param"
 }

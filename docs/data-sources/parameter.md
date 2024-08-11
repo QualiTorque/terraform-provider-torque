@@ -23,12 +23,12 @@ terraform {
 
 provider "torque" {
   host  = "https://portal.qtorque.io/"
-  space = "amir"
-  token = "LFex3GLswCuXpPr5IBz753ekXOV2Xci0xelygfCSAlQ"
+  space = "api_space"
+  token = "111111111111"
 }
 
 data "torque_parameter" "parameter" {
-  name = "param2"
+  name = "param"
 }
 ```
 
