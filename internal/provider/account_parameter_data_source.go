@@ -18,7 +18,7 @@ var (
 )
 
 // NewaccountParametersDataSource is a helper function to simplify the provider implementation.
-func NewaccountParameterDataSource() datasource.DataSource {
+func NewAccountParameterDataSource() datasource.DataSource {
 	return &accountParameterDataSource{}
 }
 
@@ -50,7 +50,7 @@ func (d *accountParameterDataSource) Schema(_ context.Context, _ datasource.Sche
 				Required:            true,
 			},
 			"value": schema.StringAttribute{
-				MarkdownDescription: "Parameter Value, will be an empty string if the parameter is sensitive",
+				MarkdownDescription: "Parameter Value. Value will be an empty string if the parameter is sensitive",
 				Computed:            true,
 			},
 			"sensitive": schema.BoolAttribute{
