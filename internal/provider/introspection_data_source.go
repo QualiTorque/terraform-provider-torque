@@ -44,7 +44,7 @@ type introspectionDataModel struct {
 type environmentIntrospectionDataSourceModel struct {
 	SpaceName types.String             `tfsdk:"space_name"`
 	Id        types.String             `tfsdk:"id"`
-	Data      []introspectionDataModel `tfsdk:"data"`
+	Resources      []introspectionDataModel `tfsdk:"resources"`
 }
 
 // Metadata returns the data source type name.
@@ -65,7 +65,7 @@ func (d *environmentIntrospectionDataSource) Schema(_ context.Context, _ datasou
 				MarkdownDescription: "Environment ID (15 alphanumeric characters)",
 				Required:            true,
 			},
-			"data": schema.ListNestedAttribute{
+			"resources": schema.ListNestedAttribute{
 				Description: "List of introspection data, the actual resources in the environment",
 				Computed:    true,
 				NestedObject: schema.NestedAttributeObject{
@@ -190,7 +190,7 @@ func (d *environmentIntrospectionDataSource) Read(ctx context.Context, req datas
 			}
 			introspectionData.Attributes = append(introspectionData.Attributes, attributeData)
 		}
-		state.Data = append(state.Data, introspectionData)
+		state.Resources = append(state.Resources, introspectionData)
 	}
 
 	diags = resp.State.Set(ctx, &state)

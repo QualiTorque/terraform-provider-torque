@@ -43,15 +43,15 @@ data "torque_environment_introspection" "env_introspection" {
 
 ### Read-Only
 
-- `data` (Attributes List) List of introspection data, the actual resources in the environment (see [below for nested schema](#nestedatt--data))
+- `resources` (Attributes List) List of introspection data, the actual resources in the environment (see [below for nested schema](#nestedatt--resources))
 
-<a id="nestedatt--data"></a>
-### Nested Schema for `data`
+<a id="nestedatt--resources"></a>
+### Nested Schema for `resources`
 
 Read-Only:
 
 - `alias` (String) Resource concrete name
-- `attributes` (Attributes List) Map of the resource attributes (see [below for nested schema](#nestedatt--data--attributes))
+- `attributes` (Attributes List) Map of the resource attributes (see [below for nested schema](#nestedatt--resources--attributes))
 - `custom_icon` (String) Path to a custom icon for the resource
 - `grain_path` (String) Grain's path in the blueprint
 - `grain_type` (String) Grain kind, like Terraform, CloudFormation, etc.
@@ -61,8 +61,8 @@ Read-Only:
 - `resource_type` (String) Resource type, like azure_vm or_aws instance for example
 - `status` (String) Status of the resource, for example ec2 instance might be running or shut down etc.
 
-<a id="nestedatt--data--attributes"></a>
-### Nested Schema for `data.attributes`
+<a id="nestedatt--resources--attributes"></a>
+### Nested Schema for `resources.attributes`
 
 Read-Only:
 
