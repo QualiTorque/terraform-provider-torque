@@ -44,7 +44,7 @@ type introspectionDataModel struct {
 type environmentIntrospectionDataSourceModel struct {
 	SpaceName types.String             `tfsdk:"space_name"`
 	Id        types.String             `tfsdk:"id"`
-	Resources      []introspectionDataModel `tfsdk:"resources"`
+	Resources []introspectionDataModel `tfsdk:"resources"`
 }
 
 // Metadata returns the data source type name.
