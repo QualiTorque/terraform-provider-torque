@@ -53,7 +53,7 @@ func (r *TorqueBlueprintResource) Schema(ctx context.Context, req resource.Schem
 				Computed:    true,
 			},
 			"name": schema.StringAttribute{
-				Description: "no idea!! ",
+				Description: "The blueprint display name ",
 				Optional:    true,
 			},
 			"display_name": schema.StringAttribute{

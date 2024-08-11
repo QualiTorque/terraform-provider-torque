@@ -59,7 +59,7 @@ Read-Only:
 - `display_name` (String) The user friendly name of the blueprint in the space
 - `enabled` (Boolean) is Published blueprint in the space
 - `modified_by` (String) The name of the user that last modified the blueprint
-- `name` (String) no idea!!
+- `name` (String) The blueprint display name
 - `repository_branch` (String) The branch from which the blueprint is taken
 - `repository_name` (String) The repository name from which the blueprint is used
 - `url` (String) URI of the blueprint

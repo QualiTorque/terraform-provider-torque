@@ -112,11 +112,11 @@ func (d *environmentIntrospectionDataSource) Schema(_ context.Context, _ datasou
 							NestedObject: schema.NestedAttributeObject{
 								Attributes: map[string]schema.Attribute{
 									"name": schema.StringAttribute{
-										Description: "Input's name",
+										Description: "Attribute's name",
 										Computed:    true,
 									},
 									"value": schema.StringAttribute{
-										Description: "The value of the input",
+										Description: "The value of the Attribute",
 										Computed:    true,
 									},
 								},

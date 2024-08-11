@@ -17,7 +17,7 @@ Creation of a new Torque space with associated entities (users, repos, etc...)
 
 ### Optional
 
-- `name` (String) no idea!!
+- `name` (String) The blueprint display name
 
 ### Read-Only
 
