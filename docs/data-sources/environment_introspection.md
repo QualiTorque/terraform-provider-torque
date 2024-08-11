@@ -66,5 +66,5 @@ Read-Only:
 
 Read-Only:
 
-- `name` (String) Input's name
-- `value` (String) The value of the input
+- `name` (String) Attribute's name
+- `value` (String) The value of the Attribute

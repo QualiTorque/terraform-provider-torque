@@ -75,7 +75,7 @@ func (d *spaceRepoBlueprintsDataSource) Schema(_ context.Context, _ datasource.S
 							Computed:    true,
 						},
 						"name": schema.StringAttribute{
-							Description: "no idea!! ",
+							Description: "The blueprint display name ",
 							Computed:    true,
 						},
 						"display_name": schema.StringAttribute{
