@@ -24,7 +24,7 @@ website/node_modules
 *.iml
 *.test
 *.iml
-
+*.tfvars
 website/vendor
 
 # Test exclusions
@@ -35,3 +35,4 @@ website/vendor
 *.winfile eol=crlf
 
 scripts/
+/examples/old

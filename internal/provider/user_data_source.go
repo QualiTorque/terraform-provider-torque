@@ -54,7 +54,7 @@ func (d *userDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, r
 		Attributes: map[string]schema.Attribute{
 			"user_email": schema.StringAttribute{
 				MarkdownDescription: "The Email of the user",
-				Optional:            true,
+				Required:            true,
 			},
 			"first_name": schema.StringAttribute{
 				MarkdownDescription: "User first name",

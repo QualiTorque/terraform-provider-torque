@@ -56,7 +56,7 @@ func (r *TorqueSpaceRepositoryResource) Schema(ctx context.Context, req resource
 				Required:    true,
 			},
 			"repository_type": schema.StringAttribute{
-				Description: "Repository type. Available types: github, bitbucket, gitlab, azure (for Azure DevOps)",
+				Description: "Repository type. Available types: github, bitbucket, gitlab, azure (for Azure DevOps). For CodeCommit, Please use torque_codecommit_repository_space_association resource. For Gitlab Enterprise please use torque_gitlab_enterprise_repository_space_association resource",
 				Required:    true,
 			},
 			"branch": schema.StringAttribute{
@@ -100,7 +100,7 @@ func (r *TorqueSpaceRepositoryResource) Create(ctx context.Context, req resource
 		return
 	}
 
-	err := r.client.OnboardRepoToSpace(data.SpaceName.ValueString(), data.RepoName.ValueString(), trimQuote(data.RepoType.String()),
+	err := r.client.OnboardRepoToSpace(data.SpaceName.ValueString(), data.RepoName.ValueString(), data.RepoType.ValueString(),
 		data.RepoUrl.ValueString(), data.RepoToken.ValueString(), data.RepoBranch.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to onboard repository to space, got error: %s", err))
