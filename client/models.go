@@ -15,16 +15,49 @@ type User struct {
 }
 
 type Blueprint struct {
-	BlueprintName string `json:"blueprint_name"`
-	Name          string `json:"name"`
-	DisplayName   string `json:"display_name"`
-	RepoName      string `json:"repository_name"`
-	RepoBranch    string `json:"repository_branch"`
-	Commit        string `json:"commit"`
-	Description   string `json:"description"`
-	Url           string `json:"url"`
-	ModifiedBy    string `json:"modified_by"`
-	Published     bool   `json:"enabled"`
+	BlueprintName string   `json:"blueprint_name"`
+	Name          string   `json:"name"`
+	DisplayName   string   `json:"display_name"`
+	RepoName      string   `json:"repository_name"`
+	RepoBranch    string   `json:"repository_branch"`
+	Commit        string   `json:"commit"`
+	Description   string   `json:"description"`
+	Url           string   `json:"url"`
+	ModifiedBy    string   `json:"modified_by"`
+	Published     bool     `json:"enabled"`
+	Inputs        []Input  `json:"inputs"`
+	Outputs       []Output `json:"outputs"`
+}
+
+type DetailedBlueprint struct {
+	Details  Blueprint      `json:"details"`
+	Tags     []BlueprintTag `json:"tags"`
+	Policies Policies       `json:"policies"`
+}
+
+type Input struct {
+	Name         string `json:"name"`
+	Type         string `json:"type"`
+	DefaultValue string `json:"default_value"`
+}
+
+type Output struct {
+	Name string `json:"name"`
+}
+
+type BlueprintTag struct {
+	Name           string   `json:"name"`
+	DefaultValue   string   `json:"default_value"`
+	PossibleValues []string `json:"possible_values"`
+	Description    string   `json:"description"`
+}
+
+type Policies struct {
+	MaxDuration           string `json:"max_duration"`
+	DefaultDuration       string `json:"default_duration"`
+	DefaultExtend         string `json:"default_extend"`
+	MaxActiveEnvironments int32  `json:"max_active_environments"`
+	AlwaysOn              bool   `json:"always_on"`
 }
 
 type UserSpaceAssociation struct {

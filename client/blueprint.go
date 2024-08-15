@@ -6,12 +6,12 @@ import (
 	"net/http"
 )
 
-func (c *Client) GetBlueprint(space_name string, name string) (Blueprint, error) {
+func (c *Client) GetBlueprintDetails(space_name string, name string) (DetailedBlueprint, error) {
 	fmt.Println(c.HostURL + "api/spaces")
 
 	req, err := http.NewRequest("GET", fmt.Sprintf("%sapi/spaces/%s/catalog/%s", c.HostURL, space_name, name), nil)
 	if err != nil {
-		return Blueprint{}, err
+		return DetailedBlueprint{}, err
 	}
 
 	req.Header.Add("Content-Type", "application/json")
@@ -19,13 +19,13 @@ func (c *Client) GetBlueprint(space_name string, name string) (Blueprint, error)
 
 	body, err := c.doRequest(req, &c.Token)
 	if err != nil {
-		return Blueprint{}, err
+		return DetailedBlueprint{}, err
 	}
 
-	blueprint := Blueprint{}
+	blueprint := DetailedBlueprint{}
 	err = json.Unmarshal(body, &blueprint)
 	if err != nil {
-		return Blueprint{}, err
+		return DetailedBlueprint{}, err
 	}
 	return blueprint, nil
 }

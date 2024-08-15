@@ -225,5 +225,6 @@ func (p *torqueProvider) DataSources(_ context.Context) []func() datasource.Data
 		NewEnvironmentIntrospectionDataSource,
 		NewAccountParameterDataSource,
 		NewSpaceParameterDataSource,
+		NewSpaceBlueprintDataSource,
 	}
 }
