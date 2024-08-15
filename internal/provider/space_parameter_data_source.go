@@ -117,6 +117,7 @@ func (d *spaceParameterDataSource) Read(ctx context.Context, req datasource.Read
 	} else {
 		state.Value = types.StringValue(space_parameter_data.Value)
 	}
+	state.SpaceName =  space_name
 	state.Sensitive = types.BoolValue(space_parameter_data.Sensitive)
 	state.Description = types.StringValue(space_parameter_data.Description)
 	diags = resp.State.Set(ctx, &state)
