@@ -50,7 +50,7 @@ func (d *accountParameterDataSource) Schema(_ context.Context, _ datasource.Sche
 				Required:            true,
 			},
 			"value": schema.StringAttribute{
-				MarkdownDescription: "Parameter Value. Value will be an empty string if the parameter is sensitive",
+				MarkdownDescription: "Parameter Value. Value of sensitive parameter is null.",
 				Computed:            true,
 			},
 			"sensitive": schema.BoolAttribute{

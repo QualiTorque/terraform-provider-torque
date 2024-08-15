@@ -13,5 +13,5 @@ provider "torque" {
 }
 
 data "torque_parameter" "parameter" {
-  name = "param"
+  name = "parameter"
 }

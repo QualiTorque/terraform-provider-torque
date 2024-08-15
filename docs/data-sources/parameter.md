@@ -28,7 +28,7 @@ provider "torque" {
 }
 
 data "torque_parameter" "parameter" {
-  name = "param"
+  name = "parameter"
 }
 ```
 
@@ -43,4 +43,4 @@ data "torque_parameter" "parameter" {
 
 - `description` (String) Parameter description
 - `sensitive` (Boolean) Whether the parameter is sensitive or not.
-- `value` (String) Parameter Value. Value will be an empty string if the parameter is sensitive
+- `value` (String) Parameter Value. Value of sensitive parameter is null.
