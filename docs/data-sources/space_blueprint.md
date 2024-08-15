@@ -3,12 +3,12 @@
 page_title: "torque_space_blueprint Data Source - terraform-provider-torque"
 subcategory: ""
 description: |-
-  Get blueprint information for a specific repository in a space
+  Returns details of a published blueprint in blueprints catalog.
 ---
 
 # torque_space_blueprint (Data Source)
 
-Get blueprint information for a specific repository in a space
+Returns details of a published blueprint in blueprints catalog.
 
 ## Example Usage
 
@@ -38,8 +38,8 @@ data "torque_space_blueprint" "blueprint" {
 
 ### Required
 
-- `name` (String) The name of the blueprint
-- `space_name` (String) The name of the space to use
+- `name` (String) Blueprint name
+- `space_name` (String) Name of the space containing the blueprint
 
 ### Optional
 
@@ -47,27 +47,41 @@ data "torque_space_blueprint" "blueprint" {
 
 ### Read-Only
 
-- `always_on` (Boolean) The unique name of the blueprint
+- `always_on` (Boolean) When True, the environment will always be on, when False, it will be ephemeral.
 - `commit` (String) The commit id of the blueprint
-- `default_duration` (String) The unique name of the blueprint
-- `default_extend` (String) The unique name of the blueprint
+- `default_duration` (String) Default duration of environment in ISO 8601 format: P{days}DT{hours}H{minutes}M{seconds}S] (for example, 'P0DT2H3M4S')
+- `default_extend` (String) Default Extend of environment in ISO 8601 format: P{days}DT{hours}H{minutes}M{seconds}S] (for example, 'P0DT2H3M4S')
 - `description` (String) The description of the blueprint
 - `display_name` (String) The user-friendly name of the blueprint in the space
 - `enabled` (Boolean) Is the published blueprint in the space
-- `max_active_environments` (Number) The unique name of the blueprint
-- `max_duration` (String) The unique name of the blueprint
+- `inputs` (Attributes List) List of inputs that this blueprint requires. (see [below for nested schema](#nestedatt--inputs))
+- `last_modified` (String) The time of the last modificiation of the blueprint
+- `max_active_environments` (Number) Max active environments that can be launched from the blueprint
+- `max_duration` (String) Max duration of environment in ISO 8601 format: P{days}DT{hours}H{minutes}M{seconds}S] (for example, 'P0DT2H3M4S')
 - `modified_by` (String) The name of the user that last modified the blueprint
-- `outputs` (List of String) Blueprints in the space
+- `num_of_active_environments` (Number) Number of current active environments that were launched from this blueprint.
+- `outputs` (List of String) List of this blueprint's outputs names.
 - `repository_branch` (String) The branch from which the blueprint is taken
 - `tags` (Attributes List) Blueprints in the space (see [below for nested schema](#nestedatt--tags))
 - `url` (String) URI of the blueprint
+
+<a id="nestedatt--inputs"></a>
+### Nested Schema for `inputs`
+
+Read-Only:
+
+- `default_value` (String) Input's default value
+- `description` (String) The input's description
+- `name` (String) Input's name
+- `type` (String) Input type, like agent, string etc.
+
 
 <a id="nestedatt--tags"></a>
 ### Nested Schema for `tags`
 
 Read-Only:
 
-- `default_value` (String) The blueprint display name
-- `description` (String) The repository name from which the blueprint is used
-- `name` (String) The unique name of the blueprint
-- `possible_values` (List of String) The user friendly name of the blueprint in the space
+- `default_value` (String) The tag's default value
+- `description` (String) The description of this blueprint tag
+- `name` (String) The tag's
+- `possible_values` (List of String) List of possible values for this tag
