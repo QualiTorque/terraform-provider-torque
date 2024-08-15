@@ -106,7 +106,11 @@ func (d *accountParameterDataSource) Read(ctx context.Context, req datasource.Re
 	}
 
 	state.Name = types.StringValue(account_parameter_data.Name)
-	state.Value = types.StringValue(account_parameter_data.Value)
+	if account_parameter_data.Sensitive {
+		state.Value = types.StringNull()  
+	} else {
+		state.Value = types.StringValue(account_parameter_data.Value)
+	}
 	state.Sensitive = types.BoolValue(account_parameter_data.Sensitive)
 	state.Description = types.StringValue(account_parameter_data.Description)
 	diags := resp.State.Set(ctx, &state)
