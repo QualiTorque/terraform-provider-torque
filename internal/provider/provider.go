@@ -54,7 +54,7 @@ func (p *torqueProvider) Schema(_ context.Context, _ provider.SchemaRequest, res
 				Optional:    true,
 			},
 			"space": schema.StringAttribute{
-				Description: "Space for Torque API. May also be provided via TORUQE_SPACE environment variable.",
+				Description: "Space for Torque API. May also be provided via TORQUE_SPACE environment variable.",
 				Optional:    true,
 			},
 			"token": schema.StringAttribute{
@@ -223,5 +223,6 @@ func (p *torqueProvider) DataSources(_ context.Context) []func() datasource.Data
 		NewSpaceRepositoryBlueprintsDataSource,
 		NewEnvironmentDataSource,
 		NewEnvironmentIntrospectionDataSource,
+		NewAccountParameterDataSource,
 	}
 }
