@@ -24,6 +24,7 @@ type Blueprint struct {
 	Description   string   `json:"description"`
 	Url           string   `json:"url"`
 	ModifiedBy    string   `json:"modified_by"`
+	LastModified  string   `json:"last_modified"`
 	Published     bool     `json:"enabled"`
 	Inputs        []Input  `json:"inputs"`
 	Outputs       []Output `json:"outputs"`

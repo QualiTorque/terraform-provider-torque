@@ -30,16 +30,17 @@ type spaceBlueprintDataSource struct {
 
 // userDataSourceModel maps the data source schema data.
 type spaceBlueprintDataSourceModel struct {
-	SpaceName   types.String `tfsdk:"space_name"`
-	Name        types.String `tfsdk:"name"`
-	DisplayName types.String `tfsdk:"display_name"`
-	RepoName    types.String `tfsdk:"repository_name"`
-	RepoBranch  types.String `tfsdk:"repository_branch"`
-	Commit      types.String `tfsdk:"commit"`
-	Description types.String `tfsdk:"description"`
-	Url         types.String `tfsdk:"url"`
-	ModifiedBy  types.String `tfsdk:"modified_by"`
-	Published   types.Bool   `tfsdk:"enabled"`
+	SpaceName    types.String `tfsdk:"space_name"`
+	Name         types.String `tfsdk:"name"`
+	DisplayName  types.String `tfsdk:"display_name"`
+	RepoName     types.String `tfsdk:"repository_name"`
+	RepoBranch   types.String `tfsdk:"repository_branch"`
+	Commit       types.String `tfsdk:"commit"`
+	Description  types.String `tfsdk:"description"`
+	Url          types.String `tfsdk:"url"`
+	ModifiedBy   types.String `tfsdk:"modified_by"`
+	LastModified types.String `tfsdk:"last_modified"`
+	Published    types.Bool   `tfsdk:"enabled"`
 	// Details   blueprint     `tfsdk:"details"`
 	Tags                  []blueprintTag `tfsdk:"tags"`
 	MaxDuration           types.String   `tfsdk:"max_duration"`
@@ -127,6 +128,10 @@ func (d *spaceBlueprintDataSource) Schema(_ context.Context, _ datasource.Schema
 				Computed:    true,
 			},
 			"modified_by": schema.StringAttribute{
+				Description: "The name of the user that last modified the blueprint",
+				Computed:    true,
+			},
+			"last_modified": schema.StringAttribute{
 				Description: "The name of the user that last modified the blueprint",
 				Computed:    true,
 			},
@@ -254,6 +259,7 @@ func (d *spaceBlueprintDataSource) Read(ctx context.Context, req datasource.Read
 	state.MaxActiveEnvironments = types.Int32Value(blueprint_data.Policies.MaxActiveEnvironments)
 	state.AlwaysOn = types.BoolValue(blueprint_data.Policies.AlwaysOn)
 	state.ModifiedBy = types.StringValue(blueprint_data.Details.ModifiedBy)
+	state.LastModified = types.StringValue(blueprint_data.Details.LastModified)
 	state.RepoBranch = types.StringValue(blueprint_data.Details.RepoBranch)
 	state.RepoName = types.StringValue(blueprint_data.Details.RepoName)
 	state.Url = types.StringValue(blueprint_data.Details.Url)
