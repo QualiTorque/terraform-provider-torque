@@ -107,7 +107,7 @@ func (d *accountParameterDataSource) Read(ctx context.Context, req datasource.Re
 
 	state.Name = types.StringValue(account_parameter_data.Name)
 	if account_parameter_data.Sensitive {
-		state.Value = types.StringNull()  
+		state.Value = types.StringNull()
 	} else {
 		state.Value = types.StringValue(account_parameter_data.Value)
 	}
