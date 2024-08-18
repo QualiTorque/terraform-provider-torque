@@ -142,37 +142,41 @@ func (r *TorqueSpaceResource) Read(ctx context.Context, req resource.ReadRequest
 }
 
 func (r *TorqueSpaceResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var data TorqueSpaceResourceModel
+	var plan, state TorqueSpaceResourceModel
 
-	diags := req.Plan.Get(ctx, &data)
+	resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
+	diags := req.Plan.Get(ctx, &plan)
+
+	current_space := state.Name
+
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
 	// Update existing order
-	err := r.client.UpdateSpace(data.Name.ValueString(), data.Color.ValueString(), data.Icon.ValueString())
+	err := r.client.UpdateSpace(current_space.ValueString(), plan.Name.ValueString(), plan.Color.ValueString(), plan.Icon.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Error Updating Torque space",
-			"Could not update group, unexpected error: "+err.Error(),
+			"Could not update Torque Space name, unexpected error: "+err.Error(),
 		)
 		return
 	}
 
-	space, err := r.client.GetSpace(data.Name.ValueString())
+	space, err := r.client.GetSpace(plan.Name.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Error Reading space details",
-			"Could not read Torque group name "+data.Name.ValueString()+": "+err.Error(),
+			"Could not read Torque Space name "+plan.Name.ValueString()+": "+err.Error(),
 		)
 		return
 	}
 
-	data.Color = types.StringValue(space.Color)
-	data.Icon = types.StringValue(space.Icon)
+	plan.Color = types.StringValue(space.Color)
+	plan.Icon = types.StringValue(space.Icon)
 
-	diags = resp.State.Set(ctx, data)
+	diags = resp.State.Set(ctx, plan)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
