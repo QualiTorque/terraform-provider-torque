@@ -11,6 +11,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/qualitorque/terraform-provider-torque/client"
+	"github.com/qualitorque/terraform-provider-torque/internal/provider/data_sources"
+	"github.com/qualitorque/terraform-provider-torque/internal/provider/resources"
 )
 
 // Ensure ScaffoldingProvider satisfies various provider interfaces.
@@ -195,36 +197,36 @@ func (p *torqueProvider) Configure(ctx context.Context, req provider.ConfigureRe
 
 func (p *torqueProvider) Resources(ctx context.Context) []func() resource.Resource {
 	return []func() resource.Resource{
-		NewTorqueIntrospectionResource,
-		NewTorqueAgentSpaceAssociationResource,
-		NewTorqueSpaceRepositoryResource,
-		NewTorqueSpaceResource,
-		NewTorqueUserSpaceAssociationResource,
-		NewTorqueTagResource,
-		NewTorqueCatalogItemResource,
-		NewTorqueTagSpaceValueAssociationResource,
-		NewTorqueParameterResource,
-		NewTorqueSpaceParameterResource,
-		NewTorqueGroupResource,
-		NewTorqueAwsCostTargetResource,
-		NewTorqueTagBlueprintValueAssociationResource,
-		NewTorqueSpaceEmailNotificationResource,
-		NewTorqueAccountResource,
-		NewTorqueSpaceCodeCommitRepositoryResource,
-		NewTorqueSpaceGitlabEnterpriseRepositoryResource,
+		resources.NewTorqueIntrospectionResource,
+		resources.NewTorqueAgentSpaceAssociationResource,
+		resources.NewTorqueSpaceRepositoryResource,
+		resources.NewTorqueSpaceResource,
+		resources.NewTorqueUserSpaceAssociationResource,
+		resources.NewTorqueTagResource,
+		resources.NewTorqueCatalogItemResource,
+		resources.NewTorqueTagSpaceValueAssociationResource,
+		resources.NewTorqueParameterResource,
+		resources.NewTorqueSpaceParameterResource,
+		resources.NewTorqueGroupResource,
+		resources.NewTorqueAwsCostTargetResource,
+		resources.NewTorqueTagBlueprintValueAssociationResource,
+		resources.NewTorqueSpaceEmailNotificationResource,
+		resources.NewTorqueAccountResource,
+		resources.NewTorqueSpaceCodeCommitRepositoryResource,
+		resources.NewTorqueSpaceGitlabEnterpriseRepositoryResource,
 	}
 }
 
 // DataSources defines the data sources implemented in the provider.
 func (p *torqueProvider) DataSources(_ context.Context) []func() datasource.DataSource {
 	return []func() datasource.DataSource{
-		NewUserDataSource,
-		NewSpaceRepositoryBlueprintsDataSource,
-		NewEnvironmentDataSource,
-		NewEnvironmentIntrospectionDataSource,
-		NewAccountParameterDataSource,
-		NewSpaceParameterDataSource,
-		NewSpaceBlueprintDataSource,
-		NewTorqueWorkflowDataSource,
+		data_sources.NewUserDataSource,
+		data_sources.NewSpaceRepositoryBlueprintsDataSource,
+		data_sources.NewEnvironmentDataSource,
+		data_sources.NewEnvironmentIntrospectionDataSource,
+		data_sources.NewAccountParameterDataSource,
+		data_sources.NewSpaceParameterDataSource,
+		data_sources.NewSpaceBlueprintDataSource,
+		data_sources.NewTorqueWorkflowDataSource,
 	}
 }
