@@ -10,7 +10,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/qualitorque/terraform-provider-torque/client"
 )
 
@@ -62,7 +61,7 @@ func (r *TorqueAssetLibraryItemResource) Schema(ctx context.Context, req resourc
 			"repository_name": schema.StringAttribute{
 				MarkdownDescription: "The name of the repository where the blueprint resides. \"Stored in Torque\" will be stored in \"qtorque\" repository",
 				Optional:            true,
-				Computed:            false,
+				Computed:            true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.RequiresReplace(),
 				},
@@ -106,9 +105,16 @@ func (r *TorqueAssetLibraryItemResource) Create(ctx context.Context, req resourc
 		return
 	}
 
-	tflog.Trace(ctx, "Resource Created Successful!")
+	if data.RepositoryName.IsUnknown() {
+		blueprint, err := r.client.GetBlueprint(data.SpaceName.ValueString(), data.BlueprintName.ValueString())
+		if err != nil {
+			resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to retrieve blueprint details, got error: %s", err))
+			return
+		}
+		data.RepositoryName = types.StringValue(blueprint.RepoName)
 
-	// Save data into Terraform state.
+	}
+
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 
 }
