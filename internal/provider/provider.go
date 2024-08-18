@@ -11,8 +11,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/qualitorque/terraform-provider-torque/client"
-	"github.com/qualitorque/terraform-provider-torque/internal/provider/resources"
 	"github.com/qualitorque/terraform-provider-torque/internal/provider/data_sources"
+	"github.com/qualitorque/terraform-provider-torque/internal/provider/resources"
 )
 
 // Ensure ScaffoldingProvider satisfies various provider interfaces.

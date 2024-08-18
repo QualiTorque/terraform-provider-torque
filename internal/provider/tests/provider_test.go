@@ -5,9 +5,10 @@ package tests
 
 import (
 	"testing"
-	"github.com/qualitorque/terraform-provider-torque/internal/provider"
+
 	"github.com/hashicorp/terraform-plugin-framework/providerserver"
 	"github.com/hashicorp/terraform-plugin-go/tfprotov6"
+	"github.com/qualitorque/terraform-provider-torque/internal/provider"
 )
 
 const (
