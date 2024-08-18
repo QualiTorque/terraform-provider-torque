@@ -1,4 +1,4 @@
-package provider
+package resources
 
 import (
 	"context"
@@ -13,29 +13,30 @@ import (
 )
 
 // Ensure provider defined types fully satisfy framework interfaces.
-var _ resource.Resource = &TorqueUserSpaceAssociationResource{}
-var _ resource.ResourceWithImportState = &TorqueUserSpaceAssociationResource{}
+var _ resource.Resource = &TorqueAgentSpaceAssociationResource{}
+var _ resource.ResourceWithImportState = &TorqueAgentSpaceAssociationResource{}
 
-func NewTorqueUserSpaceAssociationResource() resource.Resource {
-	return &TorqueUserSpaceAssociationResource{}
+func NewTorqueAgentSpaceAssociationResource() resource.Resource {
+	return &TorqueAgentSpaceAssociationResource{}
 }
 
-// TorqueUserSpaceAssociationResource defines the resource implementation.
-type TorqueUserSpaceAssociationResource struct {
+// TorqueAgentSpaceAssociationResource defines the resource implementation.
+type TorqueAgentSpaceAssociationResource struct {
 	client *client.Client
 }
 
-type TorqueUserSpaceAssociationResourceModel struct {
-	SpaceName types.String `tfsdk:"space_name"`
-	User      types.String `tfsdk:"user_email"`
-	UserRole  types.String `tfsdk:"user_role"`
+type TorqueAgentSpaceAssociationResourceModel struct {
+	SpaceName      types.String `tfsdk:"space_name"`
+	AgentName      types.String `tfsdk:"agent_name"`
+	Namespace      types.String `tfsdk:"namespace"`
+	ServiceAccount types.String `tfsdk:"service_account"`
 }
 
-func (r *TorqueUserSpaceAssociationResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
-	resp.TypeName = "torque_user_space_association"
+func (r *TorqueAgentSpaceAssociationResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
+	resp.TypeName = "torque_agent_space_association"
 }
 
-func (r *TorqueUserSpaceAssociationResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
+func (r *TorqueAgentSpaceAssociationResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		MarkdownDescription: "Associate Torque space with existing registered agent",
 
@@ -44,19 +45,23 @@ func (r *TorqueUserSpaceAssociationResource) Schema(ctx context.Context, req res
 				MarkdownDescription: "Existing Torque Space name",
 				Required:            true,
 			},
-			"user_email": schema.StringAttribute{
-				Description: "List of users emails",
+			"agent_name": schema.StringAttribute{
+				Description: "Agent name to associate to the space",
 				Required:    true,
 			},
-			"user_role": schema.StringAttribute{
-				Description: "The role of the users in the space.",
+			"service_account": schema.StringAttribute{
+				Description: "Default service account to be used with the agent in the space",
+				Required:    true,
+			},
+			"namespace": schema.StringAttribute{
+				Description: "Default namespace to be used with the agent in the space",
 				Required:    true,
 			},
 		},
 	}
 }
 
-func (r *TorqueUserSpaceAssociationResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
+func (r *TorqueAgentSpaceAssociationResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
 	// Prevent panic if the provider has not been configured.
 	if req.ProviderData == nil {
 		return
@@ -76,8 +81,8 @@ func (r *TorqueUserSpaceAssociationResource) Configure(ctx context.Context, req 
 	r.client = client
 }
 
-func (r *TorqueUserSpaceAssociationResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
-	var data TorqueUserSpaceAssociationResourceModel
+func (r *TorqueAgentSpaceAssociationResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
+	var data TorqueAgentSpaceAssociationResourceModel
 
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
 
@@ -85,9 +90,10 @@ func (r *TorqueUserSpaceAssociationResource) Create(ctx context.Context, req res
 		return
 	}
 
-	err := r.client.AddUserToSpace(data.User.ValueString(), data.UserRole.ValueString(), data.SpaceName.ValueString())
+	err := r.client.AddAgentToSpace(data.AgentName.ValueString(), data.Namespace.ValueString(),
+		data.ServiceAccount.ValueString(), data.SpaceName.ValueString(), "K8S")
 	if err != nil {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to add user to space, got error: %s", err))
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to attach agent to space, got error: %s", err))
 		return
 	}
 
@@ -97,8 +103,8 @@ func (r *TorqueUserSpaceAssociationResource) Create(ctx context.Context, req res
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
-func (r *TorqueUserSpaceAssociationResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
-	var data TorqueUserSpaceAssociationResourceModel
+func (r *TorqueAgentSpaceAssociationResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
+	var data TorqueAgentSpaceAssociationResourceModel
 
 	// Read Terraform prior state data into the model.
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
@@ -119,8 +125,8 @@ func (r *TorqueUserSpaceAssociationResource) Read(ctx context.Context, req resou
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
-func (r *TorqueUserSpaceAssociationResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var data TorqueUserSpaceAssociationResourceModel
+func (r *TorqueAgentSpaceAssociationResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+	var data TorqueAgentSpaceAssociationResourceModel
 
 	// Read Terraform plan data into the model
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
@@ -141,8 +147,8 @@ func (r *TorqueUserSpaceAssociationResource) Update(ctx context.Context, req res
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
-func (r *TorqueUserSpaceAssociationResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
-	var data TorqueUserSpaceAssociationResourceModel
+func (r *TorqueAgentSpaceAssociationResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+	var data TorqueAgentSpaceAssociationResourceModel
 
 	// Read Terraform prior state data into the model.
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
@@ -151,14 +157,15 @@ func (r *TorqueUserSpaceAssociationResource) Delete(ctx context.Context, req res
 		return
 	}
 
-	// Remove users from space.
-	err := r.client.RemoveUserFromSpace(data.User.ValueString(), data.SpaceName.ValueString())
+	// Remove repos from space.
+	err := r.client.RemoveAgentFromSpace(data.AgentName.ValueString(), data.SpaceName.ValueString())
 	if err != nil {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to remove user from space, got error: %s", err))
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to attach agent to space, got error: %s", err))
 		return
 	}
+
 }
 
-func (r *TorqueUserSpaceAssociationResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+func (r *TorqueAgentSpaceAssociationResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resource.ImportStatePassthroughID(ctx, path.Root("name"), req, resp)
 }

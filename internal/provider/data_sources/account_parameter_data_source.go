@@ -1,4 +1,4 @@
-package provider
+package data_sources
 
 import (
 	"context"
@@ -13,23 +13,22 @@ import (
 
 // Ensure the implementation satisfies the expected interfaces.
 var (
-	_ datasource.DataSource              = &spaceParameterDataSource{}
-	_ datasource.DataSourceWithConfigure = &spaceParameterDataSource{}
+	_ datasource.DataSource              = &accountParameterDataSource{}
+	_ datasource.DataSourceWithConfigure = &accountParameterDataSource{}
 )
 
-// NewspaceParametersDataSource is a helper function to simplify the provider implementation.
-func NewSpaceParameterDataSource() datasource.DataSource {
-	return &spaceParameterDataSource{}
+// NewaccountParametersDataSource is a helper function to simplify the provider implementation.
+func NewAccountParameterDataSource() datasource.DataSource {
+	return &accountParameterDataSource{}
 }
 
-// spaceParameterDataSource is the data source implementation.
-type spaceParameterDataSource struct {
+// accountParameterDataSource is the data source implementation.
+type accountParameterDataSource struct {
 	client *client.Client
 }
 
-// spaceParameterDataSourceModel maps the data source schema data.
-type spaceParameterDataSourceModel struct {
-	SpaceName   types.String `tfsdk:"space_name"`
+// accountParameterDataSourceModel maps the data source schema data.
+type accountParameterDataSourceModel struct {
 	Name        types.String `tfsdk:"name"`
 	Value       types.String `tfsdk:"value"`
 	Sensitive   types.Bool   `tfsdk:"sensitive"`
@@ -37,21 +36,17 @@ type spaceParameterDataSourceModel struct {
 }
 
 // Metadata returns the data source type name.
-func (d *spaceParameterDataSource) Metadata(_ context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_space_parameter"
+func (d *accountParameterDataSource) Metadata(_ context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
+	resp.TypeName = req.ProviderTypeName + "_parameter"
 }
 
 // Schema defines the schema for the data source.
-func (d *spaceParameterDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
+func (d *accountParameterDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		Description: "Get Account Parameter details.",
 		Attributes: map[string]schema.Attribute{
-			"space_name": schema.StringAttribute{
-				MarkdownDescription: "The name of the Torque Space of the parameter",
-				Required:            true,
-			},
 			"name": schema.StringAttribute{
-				MarkdownDescription: "The name of the space level parameter",
+				MarkdownDescription: "The name of the account level parameter",
 				Required:            true,
 			},
 			"value": schema.StringAttribute{
@@ -71,7 +66,7 @@ func (d *spaceParameterDataSource) Schema(_ context.Context, _ datasource.Schema
 }
 
 // Configure adds the provider configured client to the data source.
-func (d *spaceParameterDataSource) Configure(_ context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
+func (d *accountParameterDataSource) Configure(_ context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
 	if req.ProviderData == nil {
 		return
 	}
@@ -90,19 +85,18 @@ func (d *spaceParameterDataSource) Configure(_ context.Context, req datasource.C
 }
 
 // Read refreshes the Terraform state with the latest data.
-func (d *spaceParameterDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
-	var state spaceParameterDataSourceModel
-	var space_name types.String
+func (d *accountParameterDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
+	var state accountParameterDataSourceModel
+
 	var parameter types.String
 
-	diags := req.Config.GetAttribute(ctx, path.Root("space_name"), &space_name)
-	diags = append(diags, req.Config.GetAttribute(ctx, path.Root("name"), &parameter)...)
-	resp.Diagnostics.Append(diags...)
+	diags1 := req.Config.GetAttribute(ctx, path.Root("name"), &parameter)
+	resp.Diagnostics.Append(diags1...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	space_parameter_data, err := d.client.GetSpaceParameter(space_name.ValueString(), parameter.ValueString())
+	account_parameter_data, err := d.client.GetAccountParameter(parameter.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to Read Torque Account Parameter",
@@ -111,16 +105,15 @@ func (d *spaceParameterDataSource) Read(ctx context.Context, req datasource.Read
 		return
 	}
 
-	state.Name = types.StringValue(space_parameter_data.Name)
-	if space_parameter_data.Sensitive {
+	state.Name = types.StringValue(account_parameter_data.Name)
+	if account_parameter_data.Sensitive {
 		state.Value = types.StringNull()
 	} else {
-		state.Value = types.StringValue(space_parameter_data.Value)
+		state.Value = types.StringValue(account_parameter_data.Value)
 	}
-	state.SpaceName = space_name
-	state.Sensitive = types.BoolValue(space_parameter_data.Sensitive)
-	state.Description = types.StringValue(space_parameter_data.Description)
-	diags = resp.State.Set(ctx, &state)
+	state.Sensitive = types.BoolValue(account_parameter_data.Sensitive)
+	state.Description = types.StringValue(account_parameter_data.Description)
+	diags := resp.State.Set(ctx, &state)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return

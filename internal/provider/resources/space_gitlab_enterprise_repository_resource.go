@@ -1,4 +1,4 @@
-package provider
+package resources
 
 import (
 	"context"
@@ -15,37 +15,34 @@ import (
 )
 
 // Ensure provider defined types fully satisfy framework interfaces.
-var _ resource.Resource = &TorqueSpaceCodeCommitRepositoryResource{}
-var _ resource.ResourceWithImportState = &TorqueSpaceCodeCommitRepositoryResource{}
+var _ resource.Resource = &TorqueSpaceGitlabEnterpriseRepositoryResource{}
+var _ resource.ResourceWithImportState = &TorqueSpaceGitlabEnterpriseRepositoryResource{}
 
-func NewTorqueSpaceCodeCommitRepositoryResource() resource.Resource {
-	return &TorqueSpaceCodeCommitRepositoryResource{}
+func NewTorqueSpaceGitlabEnterpriseRepositoryResource() resource.Resource {
+	return &TorqueSpaceGitlabEnterpriseRepositoryResource{}
 }
 
 // TorqueAgentSpaceAssociationResource defines the resource implementation.
-type TorqueSpaceCodeCommitRepositoryResource struct {
+type TorqueSpaceGitlabEnterpriseRepositoryResource struct {
 	client *client.Client
 }
 
-type TorqueSpaceCodeCommitRepositoryResourceModel struct {
+type TorqueSpaceGitlabEnterpriseRepositoryResourceModel struct {
 	SpaceName      types.String `tfsdk:"space_name"`
-	RepositoryUrl  types.String `tfsdk:"repository_url"`
-	RoleArn        types.String `tfsdk:"role_arn"`
-	AwsRegion      types.String `tfsdk:"aws_region"`
-	ExternalId     types.String `tfsdk:"external_id"`
-	Username       types.String `tfsdk:"git_username"`
-	Password       types.String `tfsdk:"git_password"`
-	Branch         types.String `tfsdk:"branch"`
+	BaseUrl        types.String `tfsdk:"base_url"`
 	RepositoryName types.String `tfsdk:"repository_name"`
+	RepositoryUrl  types.String `tfsdk:"repository_url"`
+	Token          types.String `tfsdk:"token"`
+	Branch         types.String `tfsdk:"branch"`
 }
 
-func (r *TorqueSpaceCodeCommitRepositoryResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
-	resp.TypeName = "torque_codecommit_repository_space_association"
+func (r *TorqueSpaceGitlabEnterpriseRepositoryResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
+	resp.TypeName = "torque_gitlab_enterprise_repository_space_association"
 }
 
-func (r *TorqueSpaceCodeCommitRepositoryResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
+func (r *TorqueSpaceGitlabEnterpriseRepositoryResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Onboard a new CodeCommit repository into an existing space",
+		MarkdownDescription: "Onboard a new GitlabEnterprise repository into an existing space",
 
 		Attributes: map[string]schema.Attribute{
 			"space_name": schema.StringAttribute{
@@ -55,43 +52,29 @@ func (r *TorqueSpaceCodeCommitRepositoryResource) Schema(ctx context.Context, re
 					stringplanmodifier.RequiresReplace(),
 				},
 			},
+			"base_url": schema.StringAttribute{
+				Description: "Repository base URL. For example: https://gitlab-on-prem.example.com/",
+				Required:    true,
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.RequiresReplace(),
+				},
+			},
+			"repository_name": schema.StringAttribute{
+				Description: "The name of the GitlabEnterprise repository to onboard. In this example, repo_name",
+				Required:    true,
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.RequiresReplace(),
+				},
+			},
 			"repository_url": schema.StringAttribute{
-				Description: "Repository URL. For example: https://git-codecommit.eu-west-1.amazonaws.com/v1/repos/repo",
+				Description: "The url of the specific GitlabEnterprise repository/project to onboard. For example: https://gitlab-on-prem.example.com/repo_name",
 				Required:    true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.RequiresReplace(),
 				},
 			},
-			"role_arn": schema.StringAttribute{
-				Description: "AWS Role ARN for Torque to use which has permissions to connect to CodeCommit",
-				Required:    true,
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.RequiresReplace(),
-				},
-			},
-			"aws_region": schema.StringAttribute{
-				Description: "AWS Region that hosts the CodeCommit Repository, i.e eu-west-1",
-				Required:    true,
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.RequiresReplace(),
-				},
-			},
-			"external_id": schema.StringAttribute{
-				Description: "External ID used in the IAM role trust policy.",
-				Required:    true,
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.RequiresReplace(),
-				},
-			},
-			"git_username": schema.StringAttribute{
-				Description: "Git Username",
-				Required:    true,
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.RequiresReplace(),
-				},
-			},
-			"git_password": schema.StringAttribute{
-				Description: "Git Password",
+			"token": schema.StringAttribute{
+				Description: "Authentication Token to the project/repository",
 				Required:    true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.RequiresReplace(),
@@ -104,18 +87,11 @@ func (r *TorqueSpaceCodeCommitRepositoryResource) Schema(ctx context.Context, re
 					stringplanmodifier.RequiresReplace(),
 				},
 			},
-			"repository_name": schema.StringAttribute{
-				Description: "The name of the CodeCommit repository to onboard",
-				Required:    true,
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.RequiresReplace(),
-				},
-			},
 		},
 	}
 }
 
-func (r *TorqueSpaceCodeCommitRepositoryResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
+func (r *TorqueSpaceGitlabEnterpriseRepositoryResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
 	// Prevent panic if the provider has not been configured.
 	if req.ProviderData == nil {
 		return
@@ -135,8 +111,8 @@ func (r *TorqueSpaceCodeCommitRepositoryResource) Configure(ctx context.Context,
 	r.client = client
 }
 
-func (r *TorqueSpaceCodeCommitRepositoryResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
-	var data TorqueSpaceCodeCommitRepositoryResourceModel
+func (r *TorqueSpaceGitlabEnterpriseRepositoryResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
+	var data TorqueSpaceGitlabEnterpriseRepositoryResourceModel
 
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
 
@@ -144,8 +120,8 @@ func (r *TorqueSpaceCodeCommitRepositoryResource) Create(ctx context.Context, re
 		return
 	}
 
-	err := r.client.OnboardCodeCommitRepoToSpace(data.SpaceName.ValueString(), data.RepositoryName.ValueString(), data.RoleArn.ValueString(),
-		data.RepositoryUrl.ValueString(), data.AwsRegion.ValueString(), data.Branch.ValueString(), data.ExternalId.ValueString(), data.Username.ValueString(), data.Password.ValueString())
+	err := r.client.OnboardGitlabEnterpriseRepoToSpace(data.SpaceName.ValueString(), data.BaseUrl.ValueString(), data.RepositoryName.ValueString(),
+		data.RepositoryUrl.ValueString(), data.Token.ValueString(), data.Branch.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to onboard repository to space, got error: %s", err))
 		return
@@ -157,8 +133,8 @@ func (r *TorqueSpaceCodeCommitRepositoryResource) Create(ctx context.Context, re
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
-func (r *TorqueSpaceCodeCommitRepositoryResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
-	var data TorqueSpaceCodeCommitRepositoryResourceModel
+func (r *TorqueSpaceGitlabEnterpriseRepositoryResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
+	var data TorqueSpaceGitlabEnterpriseRepositoryResourceModel
 
 	// Read Terraform prior state data into the model.
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
@@ -179,8 +155,8 @@ func (r *TorqueSpaceCodeCommitRepositoryResource) Read(ctx context.Context, req 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
-func (r *TorqueSpaceCodeCommitRepositoryResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	// var data TorqueSpaceCodeCommitRepositoryResourceModel
+func (r *TorqueSpaceGitlabEnterpriseRepositoryResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+	// var data TorqueSpaceGitlabEnterpriseRepositoryResourceModel
 
 	// // Read Terraform plan data into the model
 	// resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
@@ -201,8 +177,8 @@ func (r *TorqueSpaceCodeCommitRepositoryResource) Update(ctx context.Context, re
 	// resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
-func (r *TorqueSpaceCodeCommitRepositoryResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
-	var data TorqueSpaceCodeCommitRepositoryResourceModel
+func (r *TorqueSpaceGitlabEnterpriseRepositoryResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+	var data TorqueSpaceGitlabEnterpriseRepositoryResourceModel
 
 	// Read Terraform prior state data into the model.
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
@@ -220,6 +196,6 @@ func (r *TorqueSpaceCodeCommitRepositoryResource) Delete(ctx context.Context, re
 
 }
 
-func (r *TorqueSpaceCodeCommitRepositoryResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+func (r *TorqueSpaceGitlabEnterpriseRepositoryResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resource.ImportStatePassthroughID(ctx, path.Root("name"), req, resp)
 }
