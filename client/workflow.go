@@ -7,7 +7,6 @@ import (
 )
 
 func (c *Client) GetWorkflow(workflow_name string) (Workflow, error) {
-	fmt.Println(c.HostURL + "api/spaces")
 
 	req, err := http.NewRequest("GET", fmt.Sprintf("%sapi/automation/workflows/%s", c.HostURL, workflow_name), nil)
 	workflow := Workflow{}

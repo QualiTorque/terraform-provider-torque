@@ -293,10 +293,10 @@ type Workflow struct {
 	DisplayName     string          `json:"display_name"`
 	Description     string          `json:"description"`
 	SpaceDefinition spaceDefinition `json:"space_definition"`
-	Name            bool            `json:"name"`
+	Name            string          `json:"name"`
 }
 
 type spaceDefinition struct {
-	EnforcedOnAllSpaces string   `json:"enforced_on_all_spaces"`
-	SpecificSpaces  []string `json:"specific_spaces"`
+	EnforcedOnAllSpaces bool     `json:"enforced_on_all_spaces"`
+	SpecificSpaces      []string `json:"specific_spaces"`
 }
