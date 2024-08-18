@@ -6,12 +6,13 @@ import (
 	"net/http"
 )
 
-func (c *Client) GetBlueprint(space_name string, name string) (Blueprint, error) {
+func (c *Client) GetBlueprint(space_name string, name string) (*Blueprint, error) {
 	fmt.Println(c.HostURL + "api/spaces")
 
-	req, err := http.NewRequest("GET", fmt.Sprintf("%sapi/spaces/%s/catalog/%s", c.HostURL, space_name, name), nil)
+	req, err := http.NewRequest("GET", fmt.Sprintf("%sapi/spaces/%s/blueprints", c.HostURL, space_name), nil)
+
 	if err != nil {
-		return Blueprint{}, err
+		return nil, err
 	}
 
 	req.Header.Add("Content-Type", "application/json")
@@ -19,13 +20,21 @@ func (c *Client) GetBlueprint(space_name string, name string) (Blueprint, error)
 
 	body, err := c.doRequest(req, &c.Token)
 	if err != nil {
-		return Blueprint{}, err
+		return nil, err
+	}
+	blueprints := []Blueprint{}
+	err = json.Unmarshal(body, &blueprints)
+	if err != nil {
+		return nil, err
 	}
 
 	blueprint := Blueprint{}
-	err = json.Unmarshal(body, &blueprint)
-	if err != nil {
-		return Blueprint{}, err
+	for _, blueprint_item := range blueprints {
+		if name == blueprint_item.Name {
+			blueprint = blueprint_item
+			return &blueprint, nil
+		}
 	}
-	return blueprint, nil
+
+	return nil, fmt.Errorf("blueprint %s not found", name)
 }

@@ -201,7 +201,6 @@ func (p *torqueProvider) Resources(ctx context.Context) []func() resource.Resour
 		NewTorqueSpaceResource,
 		NewTorqueUserSpaceAssociationResource,
 		NewTorqueTagResource,
-		NewTorqueBlueprintResource,
 		NewTorqueCatalogItemResource,
 		NewTorqueTagSpaceValueAssociationResource,
 		NewTorqueParameterResource,
@@ -225,5 +224,6 @@ func (p *torqueProvider) DataSources(_ context.Context) []func() datasource.Data
 		NewEnvironmentIntrospectionDataSource,
 		NewAccountParameterDataSource,
 		NewSpaceParameterDataSource,
+		NewSpaceBlueprintDataSource,
 	}
 }
