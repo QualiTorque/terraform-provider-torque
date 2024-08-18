@@ -59,23 +59,23 @@ resource "torque_space_email_notification" "new_notification" {
 
 ### Optional
 
-- `action_failed` (Boolean) Confgure notification for the "Action Failed" event
-- `collaborator_added` (Boolean) Confgure notification for the "Collaborator Added" event
-- `drift_detected` (Boolean) Confgure notification for the "Drift Detected" event
-- `end_threshold` (Number) Confgure notification environment end reminder notification
-- `environment_active_with_error` (Boolean) Confgure notification for the "Environment Active With Error" event
-- `environment_deployed` (Boolean) Confgure notification for the "Environment Deployed" event
-- `environment_ended` (Boolean) Confgure notification for the "Environment Ended" event
-- `environment_ending_failed` (Boolean) Confgure notification for the "Environment Ending Failed" event
-- `environment_extended` (Boolean) Confgure notification for the "Environment Extended" event
-- `environment_force_ended` (Boolean) Confgure notification for the "Environment Force Ended" event
-- `environment_idle` (Boolean) Confgure notification for the "Environment Idle" event
-- `environment_launched` (Boolean) Confgure notification for the "Environment Launched" event
-- `idle_reminders` (List of Number) Confgure notification for environment reminder notification
-- `updates_detected` (Boolean) Confgure notification for the "Updates Detected" event
-- `workflow_failed` (Boolean) Confgure notification for the "Workflow Failed" event
-- `workflow_start_reminder` (Number) Confgure notification for the "Drift Detected" event
-- `workflow_started` (Boolean) Confgure notification for the "Workflow Started" event
+- `action_failed` (Boolean) Configure notification for the "Action Failed" event
+- `collaborator_added` (Boolean) Configure notification for the "Collaborator Added" event
+- `drift_detected` (Boolean) Configure notification for the "Drift Detected" event
+- `end_threshold` (Number) Time in minutes to send notification environment end event reminder notification before an environment ends. For example, 10
+- `environment_active_with_error` (Boolean) Configure notification for the "Environment Active With Error" event
+- `environment_deployed` (Boolean) Configure notification for the "Environment Deployed" event
+- `environment_ended` (Boolean) Configure notification for the "Environment Ended" event
+- `environment_ending_failed` (Boolean) Configure notification for the "Environment Ending Failed" event
+- `environment_extended` (Boolean) Configure notification for the "Environment Extended" event
+- `environment_force_ended` (Boolean) Configure notification for the "Environment Force Ended" event
+- `environment_idle` (Boolean) Configure notification for the "Environment Idle" event
+- `environment_launched` (Boolean) Configure notification for the "Environment Launched" event
+- `idle_reminders` (List of Number) Array of time in hours to send notification for environment idle reminder
+- `updates_detected` (Boolean) Configure notification for the "Updates Detected" event
+- `workflow_failed` (Boolean) Configure notification for the "Workflow Failed" event
+- `workflow_start_reminder` (Number) Configure notification for the "Drift Detected" event
+- `workflow_started` (Boolean) Configure notification for the "Workflow Started" event
 
 ### Read-Only
 
