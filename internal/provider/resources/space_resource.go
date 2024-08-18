@@ -142,11 +142,11 @@ func (r *TorqueSpaceResource) Read(ctx context.Context, req resource.ReadRequest
 }
 
 func (r *TorqueSpaceResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var plan,state TorqueSpaceResourceModel
+	var plan, state TorqueSpaceResourceModel
 
 	resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
 	diags := req.Plan.Get(ctx, &plan)
-	
+
 	current_space := state.Name
 
 	resp.Diagnostics.Append(diags...)
