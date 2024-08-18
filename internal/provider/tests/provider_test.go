@@ -1,13 +1,14 @@
 // Copyright (c) HashiCorp, Inc.
 // SPDX-License-Identifier: MPL-2.0
 
-package provider
+package tests
 
 import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-framework/providerserver"
 	"github.com/hashicorp/terraform-plugin-go/tfprotov6"
+	"github.com/qualitorque/terraform-provider-torque/internal/provider"
 )
 
 const (
@@ -25,7 +26,7 @@ const (
 // CLI command executed to create a provider server to which the CLI can
 // reattach.
 var testAccProtoV6ProviderFactories = map[string]func() (tfprotov6.ProviderServer, error){
-	"torque": providerserver.NewProtocol6WithError(New("test")()),
+	"torque": providerserver.NewProtocol6WithError(provider.New("test")()),
 }
 
 func testAccPreCheck(t *testing.T) {
