@@ -168,9 +168,9 @@ func (r *TorqueAssetLibraryItemResource) Delete(ctx context.Context, req resourc
 	}
 
 	// Delete the space.
-	err := r.client.UnpublishBlueprintInSpace(data.SpaceName.ValueString(), data.RepositoryName.ValueString(), data.BlueprintName.ValueString())
+	err := r.client.RemoveBlueprintFromAssetLibrary(data.SpaceName.ValueString(), data.RepositoryName.ValueStringPointer(), data.BlueprintName.ValueString())
 	if err != nil {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to unpublish blueprint from space, got error: %s", err))
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to remove blueprint from asset-library, got error: %s", err))
 		return
 	}
 
