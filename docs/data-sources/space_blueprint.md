@@ -3,12 +3,12 @@
 page_title: "torque_space_blueprint Data Source - terraform-provider-torque"
 subcategory: ""
 description: |-
-  Returns details of a published blueprint in blueprints catalog.
+  Returns details of a blueprint in the specified space
 ---
 
 # torque_space_blueprint (Data Source)
 
-Returns details of a published blueprint in blueprints catalog.
+Returns details of a blueprint in the specified space
 
 ## Example Usage
 
@@ -60,7 +60,6 @@ data "torque_space_blueprint" "blueprint" {
 - `max_duration` (String) Max duration of environment in ISO 8601 format: P{days}DT{hours}H{minutes}M{seconds}S] (for example, 'P0DT2H3M4S')
 - `modified_by` (String) The name of the user that last modified the blueprint
 - `num_of_active_environments` (Number) Number of current active environments that were launched from this blueprint.
-- `outputs` (List of String) List of this blueprint's outputs names.
 - `repository_branch` (String) The branch from which the blueprint is taken
 - `tags` (Attributes List) Blueprints in the space (see [below for nested schema](#nestedatt--tags))
 - `url` (String) URI of the blueprint
@@ -73,7 +72,7 @@ Read-Only:
 - `default_value` (String) Input's default value
 - `description` (String) The input's description
 - `name` (String) Input's name
-- `type` (String) Input type, like agent, string etc.
+- `possible_values` (List of String) List of possible values for this input
 
 
 <a id="nestedatt--tags"></a>
@@ -83,5 +82,5 @@ Read-Only:
 
 - `default_value` (String) The tag's default value
 - `description` (String) The description of this blueprint tag
-- `name` (String) The tag's
+- `name` (String) The tag's name
 - `possible_values` (List of String) List of possible values for this tag

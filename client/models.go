@@ -15,37 +15,28 @@ type User struct {
 }
 
 type Blueprint struct {
-	BlueprintName           string   `json:"blueprint_name"`
-	Name                    string   `json:"name"`
-	DisplayName             string   `json:"display_name"`
-	RepoName                string   `json:"repository_name"`
-	RepoBranch              string   `json:"repository_branch"`
-	Commit                  string   `json:"commit"`
-	Description             string   `json:"description"`
-	Url                     string   `json:"url"`
-	ModifiedBy              string   `json:"modified_by"`
-	LastModified            string   `json:"last_modified"`
-	Published               bool     `json:"enabled"`
-	Inputs                  []Input  `json:"inputs"`
-	Outputs                 []Output `json:"outputs"`
-	NumOfActiveEnvironments int32    `json:"num_of_active_environments"`
-}
-
-type DetailedBlueprint struct {
-	Details  Blueprint      `json:"details"`
-	Tags     []BlueprintTag `json:"tags"`
-	Policies Policies       `json:"policies"`
+	BlueprintName           string         `json:"blueprint_name"`
+	Name                    string         `json:"name"`
+	DisplayName             string         `json:"display_name"`
+	RepoName                string         `json:"repository_name"`
+	RepoBranch              string         `json:"repository_branch"`
+	Commit                  string         `json:"commit"`
+	Description             string         `json:"description"`
+	Url                     string         `json:"url"`
+	ModifiedBy              string         `json:"modified_by"`
+	LastModified            string         `json:"last_modified"`
+	Published               bool           `json:"enabled"`
+	Inputs                  []Input        `json:"inputs"`
+	Tags                    []BlueprintTag `json:"tags"`
+	Policies                Policies       `json:"policies"`
+	NumOfActiveEnvironments int32          `json:"num_of_active_environments"`
 }
 
 type Input struct {
-	Name         string `json:"name"`
-	Type         string `json:"type"`
-	DefaultValue string `json:"default_value"`
-	Description  string `json:"description"`
-}
-
-type Output struct {
-	Name string `json:"name"`
+	Name           string   `json:"name"`
+	PossibleValues []string `json:"possible_values"`
+	DefaultValue   string   `json:"default_value"`
+	Description    string   `json:"description"`
 }
 
 type BlueprintTag struct {

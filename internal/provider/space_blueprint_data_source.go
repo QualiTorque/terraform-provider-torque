@@ -48,7 +48,6 @@ type spaceBlueprintDataSourceModel struct {
 	DefaultExtend           types.String     `tfsdk:"default_extend"`
 	MaxActiveEnvironments   types.Int32      `tfsdk:"max_active_environments"`
 	AlwaysOn                types.Bool       `tfsdk:"always_on"`
-	Outputs                 types.List       `tfsdk:"outputs"`
 	Inputs                  []blueprintInput `tfsdk:"inputs"`
 }
 
@@ -60,10 +59,10 @@ type blueprintTag struct {
 }
 
 type blueprintInput struct {
-	Name         types.String `tfsdk:"name"`
-	DefaultValue types.String `tfsdk:"default_value"`
-	Type         types.String `tfsdk:"type"`
-	Description  types.String `tfsdk:"description"`
+	Name           types.String `tfsdk:"name"`
+	DefaultValue   types.String `tfsdk:"default_value"`
+	PossibleValues types.List   `tfsdk:"possible_values"`
+	Description    types.String `tfsdk:"description"`
 }
 
 // Metadata returns the data source type name.
@@ -74,7 +73,7 @@ func (d *spaceBlueprintDataSource) Metadata(_ context.Context, req datasource.Me
 // Schema defines the schema for the data source.
 func (d *spaceBlueprintDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		Description: "Returns details of a published blueprint in blueprints catalog.",
+		Description: "Returns details of a blueprint in the specified space",
 		Attributes: map[string]schema.Attribute{
 			"space_name": schema.StringAttribute{
 				MarkdownDescription: "Name of the space containing the blueprint",
@@ -127,7 +126,7 @@ func (d *spaceBlueprintDataSource) Schema(_ context.Context, _ datasource.Schema
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
 						"name": schema.StringAttribute{
-							Description: "The tag's",
+							Description: "The tag's name",
 							Computed:    true,
 						},
 						"default_value": schema.StringAttribute{
@@ -146,11 +145,6 @@ func (d *spaceBlueprintDataSource) Schema(_ context.Context, _ datasource.Schema
 					},
 				},
 			},
-			"outputs": schema.ListAttribute{
-				Description: "List of this blueprint's outputs names.",
-				Computed:    true,
-				ElementType: types.StringType,
-			},
 			"inputs": schema.ListNestedAttribute{
 				Description: "List of inputs that this blueprint requires.",
 				Computed:    true,
@@ -164,9 +158,10 @@ func (d *spaceBlueprintDataSource) Schema(_ context.Context, _ datasource.Schema
 							Description: "Input's default value",
 							Computed:    true,
 						},
-						"type": schema.StringAttribute{
-							Description: "Input type, like agent, string etc.",
+						"possible_values": schema.ListAttribute{
+							Description: "List of possible values for this input",
 							Computed:    true,
+							ElementType: types.StringType,
 						},
 						"description": schema.StringAttribute{
 							Description: "The input's description",
@@ -235,10 +230,10 @@ func (d *spaceBlueprintDataSource) Read(ctx context.Context, req datasource.Read
 		return
 	}
 
-	blueprint_data, err := d.client.GetBlueprintDetails(space_name.ValueString(), name.ValueString())
+	blueprint_data, err := d.client.GetBlueprint(space_name.ValueString(), name.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Unable to Read Torque user",
+			"Unable to read Blueprint details or it doesn't exist",
 			err.Error(),
 		)
 		return
@@ -247,21 +242,21 @@ func (d *spaceBlueprintDataSource) Read(ctx context.Context, req datasource.Read
 	// initialize state
 	state.SpaceName = types.StringValue(space_name.ValueString())
 	state.Name = types.StringValue(name.ValueString())
-	state.DisplayName = types.StringValue(blueprint_data.Details.DisplayName)
-	state.Commit = types.StringValue(blueprint_data.Details.Commit)
-	state.Description = types.StringValue(blueprint_data.Details.Description)
-	state.Published = types.BoolValue(blueprint_data.Details.Published)
+	state.DisplayName = types.StringValue(blueprint_data.DisplayName)
+	state.Commit = types.StringValue(blueprint_data.Commit)
+	state.Description = types.StringValue(blueprint_data.Description)
+	state.Published = types.BoolValue(blueprint_data.Published)
 	state.MaxDuration = types.StringValue(blueprint_data.Policies.MaxDuration)
 	state.DefaultDuration = types.StringValue(blueprint_data.Policies.DefaultDuration)
 	state.DefaultExtend = types.StringValue(blueprint_data.Policies.DefaultExtend)
 	state.MaxActiveEnvironments = types.Int32Value(blueprint_data.Policies.MaxActiveEnvironments)
 	state.AlwaysOn = types.BoolValue(blueprint_data.Policies.AlwaysOn)
-	state.ModifiedBy = types.StringValue(blueprint_data.Details.ModifiedBy)
-	state.LastModified = types.StringValue(blueprint_data.Details.LastModified)
-	state.RepoBranch = types.StringValue(blueprint_data.Details.RepoBranch)
-	state.RepoName = types.StringValue(blueprint_data.Details.RepoName)
-	state.Url = types.StringValue(blueprint_data.Details.Url)
-	state.NumOfActiveEnvironments = types.Int32Value(blueprint_data.Details.NumOfActiveEnvironments)
+	state.ModifiedBy = types.StringValue(blueprint_data.ModifiedBy)
+	state.LastModified = types.StringValue(blueprint_data.LastModified)
+	state.RepoBranch = types.StringValue(blueprint_data.RepoBranch)
+	state.RepoName = types.StringValue(blueprint_data.RepoName)
+	state.Url = types.StringValue(blueprint_data.Url)
+	state.NumOfActiveEnvironments = types.Int32Value(blueprint_data.NumOfActiveEnvironments)
 	for _, tagItem := range blueprint_data.Tags {
 		var possibleValues []attr.Value
 		for _, value := range tagItem.PossibleValues {
@@ -277,54 +272,21 @@ func (d *spaceBlueprintDataSource) Read(ctx context.Context, req datasource.Read
 		state.Tags = append(state.Tags, tagData)
 	}
 
-	var outputs []attr.Value
-	for _, output := range blueprint_data.Details.Outputs {
-		outputs = append(outputs, types.StringValue(output.Name))
-	}
-	outputsList, _ := types.ListValue(types.StringType, outputs)
-	state.Outputs = outputsList
+	for _, inputItem := range blueprint_data.Inputs {
+		var possibleValues []attr.Value
+		for _, value := range inputItem.PossibleValues {
+			possibleValues = append(possibleValues, types.StringValue(value))
+		}
+		possibleValuesList, _ := types.ListValue(types.StringType, possibleValues)
 
-	for _, inputItem := range blueprint_data.Details.Inputs {
 		inputData := blueprintInput{
-			Name:         types.StringValue(inputItem.Name),
-			Type:         types.StringValue(inputItem.Type),
-			DefaultValue: types.StringValue(inputItem.DefaultValue),
-			Description:  types.StringValue(inputItem.Description),
+			Name:           types.StringValue(inputItem.Name),
+			PossibleValues: possibleValuesList,
+			DefaultValue:   types.StringValue(inputItem.DefaultValue),
+			Description:    types.StringValue(inputItem.Description),
 		}
 		state.Inputs = append(state.Inputs, inputData)
 	}
-	// for _, outputItem := range blueprint_data.Details.Outputs {
-	// 	// outputData := blueprintOutput{
-	// 	// 	Name: types.StringValue(outputItem.Name),
-	// 	// }
-	// 	state.Outputs = append(state.Outputs, outputData)
-	// }
-
-	// if !state.RepoFilter.IsNull() {
-	// 	for _, blueprintItem := range blueprints_data {
-	// 		if blueprintItem.RepoName == state.RepoFilter.ValueString() {
-	// 			filteredData = append(filteredData, blueprintItem)
-	// 		}
-	// 	}
-	// } else {
-	// 	filteredData = blueprints_data
-	// }
-
-	// for _, blueprintItem := range filteredData {
-	// 	blueprintData := blueprintModel{
-	// 		BlueprintName: types.StringValue(blueprintItem.BlueprintName),
-	// 		Name:          types.StringValue(blueprintItem.Name),
-	// 		RepoName:      types.StringValue(blueprintItem.RepoName),
-	// 		Description:   types.StringValue(blueprintItem.Description),
-	// 		Commit:        types.StringValue(blueprintItem.Commit),
-	// 		ModifiedBy:    types.StringValue(blueprintItem.ModifiedBy),
-	// 		DisplayName:   types.StringValue(blueprintItem.DisplayName),
-	// 		RepoBranch:    types.StringValue(blueprintItem.RepoBranch),
-	// 		Url:           types.StringValue(blueprintItem.Url),
-	// 		Published:     types.BoolValue(blueprintItem.Published),
-	// 	}
-	// 	state.Blueprints = append(state.Blueprints, blueprintData)
-	// }
 
 	diags = resp.State.Set(ctx, &state)
 	resp.Diagnostics.Append(diags...)
