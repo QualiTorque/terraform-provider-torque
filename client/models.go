@@ -287,3 +287,16 @@ type IntrospectionItem struct {
 	Attributes       []KeyValuePair `json:"attributes"`
 	CustomIcon       string         `json:"custom_icon"`
 }
+
+type Workflow struct {
+	Yaml            string          `json:"yaml"`
+	DisplayName     string          `json:"display_name"`
+	Description     string          `json:"description"`
+	SpaceDefinition spaceDefinition `json:"space_definition"`
+	Name            bool            `json:"name"`
+}
+
+type spaceDefinition struct {
+	EnforcedOnAllSpaces string   `json:"enforced_on_all_spaces"`
+	SpecificSpaces  []string `json:"specific_spaces"`
+}
