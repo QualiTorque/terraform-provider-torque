@@ -592,7 +592,7 @@ func (c *Client) UpdateGroup(groupName string, description string, idpId string,
 // 	"icon": "screen"
 // },
 
-func (c *Client) UpdateSpace(name string, color string, icon string) error {
+func (c *Client) UpdateSpace(current_space string, name string, color string, icon string) error {
 
 	data := Space{
 		Name:  name,
@@ -605,7 +605,7 @@ func (c *Client) UpdateSpace(name string, color string, icon string) error {
 		log.Fatalf("impossible to marshall update space request: %s", err)
 	}
 
-	req, err := http.NewRequest("PUT", fmt.Sprintf("%sapi/spaces/%s", c.HostURL, name), bytes.NewReader(payload))
+	req, err := http.NewRequest("PUT", fmt.Sprintf("%sapi/spaces/%s", c.HostURL, current_space), bytes.NewReader(payload))
 	if err != nil {
 		return err
 	}
