@@ -300,3 +300,9 @@ type spaceDefinition struct {
 	EnforcedOnAllSpaces bool     `json:"enforced_on_all_spaces"`
 	SpecificSpaces      []string `json:"specific_spaces"`
 }
+
+type Label struct {
+	// SpaceName string `json:"space_name"`
+	Name      string `json:"name"`
+	Color     string `json:"color"`
+}
