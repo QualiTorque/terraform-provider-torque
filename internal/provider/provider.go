@@ -214,6 +214,7 @@ func (p *torqueProvider) Resources(ctx context.Context) []func() resource.Resour
 		resources.NewTorqueAccountResource,
 		resources.NewTorqueSpaceCodeCommitRepositoryResource,
 		resources.NewTorqueSpaceGitlabEnterpriseRepositoryResource,
+		resources.NewTorqueAssetLibraryItemResource,
 	}
 }
 
