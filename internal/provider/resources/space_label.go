@@ -37,7 +37,7 @@ type TorqueSpaceLabelResourceModel struct {
 }
 
 func (r *TorqueSpaceLabelResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
-	resp.TypeName = "torque_label"
+	resp.TypeName = "torque_space_label"
 }
 
 func (r *TorqueSpaceLabelResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {

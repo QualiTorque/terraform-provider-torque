@@ -12,7 +12,7 @@ provider "torque" {
   token = "111111111111"
 }
 
-resource "torque_label" "label" {
+resource "torque_space_label" "label" {
   space_name = "target_space"
   name       = "k8s"
   color      = "blue"
