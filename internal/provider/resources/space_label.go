@@ -43,7 +43,7 @@ func (r *TorqueSpaceLabelResource) Metadata(ctx context.Context, req resource.Me
 func (r *TorqueSpaceLabelResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "Creation of a new label is a Torque",
+		MarkdownDescription: "Creation of a new label to be used in Torque space and can be associated to catalog items.",
 
 		Attributes: map[string]schema.Attribute{
 			"space_name": schema.StringAttribute{
@@ -61,7 +61,7 @@ func (r *TorqueSpaceLabelResource) Schema(ctx context.Context, req resource.Sche
 				MarkdownDescription: "Color of the label. Allowed values: darkGray, frogGreen, pink, orange, blueGray, blue, bordeaux",
 				Required:            true,
 				Validators: []validator.String{
-					stringvalidator.OneOf([]string{"darkGray", "frogGreen", "pink", "orange", "blueGray", "blue", "bordeaux"}...),
+					stringvalidator.OneOf([]string{"aws", "darkGray", "frogGreen", "pink", "orange", "blueGray", "blue", "bordeaux", "teal", "grey"}...),
 				},
 			},
 		},
