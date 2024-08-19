@@ -39,6 +39,6 @@ resource "torque_space_label" "label" {
 
 ### Required
 
-- `color` (String) Color of the label. Allowed values: darkGray, frogGreen, pink, orange, blueGray, blue, bordeaux
+- `color` (String) Color of the label. Allowed values: aws, darkGray, frogGreen, pink, orange, blueGray, blue, bordeaux, teal, grey
 - `name` (String) Name of the new label to be added to torque
 - `space_name` (String) Name of the space where this label will be added to Torque
