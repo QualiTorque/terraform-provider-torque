@@ -146,7 +146,7 @@ func (r *TorqueParameterResource) Read(ctx context.Context, req resource.ReadReq
 	}
 
 	data.Description = types.StringValue(parameter.Description)
-	data.Value = types.StringValue(parameter.Value)
+	// data.Value = types.StringValue(parameter.Value)
 	data.Sensitive = types.BoolValue(parameter.Sensitive)
 
 	// Set refreshed state
