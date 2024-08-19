@@ -302,7 +302,12 @@ type spaceDefinition struct {
 }
 
 type Label struct {
-	// SpaceName string `json:"space_name"`
 	Name  string `json:"name"`
 	Color string `json:"color"`
+}
+
+type CatalogItemLabelsRequest struct {
+	BlueprintName  string   `json:"blueprint_name"`
+	RepositoryName string   `json:"repository_name"`
+	Labels         []string `json:"labels"`
 }
