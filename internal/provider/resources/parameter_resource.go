@@ -49,7 +49,7 @@ func (r *TorqueParameterResource) Schema(ctx context.Context, req resource.Schem
 			},
 			"value": schema.StringAttribute{
 				MarkdownDescription: "Tag value to be set as the parameter",
-				Optional:            true,
+				Required:            true,
 				Computed:            false,
 			},
 			"sensitive": schema.BoolAttribute{
@@ -104,7 +104,12 @@ func (r *TorqueParameterResource) Create(ctx context.Context, req resource.Creat
 	}
 
 	tflog.Trace(ctx, "Resource Created Successful!")
-
+	// if data.Sensitive.ValueBool() {
+	// 	data.Value = types.StringNull()
+	// 	fmt.Println("Setting data to null")
+	// } else {
+	// 	data.Value = types.StringValue(data.Value.ValueString())
+	// }
 	// Save data into Terraform state.
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
@@ -177,7 +182,6 @@ func (r *TorqueParameterResource) Update(ctx context.Context, req resource.Updat
 
 	data.Description = types.StringValue(param.Description)
 	data.Sensitive = types.BoolValue(param.Sensitive)
-	data.Value = types.StringValue(param.Value)
 
 	diags = resp.State.Set(ctx, data)
 	resp.Diagnostics.Append(diags...)
