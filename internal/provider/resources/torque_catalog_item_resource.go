@@ -39,7 +39,7 @@ func (r *TorqueCatalogItemResource) Metadata(ctx context.Context, req resource.M
 func (r *TorqueCatalogItemResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "Creation of a new Torque space with associated entities (users, repos, etc...)",
+		MarkdownDescription: "Creation of a new catalog item by publishing an existing blueprint to the self-service catalog.",
 
 		Attributes: map[string]schema.Attribute{
 			"space_name": schema.StringAttribute{

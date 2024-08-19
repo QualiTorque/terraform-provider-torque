@@ -3,12 +3,12 @@
 page_title: "torque_user_space_association Resource - terraform-provider-torque"
 subcategory: ""
 description: |-
-  Associate Torque space with existing registered agent
+  Associate Torque space with existing registered user
 ---
 
 # torque_user_space_association (Resource)
 
-Associate Torque space with existing registered agent
+Associate Torque space with existing registered user
 
 ## Example Usage
 
@@ -40,5 +40,5 @@ resource "torque_user_space_association" "user_association" {
 ### Required
 
 - `space_name` (String) Existing Torque Space name
-- `user_email` (String) List of users emails
-- `user_role` (String) The role of the users in the space.
+- `user_email` (String) The user email address
+- `user_role` (String) The role of the user in the space.

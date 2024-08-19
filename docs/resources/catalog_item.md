@@ -3,12 +3,12 @@
 page_title: "torque_catalog_item Resource - terraform-provider-torque"
 subcategory: ""
 description: |-
-  Creation of a new Torque space with associated entities (users, repos, etc...)
+  Creation of a new catalog item by publishing an existing blueprint to the self-service catalog.
 ---
 
 # torque_catalog_item (Resource)
 
-Creation of a new Torque space with associated entities (users, repos, etc...)
+Creation of a new catalog item by publishing an existing blueprint to the self-service catalog.
 
 ## Example Usage
 

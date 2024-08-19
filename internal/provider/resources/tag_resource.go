@@ -44,7 +44,7 @@ func (r *TorqueTagResource) Metadata(ctx context.Context, req resource.MetadataR
 func (r *TorqueTagResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "Creation of a new Torque space with associated entities (users, repos, etc...)",
+		MarkdownDescription: "Creation of a new Torque Tag, it's scope, value and/or possible values",
 
 		Attributes: map[string]schema.Attribute{
 			"name": schema.StringAttribute{

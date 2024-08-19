@@ -8,12 +8,14 @@ Learn more:
 
 * Read more in the Torque [documentation](http://docs.qtorque.io/).
 
+* Try out Torque yourself by visiting [Quali's Torque Playground](https://www.quali.com/watch-see-the-torque-playground-in-action/).
+
 * Join the community [discussions](https://github.com/QualiTorque/qualitorque.github.io/).
 
 ## Requirements
 
 - [Terraform](https://developer.hashicorp.com/terraform/downloads) >= 1.0
-- [Go](https://golang.org/doc/install) >= 1.19
+- [Go](https://golang.org/doc/install) >= 1.21
 
 ## Quick Start
 
