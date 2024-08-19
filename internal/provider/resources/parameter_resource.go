@@ -157,7 +157,7 @@ func (r *TorqueParameterResource) Update(ctx context.Context, req resource.Updat
 	}
 
 	// Update existing order
-	err := r.client.UpdateAccountParameter(data.Name.ValueString(), data.Name.ValueString(), data.Sensitive.ValueBool(), data.Description.ValueString())
+	err := r.client.UpdateAccountParameter(data.Name.ValueString(), data.Value.ValueString(), data.Sensitive.ValueBool(), data.Description.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Error Updating Torque parameter",
