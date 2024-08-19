@@ -58,7 +58,7 @@ func (r *TorqueSpaceLabelResource) Schema(ctx context.Context, req resource.Sche
 				Required:            true,
 			},
 			"color": schema.StringAttribute{
-				MarkdownDescription: "Color of the label. Allowed values: darkGray, frogGreen, pink, orange, blueGray, blue, bordeaux",
+				MarkdownDescription: "Color of the label. Allowed values: aws, darkGray, frogGreen, pink, orange, blueGray, blue, bordeaux, teal, grey",
 				Required:            true,
 				Validators: []validator.String{
 					stringvalidator.OneOf([]string{"aws", "darkGray", "frogGreen", "pink", "orange", "blueGray", "blue", "bordeaux", "teal", "grey"}...),
