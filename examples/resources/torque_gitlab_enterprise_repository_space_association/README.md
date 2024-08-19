@@ -1,3 +1,3 @@
-# Torque Repository to Space association module
+# Torque Gitlab Enterprise Repository module
 
-Configuration in this directory help associating a repository to a space.
+Configuration in this directory help associating a gitlab enterprise repository to a space.

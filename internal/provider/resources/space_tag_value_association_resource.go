@@ -37,7 +37,7 @@ func (r *TorqueTagSpaceValueAssociationResource) Metadata(ctx context.Context, r
 
 func (r *TorqueTagSpaceValueAssociationResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Associate Torque space with existing registered agent",
+		MarkdownDescription: "Associate Torque space with existing tag and value",
 
 		Attributes: map[string]schema.Attribute{
 			"space_name": schema.StringAttribute{

@@ -3,12 +3,12 @@
 page_title: "torque_space_tag_value_association Resource - terraform-provider-torque"
 subcategory: ""
 description: |-
-  Associate Torque space with existing registered agent
+  Associate Torque space with existing tag and value
 ---
 
 # torque_space_tag_value_association (Resource)
 
-Associate Torque space with existing registered agent
+Associate Torque space with existing tag and value
 
 ## Example Usage
 

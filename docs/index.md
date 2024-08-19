@@ -3,12 +3,20 @@
 page_title: "torque Provider"
 subcategory: ""
 description: |-
-  Interact with Torque.
+  Use Torque provider to interact with Torque by Quali.<br/><br/>
+  	Torque by Quali is an Environment-as-a-Service (EaaS) control plane and self-service catalog allowing you to deploy and manage cloud environments  
+  	comprising the infrastructure, applications,and any dependencies or external services necessary for applications or services to rely on.<br/><br/>
+  	For more information, visit [Quali's Torque Documentation](https://docs.qtorque.io)  
+  	For experimenting with Torque, visit [Quali's Torque Playground](https://www.quali.com/watch-see-the-torque-playground-in-action/)
 ---
 
 # torque Provider
 
-Interact with Torque.
+Use Torque provider to interact with Torque by Quali.<br/><br/>
+		Torque by Quali is an Environment-as-a-Service (EaaS) control plane and self-service catalog allowing you to deploy and manage cloud environments  
+		comprising the infrastructure, applications,and any dependencies or external services necessary for applications or services to rely on.<br/><br/>
+		For more information, visit [Quali's Torque Documentation](https://docs.qtorque.io)  
+		For experimenting with Torque, visit [Quali's Torque Playground](https://www.quali.com/watch-see-the-torque-playground-in-action/)
 
 ## Example Usage
 
@@ -27,4 +35,4 @@ provider "torque" {
 
 - `host` (String) URI for Torque API. May also be provided via TORQUE_HOST environment variable.
 - `space` (String) Space for Torque API. May also be provided via TORQUE_SPACE environment variable.
-- `token` (String, Sensitive) Token for Torque API. May also be provided via TORUQE_TOKEN environment variable.
+- `token` (String, Sensitive) Token for Torque API. May also be provided via TORQUE_TOKEN environment variable.

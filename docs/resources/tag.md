@@ -3,12 +3,12 @@
 page_title: "torque_tag Resource - terraform-provider-torque"
 subcategory: ""
 description: |-
-  Creation of a new Torque space with associated entities (users, repos, etc...)
+  Creation of a new Torque Tag, it's scope, value and/or possible values
 ---
 
 # torque_tag (Resource)
 
-Creation of a new Torque space with associated entities (users, repos, etc...)
+Creation of a new Torque Tag, it's scope, value and/or possible values
 
 ## Example Usage
 
