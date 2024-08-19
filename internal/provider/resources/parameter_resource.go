@@ -7,6 +7,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/qualitorque/terraform-provider-torque/client"
@@ -56,6 +58,9 @@ func (r *TorqueParameterResource) Schema(ctx context.Context, req resource.Schem
 				MarkdownDescription: "Sensitive or not",
 				Optional:            true,
 				Computed:            false,
+				PlanModifiers: []planmodifier.Bool{
+					boolplanmodifier.RequiresReplaceIf(RequiresReplaceIfSensitiveChanged, "Updating a sensitive parameter to be non-sensitive forces replacement", "Updating a sensitive parameter to be non-sensitive forces replacement"),
+				},
 			},
 			"description": schema.StringAttribute{
 				MarkdownDescription: "Parameter description",
@@ -211,4 +216,24 @@ func (r *TorqueParameterResource) Delete(ctx context.Context, req resource.Delet
 
 func (r *TorqueParameterResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resource.ImportStatePassthroughID(ctx, path.Root("name"), req, resp)
+}
+
+func RequiresReplaceIfSensitiveChanged(ctx context.Context, req planmodifier.BoolRequest, resp *boolplanmodifier.RequiresReplaceIfFuncResponse) {
+	var data, state TorqueParameterResourceModel
+	diags := req.Plan.Get(ctx, &data)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+	diags = req.State.Get(ctx, &state)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+	planSensitive := data.Sensitive.ValueBool()
+	stateSensitive := state.Sensitive.ValueBool()
+	// Check if the state value is true and the plan value is false
+	if stateSensitive && !planSensitive {
+		resp.RequiresReplace = true
+	}
 }
