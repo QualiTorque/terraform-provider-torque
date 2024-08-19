@@ -303,6 +303,6 @@ type spaceDefinition struct {
 
 type Label struct {
 	// SpaceName string `json:"space_name"`
-	Name      string `json:"name"`
-	Color     string `json:"color"`
+	Name  string `json:"name"`
+	Color string `json:"color"`
 }
