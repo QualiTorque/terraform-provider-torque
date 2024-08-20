@@ -311,3 +311,9 @@ type CatalogItemLabelsRequest struct {
 	RepositoryName string   `json:"repository_name"`
 	Labels         []string `json:"labels"`
 }
+
+type SpaceParameterRequest struct {
+	Value       string `json:"value"`
+	Sensitive   bool   `json:"sensitive"`
+	Description string `json:"description"`
+}

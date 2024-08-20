@@ -7,6 +7,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/qualitorque/terraform-provider-torque/client"
@@ -46,16 +49,22 @@ func (r *TorqueParameterResource) Schema(ctx context.Context, req resource.Schem
 			"name": schema.StringAttribute{
 				MarkdownDescription: "Name of the new parameter to be added to torque",
 				Required:            true,
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.RequiresReplace(),
+				},
 			},
 			"value": schema.StringAttribute{
-				MarkdownDescription: "Tag value to be set as the parameter",
-				Optional:            true,
+				MarkdownDescription: "Parameter value to be set",
+				Required:            true,
 				Computed:            false,
 			},
 			"sensitive": schema.BoolAttribute{
 				MarkdownDescription: "Sensitive or not",
 				Optional:            true,
 				Computed:            false,
+				PlanModifiers: []planmodifier.Bool{
+					boolplanmodifier.RequiresReplaceIf(SensitiveChangingFromTrueToFalse, "Updating a sensitive parameter to be non-sensitive forces replacement", "Updating a sensitive parameter to be non-sensitive forces replacement"),
+				},
 			},
 			"description": schema.StringAttribute{
 				MarkdownDescription: "Parameter description",
@@ -121,8 +130,8 @@ func (r *TorqueParameterResource) Read(ctx context.Context, req resource.ReadReq
 	parameter, err := r.client.GetAccountParameter(data.Name.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Error Reading group details",
-			"Could not read Torque group name "+data.Name.ValueString()+": "+err.Error(),
+			"Error Reading Parameter details",
+			"Could not read Torque parameter "+data.Name.ValueString()+": "+err.Error(),
 		)
 		return
 	}
@@ -136,7 +145,6 @@ func (r *TorqueParameterResource) Read(ctx context.Context, req resource.ReadReq
 	}
 
 	data.Description = types.StringValue(parameter.Description)
-	data.Value = types.StringValue(parameter.Value)
 	data.Sensitive = types.BoolValue(parameter.Sensitive)
 
 	// Set refreshed state
@@ -157,7 +165,7 @@ func (r *TorqueParameterResource) Update(ctx context.Context, req resource.Updat
 	}
 
 	// Update existing order
-	err := r.client.UpdateAccountParameter(data.Name.ValueString(), data.Name.ValueString(), data.Sensitive.ValueBool(), data.Description.ValueString())
+	err := r.client.UpdateAccountParameter(data.Name.ValueString(), data.Value.ValueString(), data.Sensitive.ValueBool(), data.Description.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Error Updating Torque parameter",
@@ -177,7 +185,6 @@ func (r *TorqueParameterResource) Update(ctx context.Context, req resource.Updat
 
 	data.Description = types.StringValue(param.Description)
 	data.Sensitive = types.BoolValue(param.Sensitive)
-	data.Value = types.StringValue(param.Value)
 
 	diags = resp.State.Set(ctx, data)
 	resp.Diagnostics.Append(diags...)
@@ -196,7 +203,6 @@ func (r *TorqueParameterResource) Delete(ctx context.Context, req resource.Delet
 		return
 	}
 
-	// Delete the space.
 	err := r.client.DeleteAccountParameter(data.Name.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to delete parameter, got error: %s", err))
@@ -207,4 +213,26 @@ func (r *TorqueParameterResource) Delete(ctx context.Context, req resource.Delet
 
 func (r *TorqueParameterResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resource.ImportStatePassthroughID(ctx, path.Root("name"), req, resp)
+}
+
+// boolplanmodifier function to help determine if parameter becomes non-sensitive, which requires recreating the parameter.
+func SensitiveChangingFromTrueToFalse(ctx context.Context, req planmodifier.BoolRequest, resp *boolplanmodifier.RequiresReplaceIfFuncResponse) {
+	var planSensitive, stateSensitive types.Bool
+
+	diags := req.State.GetAttribute(ctx, path.Root("sensitive"), &stateSensitive)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	diags = req.Plan.GetAttribute(ctx, path.Root("sensitive"), &planSensitive)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	// Check if the state value is true and the plan value is false
+	if stateSensitive.ValueBool() && !planSensitive.ValueBool() {
+		resp.RequiresReplace = true
+	}
 }
