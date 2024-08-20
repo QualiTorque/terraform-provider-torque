@@ -10,8 +10,6 @@ import (
 )
 
 func (c *Client) CreateSpace(name string, color string, icon string) error {
-	fmt.Println(c.HostURL + "api/spaces")
-
 	space := Space{
 		Name:  name,
 		Color: color,
@@ -40,8 +38,6 @@ func (c *Client) CreateSpace(name string, color string, icon string) error {
 }
 
 func (c *Client) DeleteSpace(name string) error {
-	fmt.Println(c.HostURL + "api/spaces")
-
 	req, err := http.NewRequest("DELETE", fmt.Sprintf("%sapi/spaces/%s", c.HostURL, name), nil)
 	if err != nil {
 		return err
