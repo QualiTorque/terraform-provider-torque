@@ -33,12 +33,13 @@ func TestSpaceResource(t *testing.T) {
 			{
 				Config: providerConfig + `
 				resource "torque_space" "test" {
-					space_name = "MySpace"
+					space_name = "MyNewSpace"
 					icon       = "star"
 					color      = "darkBlue"
 				}
 				`,
 				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttr("torque_space.test", "space_name", "MyNewSpace"),
 					resource.TestCheckResourceAttr("torque_space.test", "icon", "star"),
 					resource.TestCheckResourceAttr("torque_space.test", "color", "darkBlue"),
 				),
