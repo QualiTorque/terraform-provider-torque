@@ -120,9 +120,8 @@ func (r *TorqueEnvironmentLabelResource) Read(ctx context.Context, req resource.
 		resp.State.RemoveResource(ctx)
 		return
 	}
-
-	// data.Key = types.StringValue(label.Value)
-
+	data.Key = types.StringValue(label.Key)
+	data.Value = types.StringValue(label.Value)
 	// Set refreshed state
 	diags = resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
@@ -139,8 +138,7 @@ func (r *TorqueEnvironmentLabelResource) Update(ctx context.Context, req resourc
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	// current_name := state.Value
-	// // Update existing order
+
 	err := r.client.UpdateEnvironmentLabel(state.Key.ValueString(), state.Value.ValueString(), data.Key.ValueString(), data.Value.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError(
@@ -149,18 +147,6 @@ func (r *TorqueEnvironmentLabelResource) Update(ctx context.Context, req resourc
 		)
 		return
 	}
-
-	// label, err := r.client.GetLabel(data.Key.ValueString(), data.Value.ValueString())
-	// if err != nil {
-	// 	resp.Diagnostics.AddError(
-	// 		"Error Reading label details",
-	// 		"Could not read Torque label name "+data.Value.ValueString()+": "+err.Error(),
-	// 	)
-	// 	return
-	// }
-
-	// data.Value = types.StringValue(label.Value)
-	// data.Color = types.StringValue(label.Color)
 
 	diags = resp.State.Set(ctx, data)
 	resp.Diagnostics.Append(diags...)
@@ -179,7 +165,7 @@ func (r *TorqueEnvironmentLabelResource) Delete(ctx context.Context, req resourc
 		return
 	}
 
-	// Delete the environment.
+	// Delete the environment label.
 	err := r.client.DeleteEnvironmentLabel(data.Key.ValueString(), data.Value.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to delete environment label, got error: %s", err))
