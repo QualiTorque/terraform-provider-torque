@@ -12,8 +12,8 @@ import (
 
 func TestSpaceResource(t *testing.T) {
 	randomSuffix := GenerateRandomString(6)
-	spaceName := fmt.Sprintf("MySpace_%s", randomSuffix)
-	newSpaceName := fmt.Sprintf("MyNewSpace_%s", randomSuffix)
+	spaceName := fmt.Sprintf("MySpace-%s", randomSuffix)
+	newSpaceName := fmt.Sprintf("MyNewSpace-%s", randomSuffix)
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { testAccPreCheck(t) },
 		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
