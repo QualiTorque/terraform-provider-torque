@@ -7,6 +7,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/qualitorque/terraform-provider-torque/client"
@@ -47,10 +50,16 @@ func (r *TorqueSpaceParameterResource) Schema(ctx context.Context, req resource.
 			"space_name": schema.StringAttribute{
 				MarkdownDescription: "Space name to add the parameter to",
 				Required:            true,
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.RequiresReplace(),
+				},
 			},
 			"name": schema.StringAttribute{
 				MarkdownDescription: "Name of the new parameter to be added to torque",
 				Required:            true,
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.RequiresReplace(),
+				},
 			},
 			"value": schema.StringAttribute{
 				MarkdownDescription: "Tag value to be set as the parameter in the space",
@@ -61,6 +70,9 @@ func (r *TorqueSpaceParameterResource) Schema(ctx context.Context, req resource.
 				MarkdownDescription: "Sensitive or not",
 				Optional:            true,
 				Computed:            false,
+				PlanModifiers: []planmodifier.Bool{
+					boolplanmodifier.RequiresReplaceIf(SensitiveChangingFromTrueToFalse, "Updating a sensitive parameter to be non-sensitive forces replacement", "Updating a sensitive parameter to be non-sensitive forces replacement"),
+				},
 			},
 			"description": schema.StringAttribute{
 				MarkdownDescription: "Parameter description",
@@ -137,7 +149,14 @@ func (r *TorqueSpaceParameterResource) Update(ctx context.Context, req resource.
 	if resp.Diagnostics.HasError() {
 		return
 	}
-
+	err := r.client.UpdateSpaceParameter(data.SpaceName.ValueString(), data.Name.ValueString(), data.Value.ValueString(), data.Sensitive.ValueBool(), data.Description.ValueString())
+	if err != nil {
+		resp.Diagnostics.AddError(
+			"Error Updating space parameter",
+			"Could not update parameter, unexpected error: "+err.Error(),
+		)
+		return
+	}
 	// Save updated data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
