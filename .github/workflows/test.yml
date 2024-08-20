@@ -7,9 +7,6 @@ on:
   pull_request:
     paths-ignore:
       - 'README.md'
-  push:
-    paths-ignore:
-      - 'README.md'
 
 # Testing only needs permissions to read the repository contents.
 permissions:
@@ -77,5 +74,8 @@ jobs:
       - run: go mod download
       - env:
           TF_ACC: "1"
-        run: go test -v -cover ./internal/provider/tests/
+          TORQUE_HOST: ${{ secrets.TORQUE_HOST }}
+          TORQUE_SPACE: ${{ secrets.TORQUE_SPACE }}
+          TORQUE_TOKEN: ${{ secrets.TORQUE_TOKEN }}
+        run: go test -v -cover ./internal/provider/tests -coverpkg=./internal/provider/resources,./internal/provider/data_sources
         timeout-minutes: 10

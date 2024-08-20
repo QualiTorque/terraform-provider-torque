@@ -14,9 +14,6 @@ import (
 const (
 	providerConfig = `
 		provider "torque" {
-			host  = "https://portal.qtorque.io/"
-			space = "sample"
-			token = "my-awsome-token"
 		}
 	`
 )
