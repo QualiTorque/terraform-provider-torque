@@ -74,8 +74,8 @@ jobs:
       - run: go mod download
       - env:
           TF_ACC: "1"
-          TORQUE_HOST: "{{ secrets.TORQUE_HOST }}"
-          TORQUE_SPACE: "{{ secrets.TORQUE_SPACE }}"
-          TORQUE_TOKEN: "{{ secrets.TORQUE_TOKEN }}"
+          TORQUE_HOST: ${{ secrets.TORQUE_HOST }}
+          TORQUE_SPACE: ${{ secrets.TORQUE_SPACE }}
+          TORQUE_TOKEN: ${{ secrets.TORQUE_TOKEN }}
         run: go test -v -cover ./internal/provider/tests/
         timeout-minutes: 10
