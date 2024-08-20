@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/qualitorque/terraform-provider-torque/client"
@@ -48,9 +49,12 @@ func (r *TorqueParameterResource) Schema(ctx context.Context, req resource.Schem
 			"name": schema.StringAttribute{
 				MarkdownDescription: "Name of the new parameter to be added to torque",
 				Required:            true,
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.RequiresReplace(),
+				},
 			},
 			"value": schema.StringAttribute{
-				MarkdownDescription: "Tag value to be set as the parameter",
+				MarkdownDescription: "Parameter value to be set",
 				Required:            true,
 				Computed:            false,
 			},
@@ -59,7 +63,7 @@ func (r *TorqueParameterResource) Schema(ctx context.Context, req resource.Schem
 				Optional:            true,
 				Computed:            false,
 				PlanModifiers: []planmodifier.Bool{
-					boolplanmodifier.RequiresReplaceIf(RequiresReplaceIfSensitiveChanged, "Updating a sensitive parameter to be non-sensitive forces replacement", "Updating a sensitive parameter to be non-sensitive forces replacement"),
+					boolplanmodifier.RequiresReplaceIf(SensitiveChangingFromTrueToFalse, "Updating a sensitive parameter to be non-sensitive forces replacement", "Updating a sensitive parameter to be non-sensitive forces replacement"),
 				},
 			},
 			"description": schema.StringAttribute{
@@ -109,12 +113,7 @@ func (r *TorqueParameterResource) Create(ctx context.Context, req resource.Creat
 	}
 
 	tflog.Trace(ctx, "Resource Created Successful!")
-	// if data.Sensitive.ValueBool() {
-	// 	data.Value = types.StringNull()
-	// 	fmt.Println("Setting data to null")
-	// } else {
-	// 	data.Value = types.StringValue(data.Value.ValueString())
-	// }
+
 	// Save data into Terraform state.
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
@@ -131,8 +130,8 @@ func (r *TorqueParameterResource) Read(ctx context.Context, req resource.ReadReq
 	parameter, err := r.client.GetAccountParameter(data.Name.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Error Reading group details",
-			"Could not read Torque group name "+data.Name.ValueString()+": "+err.Error(),
+			"Error Reading Parameter details",
+			"Could not read Torque parameter "+data.Name.ValueString()+": "+err.Error(),
 		)
 		return
 	}
@@ -146,7 +145,6 @@ func (r *TorqueParameterResource) Read(ctx context.Context, req resource.ReadReq
 	}
 
 	data.Description = types.StringValue(parameter.Description)
-	// data.Value = types.StringValue(parameter.Value)
 	data.Sensitive = types.BoolValue(parameter.Sensitive)
 
 	// Set refreshed state
@@ -205,7 +203,6 @@ func (r *TorqueParameterResource) Delete(ctx context.Context, req resource.Delet
 		return
 	}
 
-	// Delete the space.
 	err := r.client.DeleteAccountParameter(data.Name.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to delete parameter, got error: %s", err))
@@ -218,7 +215,8 @@ func (r *TorqueParameterResource) ImportState(ctx context.Context, req resource.
 	resource.ImportStatePassthroughID(ctx, path.Root("name"), req, resp)
 }
 
-func RequiresReplaceIfSensitiveChanged(ctx context.Context, req planmodifier.BoolRequest, resp *boolplanmodifier.RequiresReplaceIfFuncResponse) {
+// boolplanmodifier function to help determine if parameter becomes non-sensitive, which requires recreating the parameter.
+func SensitiveChangingFromTrueToFalse(ctx context.Context, req planmodifier.BoolRequest, resp *boolplanmodifier.RequiresReplaceIfFuncResponse) {
 	var data, state TorqueParameterResourceModel
 	diags := req.Plan.Get(ctx, &data)
 	resp.Diagnostics.Append(diags...)
