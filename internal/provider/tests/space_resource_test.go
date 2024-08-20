@@ -35,13 +35,13 @@ func TestSpaceResource(t *testing.T) {
 				resource "torque_space" "test" {
 					space_name = "MyNewSpace"
 					icon       = "star"
-					color      = "darkBlue"
+					color      = "pinkRed"
 				}
 				`,
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr("torque_space.test", "space_name", "MyNewSpace"),
 					resource.TestCheckResourceAttr("torque_space.test", "icon", "star"),
-					resource.TestCheckResourceAttr("torque_space.test", "color", "darkBlue"),
+					resource.TestCheckResourceAttr("torque_space.test", "color", "pinkRed"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
