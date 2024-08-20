@@ -41,9 +41,9 @@ resource "torque_parameter" "new_parameter" {
 ### Required
 
 - `name` (String) Name of the new parameter to be added to torque
+- `value` (String) Parameter value to be set
 
 ### Optional
 
 - `description` (String) Parameter description
 - `sensitive` (Boolean) Sensitive or not
-- `value` (String) Tag value to be set as the parameter
