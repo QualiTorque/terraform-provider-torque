@@ -218,7 +218,7 @@ func (r *TorqueParameterResource) ImportState(ctx context.Context, req resource.
 // boolplanmodifier function to help determine if parameter becomes non-sensitive, which requires recreating the parameter.
 func SensitiveChangingFromTrueToFalse(ctx context.Context, req planmodifier.BoolRequest, resp *boolplanmodifier.RequiresReplaceIfFuncResponse) {
 	var planSensitive, stateSensitive types.Bool
-	
+
 	diags := req.State.GetAttribute(ctx, path.Root("sensitive"), &stateSensitive)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
