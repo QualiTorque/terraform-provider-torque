@@ -251,7 +251,7 @@ func (c *Client) GetSpaceBlueprints(space_name string) ([]Blueprint, error) {
 func (c *Client) SetSpaceTagValue(space_name string, tag_name string, tag_value string) error {
 	fmt.Println(c.HostURL + "api/spaces")
 
-	data := TagNameValue{
+	data := NameValuePair{
 		Name:  tag_name,
 		Value: tag_value,
 	}
@@ -280,7 +280,7 @@ func (c *Client) SetSpaceTagValue(space_name string, tag_name string, tag_value 
 func (c *Client) SetBlueprintTagValue(space_name string, tag_name string, tag_value string, repo_name string, blueprint_name string) error {
 	fmt.Println(c.HostURL + "api/spaces")
 
-	data := TagNameValue{
+	data := NameValuePair{
 		Name:  tag_name,
 		Value: tag_value,
 	}
