@@ -4,9 +4,13 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/qualitorque/terraform-provider-torque/client"
@@ -60,6 +64,12 @@ func (r *TorqueTagResource) Schema(ctx context.Context, req resource.SchemaReque
 				MarkdownDescription: "Tag scope. Possible values: account, space, blueprint, environment",
 				Required:            true,
 				Computed:            false,
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.RequiresReplace(),
+				},
+				Validators: []validator.String{
+					stringvalidator.OneOf([]string{"account", "space", "blueprint", "environment"}...),
+				},
 			},
 			"description": schema.StringAttribute{
 				MarkdownDescription: "Tag description",
@@ -104,15 +114,14 @@ func (r *TorqueTagResource) Create(ctx context.Context, req resource.CreateReque
 	if resp.Diagnostics.HasError() {
 		return
 	}
-
-	var possible []string
+	var possibleValues []string
 	if !data.PossibleValues.IsNull() {
 		for _, pos_value := range data.PossibleValues.Elements() {
-			possible = append(possible, pos_value.String())
+			possibleValues = append(possibleValues, pos_value.String()[1:len(pos_value.String())-1]) // To strip strings from double quotes so they can be later marshalled successfully
 		}
 	}
 
-	err := r.client.AddTag(data.Name.ValueString(), data.Value.ValueString(), data.Description.ValueString(), possible, data.Scope.ValueString())
+	err := r.client.AddTag(data.Name.ValueString(), data.Value.ValueString(), data.Description.ValueString(), possibleValues, data.Scope.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create tag, got error: %s", err))
 		return
@@ -149,11 +158,23 @@ func (r *TorqueTagResource) Read(ctx context.Context, req resource.ReadRequest, 
 
 func (r *TorqueTagResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 	var data TorqueTagResourceModel
-
+	var currentName string
 	// Read Terraform plan data into the model
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
-
+	req.State.GetAttribute(ctx, path.Root("name"), &currentName)
 	if resp.Diagnostics.HasError() {
+		return
+	}
+	var possibleValues []string
+	if !data.PossibleValues.IsNull() {
+		for _, pos_value := range data.PossibleValues.Elements() {
+			possibleValues = append(possibleValues, pos_value.String()[1:len(pos_value.String())-1]) // To strip strings from double quotes so they can be later marshalled successfully
+		}
+	}
+	fmt.Println(possibleValues)
+	err := r.client.UpdateTag(currentName, data.Name.ValueString(), data.Value.ValueString(), data.Description.ValueString(), possibleValues, data.Scope.ValueString())
+	if err != nil {
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update tag, got error: %s", err))
 		return
 	}
 

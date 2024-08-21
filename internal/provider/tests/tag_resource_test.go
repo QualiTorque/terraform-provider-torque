@@ -5,6 +5,7 @@ package tests
 
 import (
 	"fmt"
+	"regexp"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/acctest"
@@ -14,12 +15,26 @@ import (
 func TestTagResource(t *testing.T) {
 	randomSuffix := acctest.RandStringFromCharSet(6, acctest.CharSetAlphaNum)
 	tagName := fmt.Sprintf("tag_name_%s", randomSuffix)
-	// newTagName := fmt.Sprintf("new_tag_name_%s", randomSuffix)
+	newTagName := fmt.Sprintf("new_tag_name_%s", randomSuffix)
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { testAccPreCheck(t) },
 		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			{
+				// Can't create account level tag with possible values
+				Config: providerConfig + fmt.Sprintf(`
+				resource "torque_tag" "tag" {
+					name            = "%s"
+					value           = "tag_value"
+					scope           = "account"
+					description     = "tag_description"
+					possible_values = ["value1", "value2"]
+				}
+				`, tagName),
+				ExpectError: regexp.MustCompile("Unable to create tag"),
+			},
+			{
+				// Create and Read testing
 				Config: providerConfig + fmt.Sprintf(`
 				resource "torque_tag" "tag" {
 					name            = "%s"
@@ -46,9 +61,9 @@ func TestTagResource(t *testing.T) {
 					description     = "new_tag_description"
 					possible_values = ["value1", "value2"]
 				}
-				`, tagName),
+				`, newTagName),
 				Check: resource.ComposeAggregateTestCheckFunc(
-					resource.TestCheckResourceAttr("torque_tag.tag", "name", tagName),
+					resource.TestCheckResourceAttr("torque_tag.tag", "name", newTagName),
 					resource.TestCheckResourceAttr("torque_tag.tag", "value", "new_tag_value"),
 					resource.TestCheckResourceAttr("torque_tag.tag", "scope", "space"),
 					resource.TestCheckResourceAttr("torque_tag.tag", "description", "new_tag_description"),
