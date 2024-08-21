@@ -9,8 +9,6 @@ import (
 )
 
 func (c *Client) AddTag(name string, value string, description string, possible_values []string, scope string) error {
-	fmt.Println(c.HostURL + "api/spaces")
-
 	tag := Tag{
 		Name:           name,
 		Value:          value,

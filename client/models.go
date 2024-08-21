@@ -104,9 +104,9 @@ type TagNameValue struct {
 }
 
 type Tag struct {
-	Name           string   `json:"tag_name"`
-	Value          string   `json:"tag_value"`
-	Scope          string   `json:"tag_scope"`
+	Name           string   `json:"name"`
+	Value          string   `json:"value"`
+	Scope          string   `json:"scope"`
 	Description    string   `json:"description"`
 	PossibleValues []string `json:"possible_values"`
 }
