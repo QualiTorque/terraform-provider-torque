@@ -16,8 +16,8 @@ import (
 )
 
 const (
-	blueprint_name     = "aws-instance"
-	repository_name    = "qtorque"
+	blueprint_name     = "ec2"
+	repository_name    = "TerraformProviderAcceptanceTests"
 	new_blueprint_name = "rds"
 )
 
