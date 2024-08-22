@@ -26,10 +26,12 @@ const (
 var version = os.Getenv("VERSION")
 var minorVresion = strings.Split((version), ".")
 var index = minorVresion[1]
+var unique_blueprint_name = blueprint_name + "_" + index
+var new_unique_blueprint_name = new_blueprint_name + "_" + index
 
 func TestCatalogItemResource(t *testing.T) {
 	spaceName := os.Getenv("TORQUE_SPACE")
-	fmt.Println(blueprint_name+index)
+	fmt.Println(blueprint_name + index)
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { testAccPreCheck(t) },
 		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
@@ -46,7 +48,7 @@ func TestCatalogItemResource(t *testing.T) {
 				`, spaceName, blueprint_name, repository_name),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr("torque_catalog_item.catalog_item", "space_name", spaceName),
-					resource.TestCheckResourceAttr("torque_catalog_item.catalog_item", "blueprint_name", blueprint_name+index),
+					resource.TestCheckResourceAttr("torque_catalog_item.catalog_item", "blueprint_name", unique_blueprint_name),
 					resource.TestCheckResourceAttr("torque_catalog_item.catalog_item", "repository_name", repository_name),
 					testBlueprintPublished(blueprint_name),
 				),
@@ -59,12 +61,12 @@ func TestCatalogItemResource(t *testing.T) {
 					blueprint_name  = "%s"
 					repository_name = "%s"
 				}
-				`, spaceName, new_blueprint_name, repository_name),
+				`, spaceName, new_unique_blueprint_name, repository_name),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr("torque_catalog_item.catalog_item", "space_name", spaceName),
-					resource.TestCheckResourceAttr("torque_catalog_item.catalog_item", "blueprint_name", new_blueprint_name),
+					resource.TestCheckResourceAttr("torque_catalog_item.catalog_item", "blueprint_name", new_unique_blueprint_name),
 					resource.TestCheckResourceAttr("torque_catalog_item.catalog_item", "repository_name", repository_name),
-					testBlueprintPublished(new_blueprint_name),
+					testBlueprintPublished(new_unique_blueprint_name),
 				),
 				// 	ExpectError: regexp.MustCompile("Unable to publish blueprint in space"),
 			},
