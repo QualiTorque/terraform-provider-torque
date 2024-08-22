@@ -111,7 +111,7 @@ func checkBlueprintPublishedCondition(expectedPublished bool, blueprint string) 
 		host := os.Getenv("TORQUE_HOST")
 		space := os.Getenv("TORQUE_SPACE")
 		token := os.Getenv("TORQUE_TOKEN")
-		
+
 		c, err := client.NewClient(&host, &space, &token)
 		if err != nil {
 			return err
@@ -126,11 +126,11 @@ func checkBlueprintPublishedCondition(expectedPublished bool, blueprint string) 
 				return err
 			}
 			if bp.Published == expectedPublished {
-				return nil  
+				return nil
 			}
 
 			if i < maxRetries-1 {
-				time.Sleep(delay) 
+				time.Sleep(delay)
 			}
 		}
 		return fmt.Errorf("expected Published to be '%v', got '%v'", expectedPublished, !expectedPublished)
