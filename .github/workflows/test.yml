@@ -77,5 +77,6 @@ jobs:
           TORQUE_HOST: ${{ secrets.TORQUE_HOST }}
           TORQUE_SPACE: ${{ secrets.TORQUE_SPACE }}
           TORQUE_TOKEN: ${{ secrets.TORQUE_TOKEN }}
+          VERSION: ${{ matrix.terraform }}
         run: go test -v -cover ./internal/provider/tests -coverpkg=./internal/provider/resources,./internal/provider/data_sources
         timeout-minutes: 10

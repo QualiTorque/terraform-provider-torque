@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"os"
 	"regexp"
+	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -20,8 +21,15 @@ const (
 	new_blueprint_name = "rds"
 )
 
+// minorVresion       = (strings.Split(os.Getenv("INDEX"), "."))[1]
+
+var version = os.Getenv("VERSION")
+var minorVresion = strings.Split((version), ".")
+var index = minorVresion[1]
+
 func TestCatalogItemResource(t *testing.T) {
 	spaceName := os.Getenv("TORQUE_SPACE")
+	fmt.Println(blueprint_name+index)
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { testAccPreCheck(t) },
 		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
@@ -38,7 +46,7 @@ func TestCatalogItemResource(t *testing.T) {
 				`, spaceName, blueprint_name, repository_name),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr("torque_catalog_item.catalog_item", "space_name", spaceName),
-					resource.TestCheckResourceAttr("torque_catalog_item.catalog_item", "blueprint_name", blueprint_name),
+					resource.TestCheckResourceAttr("torque_catalog_item.catalog_item", "blueprint_name", blueprint_name+index),
 					resource.TestCheckResourceAttr("torque_catalog_item.catalog_item", "repository_name", repository_name),
 					testBlueprintPublished(blueprint_name),
 				),
