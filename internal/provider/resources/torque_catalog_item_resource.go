@@ -7,6 +7,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/qualitorque/terraform-provider-torque/client"
@@ -45,16 +47,25 @@ func (r *TorqueCatalogItemResource) Schema(ctx context.Context, req resource.Sch
 			"space_name": schema.StringAttribute{
 				MarkdownDescription: "Name of the space to configure",
 				Required:            true,
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.RequiresReplace(),
+				},
 			},
 			"blueprint_name": schema.StringAttribute{
 				MarkdownDescription: "The name of the blueprint to publish in the catalog",
 				Required:            true,
 				Computed:            false,
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.RequiresReplace(),
+				},
 			},
 			"repository_name": schema.StringAttribute{
 				MarkdownDescription: "The name of the repository where the blueprint resides. \"Stored in Torque\" will be stored in \"qtorque\" repository",
 				Required:            true,
 				Computed:            false,
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.RequiresReplace(),
+				},
 			},
 		},
 	}
