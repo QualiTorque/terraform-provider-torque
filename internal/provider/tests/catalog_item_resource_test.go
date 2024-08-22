@@ -31,7 +31,7 @@ var new_unique_blueprint_name = new_blueprint_name + "_" + index
 
 func TestCatalogItemResource(t *testing.T) {
 	spaceName := os.Getenv("TORQUE_SPACE")
-	fmt.Println(blueprint_name + index)
+	fmt.Println(unique_blueprint_name + index)
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { testAccPreCheck(t) },
 		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
@@ -45,12 +45,12 @@ func TestCatalogItemResource(t *testing.T) {
 					blueprint_name  = "%s"
 					repository_name = "%s"
 				}
-				`, spaceName, blueprint_name, repository_name),
+				`, spaceName, unique_blueprint_name, repository_name),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr("torque_catalog_item.catalog_item", "space_name", spaceName),
 					resource.TestCheckResourceAttr("torque_catalog_item.catalog_item", "blueprint_name", unique_blueprint_name),
 					resource.TestCheckResourceAttr("torque_catalog_item.catalog_item", "repository_name", repository_name),
-					testBlueprintPublished(blueprint_name),
+					testBlueprintPublished(unique_blueprint_name),
 				),
 			},
 			// Update and Read testing
