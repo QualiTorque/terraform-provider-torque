@@ -17,5 +17,5 @@ resource "torque_tag" "new_tag" {
   value           = "tag_value"
   scope           = "tag_scope"
   description     = "tag_description"
-  possible_values = ["valu1", "value2"]
+  possible_values = ["value1", "value2"]
 }

@@ -20,7 +20,7 @@ func (c *Client) AddTag(name string, value string, description string, possible_
 	if err != nil {
 		log.Fatalf("impossible to marshall space: %s", err)
 	}
-	req, err := http.NewRequest("POST", fmt.Sprintf("%sapi/settings/tags", c.HostURL), bytes.NewReader([]byte(payload)))
+	req, err := http.NewRequest("POST", fmt.Sprintf("%sapi/settings/tags", c.HostURL), bytes.NewReader(payload))
 	if err != nil {
 		return err
 	}

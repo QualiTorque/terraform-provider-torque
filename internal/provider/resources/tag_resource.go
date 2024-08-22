@@ -3,6 +3,7 @@ package resources
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -115,9 +116,16 @@ func (r *TorqueTagResource) Create(ctx context.Context, req resource.CreateReque
 		return
 	}
 	var possibleValues []string
+	var possible_value string
 	if !data.PossibleValues.IsNull() {
 		for _, pos_value := range data.PossibleValues.Elements() {
-			possibleValues = append(possibleValues, pos_value.String()[1:len(pos_value.String())-1]) // To strip strings from double quotes so they can be later marshalled successfully
+			if strings.HasPrefix(pos_value.String(), "\"") && strings.HasSuffix(pos_value.String(), "\"") {
+				// Remove the surrounding quotes so they can be later marshalled successfully
+				possible_value = pos_value.String()[1 : len(pos_value.String())-1]
+				possibleValues = append(possibleValues, possible_value)
+			} else {
+				possibleValues = append(possibleValues, pos_value.String())
+			}
 		}
 	}
 
@@ -176,9 +184,16 @@ func (r *TorqueTagResource) Update(ctx context.Context, req resource.UpdateReque
 		return
 	}
 	var possibleValues []string
+	var possible_value string
 	if !data.PossibleValues.IsNull() {
 		for _, pos_value := range data.PossibleValues.Elements() {
-			possibleValues = append(possibleValues, pos_value.String()[1:len(pos_value.String())-1]) // To strip strings from double quotes so they can be later marshalled successfully
+			if strings.HasPrefix(pos_value.String(), "\"") && strings.HasSuffix(pos_value.String(), "\"") {
+				// Remove the surrounding quotes so they can be later marshalled successfully
+				possible_value = pos_value.String()[1 : len(pos_value.String())-1]
+				possibleValues = append(possibleValues, possible_value)
+			} else {
+				possibleValues = append(possibleValues, pos_value.String())
+			}
 		}
 	}
 	fmt.Println(possibleValues)
