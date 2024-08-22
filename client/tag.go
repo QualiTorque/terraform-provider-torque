@@ -36,6 +36,35 @@ func (c *Client) AddTag(name string, value string, description string, possible_
 	return nil
 }
 
+func (c *Client) GetTag(tag_name string) (*Tag, error) {
+	req, err := http.NewRequest("GET", fmt.Sprintf("%sapi/settings/tags", c.HostURL), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", "application/json")
+	req.Header.Add("Accept", "application/json")
+
+	body, err := c.doRequest(req, &c.Token)
+	if err != nil {
+		return nil, err
+	}
+
+	tags := []Tag{}
+	err = json.Unmarshal(body, &tags)
+	if err != nil {
+		return nil, err
+	}
+	tag := Tag{}
+	for _, tag_item := range tags {
+		if tag_name == tag_item.Name {
+			tag = tag_item
+			return &tag, nil
+		}
+	}
+	return &tag, nil
+}
+
 func (c *Client) UpdateTag(current_name string, name string, value string, description string, possible_values []string, scope string) error {
 	tag := Tag{
 		Name:           name,

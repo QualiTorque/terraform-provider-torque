@@ -144,6 +144,16 @@ func (r *TorqueTagResource) Read(ctx context.Context, req resource.ReadRequest, 
 		return
 	}
 
+	tag, err := r.client.GetTag(data.Name.ValueString())
+	if err != nil {
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read tag, got error: %s", err))
+		return
+	}
+	data.Name = types.StringValue(tag.Name)
+	data.Value = types.StringValue(tag.Value)
+	data.Description = types.StringValue(tag.Description)
+	data.Scope = types.StringValue(tag.Scope)
+	data.PossibleValues, _ = types.ListValueFrom(ctx, types.StringType, tag.PossibleValues)
 	// If applicable, this is a great opportunity to initialize any necessary
 	// provider client data and make a call using it.
 	// httpResp, err := r.client.Do(httpReq)
