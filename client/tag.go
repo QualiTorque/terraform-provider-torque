@@ -62,7 +62,7 @@ func (c *Client) GetTag(tag_name string) (*Tag, error) {
 			return &tag, nil
 		}
 	}
-	return &tag, nil
+	return nil, fmt.Errorf("tag %s not found", tag_name)
 }
 
 func (c *Client) UpdateTag(current_name string, name string, value string, description string, possible_values []string, scope string) error {
