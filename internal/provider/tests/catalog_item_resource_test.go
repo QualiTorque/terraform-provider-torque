@@ -31,7 +31,7 @@ var new_unique_blueprint_name = new_blueprint_name + "_" + index
 
 func TestCatalogItemResource(t *testing.T) {
 	spaceName := os.Getenv("TORQUE_SPACE")
-	fmt.Println(unique_blueprint_name + index)
+	fmt.Println(unique_blueprint_name)
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { testAccPreCheck(t) },
 		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
