@@ -30,9 +30,6 @@ type TorqueTagResource struct {
 	client *client.Client
 }
 
-// POST  https://portal.qtorque.io/api/settings/tags
-// {"name":"tomera","value":"unassigned_tag_value","scope":"space","description":"asd","possible_values":["a","b"]}
-
 // TorqueTagResourceModel describes the resource data model.
 type TorqueTagResourceModel struct {
 	Name           types.String `tfsdk:"name"`
@@ -157,18 +154,12 @@ func (r *TorqueTagResource) Read(ctx context.Context, req resource.ReadRequest, 
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read tag, got error: %s", err))
 		return
 	}
+
 	data.Name = types.StringValue(tag.Name)
 	data.Value = types.StringValue(tag.Value)
 	data.Description = types.StringValue(tag.Description)
 	data.Scope = types.StringValue(tag.Scope)
 	data.PossibleValues, _ = types.ListValueFrom(ctx, types.StringType, tag.PossibleValues)
-	// If applicable, this is a great opportunity to initialize any necessary
-	// provider client data and make a call using it.
-	// httpResp, err := r.client.Do(httpReq)
-	// if err != nil {
-	//     resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read example, got error: %s", err))
-	//     return
-	// }
 
 	// Save updated data into Terraform state.
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
@@ -183,6 +174,7 @@ func (r *TorqueTagResource) Update(ctx context.Context, req resource.UpdateReque
 	if resp.Diagnostics.HasError() {
 		return
 	}
+
 	var possibleValues []string
 	var possible_value string
 	if !data.PossibleValues.IsNull() {
@@ -196,20 +188,12 @@ func (r *TorqueTagResource) Update(ctx context.Context, req resource.UpdateReque
 			}
 		}
 	}
-	fmt.Println(possibleValues)
+
 	err := r.client.UpdateTag(currentName, data.Name.ValueString(), data.Value.ValueString(), data.Description.ValueString(), possibleValues, data.Scope.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update tag, got error: %s", err))
 		return
 	}
-
-	// If applicable, this is a great opportunity to initialize any necessary
-	// provider client data and make a call using it.
-	// httpResp, err := r.client.Do(httpReq)
-	// if err != nil {
-	//     resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update example, got error: %s", err))
-	//     return
-	// }
 
 	// Save updated data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
@@ -225,7 +209,7 @@ func (r *TorqueTagResource) Delete(ctx context.Context, req resource.DeleteReque
 		return
 	}
 
-	// Delete the space.
+	// Delete the tag.
 	err := r.client.RemoveTag(data.Name.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to delete tag, got error: %s", err))
