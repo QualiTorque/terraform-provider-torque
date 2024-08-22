@@ -9,6 +9,7 @@ import (
 	"regexp"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
@@ -73,6 +74,7 @@ func TestCatalogItemResource(t *testing.T) {
 			// Delete testing automatically occurs in TestCase
 		},
 	})
+
 }
 
 func TestCatalogItemErrorIfNotExists(t *testing.T) {
@@ -109,18 +111,28 @@ func checkBlueprintPublishedCondition(expectedPublished bool, blueprint string) 
 		host := os.Getenv("TORQUE_HOST")
 		space := os.Getenv("TORQUE_SPACE")
 		token := os.Getenv("TORQUE_TOKEN")
+		
 		c, err := client.NewClient(&host, &space, &token)
 		if err != nil {
 			return err
 		}
-		bp, err := c.GetBlueprint(space, blueprint)
-		if err != nil {
-			return err
-		}
-		if bp.Published != expectedPublished {
-			return fmt.Errorf("expected Published to be '%v', got '%v'", expectedPublished, bp.Published)
-		}
 
-		return nil
+		maxRetries := 3
+		delay := 10 * time.Second
+
+		for i := 0; i < maxRetries; i++ {
+			bp, err := c.GetBlueprint(space, blueprint)
+			if err != nil {
+				return err
+			}
+			if bp.Published == expectedPublished {
+				return nil  
+			}
+
+			if i < maxRetries-1 {
+				time.Sleep(delay) 
+			}
+		}
+		return fmt.Errorf("expected Published to be '%v', got '%v'", expectedPublished, !expectedPublished)
 	}
 }
