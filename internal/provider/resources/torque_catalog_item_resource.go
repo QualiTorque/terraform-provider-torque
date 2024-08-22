@@ -118,18 +118,21 @@ func (r *TorqueCatalogItemResource) Read(ctx context.Context, req resource.ReadR
 
 	// Read Terraform prior state data into the model.
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
-
+	diags := req.State.Get(ctx, &data)
+	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
+	blueprint, err := r.client.GetBlueprint(data.SpaceName.ValueString(), data.BlueprintName.ValueString())
+	if err != nil {
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to get catalog items in space, got error: %s", err.Error()))
+		return
+	}
 
-	// If applicable, this is a great opportunity to initialize any necessary
-	// provider client data and make a call using it.
-	// httpResp, err := r.client.Do(httpReq)
-	// if err != nil {
-	//     resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read example, got error: %s", err))
-	//     return
-	// }
+	if blueprint != nil && !blueprint.Published {
+		resp.Diagnostics.AddError("Blueprint not published to catalog", "Blueprint was found in space blueprints but it is not published to catalog")
+		return
+	}
 
 	// Save updated data into Terraform state.
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
@@ -144,14 +147,6 @@ func (r *TorqueCatalogItemResource) Update(ctx context.Context, req resource.Upd
 	if resp.Diagnostics.HasError() {
 		return
 	}
-
-	// If applicable, this is a great opportunity to initialize any necessary
-	// provider client data and make a call using it.
-	// httpResp, err := r.client.Do(httpReq)
-	// if err != nil {
-	//     resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update example, got error: %s", err))
-	//     return
-	// }
 
 	// Save updated data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
