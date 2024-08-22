@@ -7,11 +7,12 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/hashicorp/terraform-plugin-testing/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 )
 
 func TestSpaceResource(t *testing.T) {
-	randomSuffix := GenerateRandomString(6)
+	randomSuffix := acctest.RandStringFromCharSet(6, acctest.CharSetAlphaNum)
 	spaceName := fmt.Sprintf("MySpace-%s", randomSuffix)
 	newSpaceName := fmt.Sprintf("MyNewSpace-%s", randomSuffix)
 	resource.Test(t, resource.TestCase{
