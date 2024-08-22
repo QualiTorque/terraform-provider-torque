@@ -35,7 +35,7 @@ func TestCatalogItemResource(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { testAccPreCheck(t) },
 		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
-		CheckDestroy:             testBlueprintNotPublished(new_blueprint_name),
+		CheckDestroy:             testBlueprintNotPublished(new_unique_blueprint_name),
 		Steps: []resource.TestStep{
 			// Create and Read testing
 			{
