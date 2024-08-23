@@ -22,7 +22,6 @@ const (
 	new_blueprint_name = "rds"
 )
 
-// minorVresion       = (strings.Split(os.Getenv("INDEX"), "."))[1]
 
 var version = os.Getenv("VERSION")
 var minorVresion = strings.Split((version), ".")
@@ -69,7 +68,6 @@ func TestCatalogItemResource(t *testing.T) {
 					resource.TestCheckResourceAttr("torque_catalog_item.catalog_item", "repository_name", repository_name),
 					testBlueprintPublished(new_unique_blueprint_name),
 				),
-				// 	ExpectError: regexp.MustCompile("Unable to publish blueprint in space"),
 			},
 			// Delete testing automatically occurs in TestCase
 		},
