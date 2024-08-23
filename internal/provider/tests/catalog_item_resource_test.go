@@ -22,7 +22,6 @@ const (
 	new_blueprint_name = "rds"
 )
 
-
 var version = os.Getenv("VERSION")
 var minorVresion = strings.Split((version), ".")
 var index = minorVresion[1]
