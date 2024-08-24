@@ -102,14 +102,14 @@ func (c *Client) GetSpaceParameter(space_name string, parameter_name string) (Pa
 		return ParameterRequest{}, err
 	}
 
-	param := ParameterRequest{}
 	for _, n := range params {
 		if parameter_name == n.Name {
-			param = n
+			return n, nil
 		}
 	}
 
-	return param, nil
+	return ParameterRequest{}, fmt.Errorf("parameter '%s' not found in space '%s'", parameter_name, space_name)
+
 }
 
 func (c *Client) GetAccountParameter(parameter_name string) (*ParameterRequest, error) {

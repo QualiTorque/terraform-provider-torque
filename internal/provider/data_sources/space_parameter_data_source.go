@@ -105,7 +105,7 @@ func (d *spaceParameterDataSource) Read(ctx context.Context, req datasource.Read
 	space_parameter_data, err := d.client.GetSpaceParameter(space_name.ValueString(), parameter.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Unable to Read Torque Account Parameter",
+			"Unable to Read Torque Space Parameter. Parameter was not found in space.",
 			err.Error(),
 		)
 		return
