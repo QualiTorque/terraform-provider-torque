@@ -22,15 +22,14 @@ const (
 	new_blueprint_name = "rds"
 )
 
-var version = os.Getenv("VERSION")
-var minorVresion = strings.Split((version), ".")
-var index = minorVresion[1]
-var unique_blueprint_name = blueprint_name + "_" + index
-var new_unique_blueprint_name = new_blueprint_name + "_" + index
-
 func TestCatalogItemResource(t *testing.T) {
 	spaceName := os.Getenv("TORQUE_SPACE")
-	fmt.Println(unique_blueprint_name)
+	var version = os.Getenv("VERSION")
+	var minorVresion = strings.Split((version), ".")
+	var index = minorVresion[1]
+	var unique_blueprint_name = blueprint_name + "_" + index
+	var new_unique_blueprint_name = new_blueprint_name + "_" + index
+
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { testAccPreCheck(t) },
 		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
