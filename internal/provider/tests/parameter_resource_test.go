@@ -14,8 +14,6 @@ import (
 const (
 	account_parameter_name  = "tf_provider_test_param"
 	account_sensitive_param = "tf_provider_test_sensitive_param"
-	// expected_value          = "value"
-	// space_name              = "TorqueTerraformProvider"
 )
 
 func TestAccountParameterDataSource(t *testing.T) {
