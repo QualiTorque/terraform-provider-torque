@@ -113,11 +113,9 @@ func checkBlueprintAssetLibraryCondition(expectedInAssetLibrary bool, blueprint 
 		}
 		bp, err := c.GetBlueprintFromAssetLibrary(space, blueprint)
 		if bp != nil && expectedInAssetLibrary {
-			fmt.Println("found blueprint in asset library and expected it to be there")
 			return nil
 		}
 		if bp == nil && !expectedInAssetLibrary {
-			fmt.Println("did not find blueprint in asset library and did not expect it to be there")
 			return nil
 		}
 
