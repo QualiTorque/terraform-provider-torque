@@ -5,23 +5,28 @@ package tests
 
 import (
 	"fmt"
+	"os"
 	"regexp"
+	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 )
 
-const (
-	aws_cost_target_name            = "aws_cost_target"
-	aws_cost_target_role_arn        = "arn:aws:iam::123456789012:role/role"
-	new_aws_cost_target_role_arn    = "arn:aws:iam::123456789012:role/newrole"
-	aws_cost_target_external_id     = "aws_cost_target_external_id"
-	new_aws_cost_target_external_id = "aws_cost_target_external_id2"
-	invalid_role_arn                = "some_arn"
-	new_aws_cost_target_name        = "new_aws_cost_target"
-)
-
 func TestAWSCostTargetResource(t *testing.T) {
+	var version = os.Getenv("VERSION")
+	var minorVresion = strings.Split((version), ".")
+	var index = minorVresion[1]
+	new_aws_cost_target_name := fmt.Sprintf("new_aws_cost_target_%s", index)
+	aws_cost_target_name := fmt.Sprintf("aws_cost_target_%s", index)
+
+	const (
+		aws_cost_target_role_arn        = "arn:aws:iam::123456789012:role/role"
+		new_aws_cost_target_role_arn    = "arn:aws:iam::123456789012:role/newrole"
+		aws_cost_target_external_id     = "aws_cost_target_external_id"
+		new_aws_cost_target_external_id = "aws_cost_target_external_id2"
+		invalid_role_arn                = "some_arn"
+	)
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { testAccPreCheck(t) },
 		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
