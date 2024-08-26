@@ -117,15 +117,24 @@ func (r *TorqueAwsCostTargetResource) Read(ctx context.Context, req resource.Rea
 }
 
 func (r *TorqueAwsCostTargetResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var data TorqueAwsCostTargetResourceModel
+	var data, state TorqueAwsCostTargetResourceModel
 
 	// Read Terraform plan data into the model
-	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
-
+	resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
+	diags := req.Plan.Get(ctx, &data)
+	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
-
+	current_target_name := state.Name
+	err := r.client.UpdateAWSCostTarget(current_target_name.ValueString(), data.Name.ValueString(), "aws", data.RoleArn.String(), data.ExternalId.ValueString())
+	if err != nil {
+		resp.Diagnostics.AddError(
+			"Error Updating Cost Target Name",
+			"Could not update Cost Target Name, unexpected error: "+err.Error(),
+		)
+		return
+	}
 	// Save updated data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }

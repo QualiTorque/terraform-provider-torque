@@ -353,7 +353,6 @@ func (c *Client) DeleteGroup(group_name string) error {
 	return nil
 }
 
-
 func (c *Client) GetGroup(group_name string) (GroupRequest, error) {
 	req, err := http.NewRequest("GET", fmt.Sprintf("%sapi/groups", c.HostURL), nil)
 	if err != nil {
