@@ -127,11 +127,11 @@ func (r *TorqueAwsCostTargetResource) Update(ctx context.Context, req resource.U
 		return
 	}
 	current_target_name := state.Name
-	err := r.client.UpdateAWSCostTarget(current_target_name.ValueString(), data.Name.ValueString(), "aws", data.RoleArn.String(), data.ExternalId.ValueString())
+	err := r.client.UpdateAWSCostTarget(current_target_name.ValueString(), data.Name.ValueString(), "aws", data.RoleArn.ValueString(), data.ExternalId.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Error Updating Cost Target Name",
-			"Could not update Cost Target Name, unexpected error: "+err.Error(),
+			"Error Updating AWS Cost Target",
+			"Could not update AWS Cost Target, unexpected error: "+err.Error(),
 		)
 		return
 	}

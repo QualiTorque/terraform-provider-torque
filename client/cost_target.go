@@ -57,7 +57,7 @@ func (c *Client) DeleteCostTarget(target_name string) error {
 
 func (c *Client) UpdateAWSCostTarget(target_name string, new_target_name string, target_type string, role_arn string, external_id string) error {
 	data := AwsCostTarget{
-		Name:       target_name,
+		NewName:    new_target_name,
 		Type:       target_type,
 		ARN:        role_arn,
 		ExternalId: external_id,
