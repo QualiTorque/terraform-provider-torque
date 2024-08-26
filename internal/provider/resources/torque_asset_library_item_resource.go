@@ -3,6 +3,7 @@ package resources
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -120,25 +121,33 @@ func (r *TorqueAssetLibraryItemResource) Create(ctx context.Context, req resourc
 }
 
 func (r *TorqueAssetLibraryItemResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
-	var data TorqueAssetLibraryItemResourceModel
+	var state TorqueAssetLibraryItemResourceModel
 
 	// Read Terraform prior state data into the model.
-	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
+	diags := req.State.Get(ctx, &state)
+	resp.Diagnostics.Append(diags...)
 
 	if resp.Diagnostics.HasError() {
 		return
 	}
-
-	// If applicable, this is a great opportunity to initialize any necessary
-	// provider client data and make a call using it.
-	// httpResp, err := r.client.Do(httpReq)
-	// if err != nil {
-	//     resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read example, got error: %s", err))
-	//     return
-	// }
+	_, err := r.client.GetBlueprintFromAssetLibrary(state.SpaceName.ValueString(), state.BlueprintName.ValueString())
+	if err != nil {
+		// Check if the error is a NotFoundError and remove the resource from state
+		if strings.Contains(err.Error(), "not found") {
+			resp.Diagnostics.AddWarning("Asset-Library item will be recreated","Blueprint was removed from asset-library outside of Terraform.")
+			resp.State.RemoveResource(ctx)
+			return
+		}
+		// Otherwise, return the error
+		resp.Diagnostics.AddError(
+			"Error reading blueprint",
+			fmt.Sprintf("Could not read blueprint %s in space %s: %s", state.BlueprintName.ValueString(), state.SpaceName.ValueString(), err.Error()),
+		)
+		return
+	}
 
 	// Save updated data into Terraform state.
-	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &state)...)
 }
 
 func (r *TorqueAssetLibraryItemResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
