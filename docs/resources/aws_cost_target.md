@@ -3,12 +3,12 @@
 page_title: "torque_aws_cost_target Resource - terraform-provider-torque"
 subcategory: ""
 description: |-
-  Creation of a new parameter is a Torque space
+  Creation of a new AWS Cost Collection target in Torque account.
 ---
 
 # torque_aws_cost_target (Resource)
 
-Creation of a new parameter is a Torque space
+Creation of a new AWS Cost Collection target in Torque account.
 
 ## Example Usage
 
