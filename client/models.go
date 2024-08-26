@@ -145,8 +145,9 @@ type SpaceRole struct {
 	SpaceRole string `json:"space_role"`
 }
 
-type AwsCostTaret struct {
+type AwsCostTarget struct {
 	Name       string `json:"name"`
+	NewName    string `json:"new_name"`
 	Type       string `json:"type"`
 	ARN        string `json:"role_arn"`
 	ExternalId string `json:"external_id"`

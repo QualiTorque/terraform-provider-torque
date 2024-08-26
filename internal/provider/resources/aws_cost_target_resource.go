@@ -25,8 +25,8 @@ type TorqueAwsCostTargetResource struct {
 	client *client.Client
 }
 
-// TTorqueAwsCostTargetResourceModel describes the resource data model.
-type TTorqueAwsCostTargetResourceModel struct {
+// TorqueAwsCostTargetResourceModel describes the resource data model.
+type TorqueAwsCostTargetResourceModel struct {
 	Name       types.String `tfsdk:"name"`
 	RoleArn    types.String `tfsdk:"role_arn"`
 	ExternalId types.String `tfsdk:"external_id"`
@@ -39,7 +39,7 @@ func (r *TorqueAwsCostTargetResource) Metadata(ctx context.Context, req resource
 func (r *TorqueAwsCostTargetResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "Creation of a new parameter is a Torque space",
+		MarkdownDescription: "Creation of a new AWS Cost Collection target in Torque account.",
 
 		Attributes: map[string]schema.Attribute{
 			"name": schema.StringAttribute{
@@ -81,7 +81,7 @@ func (r *TorqueAwsCostTargetResource) Configure(ctx context.Context, req resourc
 }
 
 func (r *TorqueAwsCostTargetResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
-	var data TTorqueAwsCostTargetResourceModel
+	var data TorqueAwsCostTargetResourceModel
 
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
 
@@ -103,7 +103,7 @@ func (r *TorqueAwsCostTargetResource) Create(ctx context.Context, req resource.C
 }
 
 func (r *TorqueAwsCostTargetResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
-	var data TTorqueAwsCostTargetResourceModel
+	var data TorqueAwsCostTargetResourceModel
 
 	// Read Terraform prior state data into the model.
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
@@ -117,21 +117,30 @@ func (r *TorqueAwsCostTargetResource) Read(ctx context.Context, req resource.Rea
 }
 
 func (r *TorqueAwsCostTargetResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var data TorqueSpaceParameterResourceModel
+	var data, state TorqueAwsCostTargetResourceModel
 
 	// Read Terraform plan data into the model
-	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
-
+	resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
+	diags := req.Plan.Get(ctx, &data)
+	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
-
+	current_target_name := state.Name
+	err := r.client.UpdateAWSCostTarget(current_target_name.ValueString(), data.Name.ValueString(), "aws", data.RoleArn.ValueString(), data.ExternalId.ValueString())
+	if err != nil {
+		resp.Diagnostics.AddError(
+			"Error Updating AWS Cost Target",
+			"Could not update AWS Cost Target, unexpected error: "+err.Error(),
+		)
+		return
+	}
 	// Save updated data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
 func (r *TorqueAwsCostTargetResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
-	var data TTorqueAwsCostTargetResourceModel
+	var data TorqueAwsCostTargetResourceModel
 
 	// Read Terraform prior state data into the model.
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
