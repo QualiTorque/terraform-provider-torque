@@ -134,7 +134,7 @@ func (r *TorqueAssetLibraryItemResource) Read(ctx context.Context, req resource.
 	if err != nil {
 		// Check if the error is a NotFoundError and remove the resource from state
 		if strings.Contains(err.Error(), "not found") {
-			resp.Diagnostics.AddWarning("Asset-Library item will be recreated","Blueprint was removed from asset-library outside of Terraform.")
+			resp.Diagnostics.AddWarning("Asset-Library item will be recreated", "Blueprint was removed from asset-library outside of Terraform.")
 			resp.State.RemoveResource(ctx)
 			return
 		}
