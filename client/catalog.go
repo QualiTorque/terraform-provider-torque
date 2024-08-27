@@ -36,8 +36,6 @@ func (c *Client) PublishBlueprintInSpace(space_name string, repo_name string, bl
 }
 
 func (c *Client) UnpublishBlueprintInSpace(space_name string, repo_name string, blueprint_name string) error {
-	fmt.Println(c.HostURL + "api/spaces")
-
 	req, err := http.NewRequest("DELETE", fmt.Sprintf("%sapi/spaces/%s/catalog/%s?repository_name=%s", c.HostURL, space_name, blueprint_name, repo_name), nil)
 	if err != nil {
 		return err

@@ -9,7 +9,6 @@ import (
 )
 
 func (c *Client) GetUserDetails(userEmail string) (*User, error) {
-	fmt.Println(c.HostURL + "api/accounts/users/" + userEmail)
 	req, err := http.NewRequest("GET", fmt.Sprintf("%sapi/accounts/users/%s", c.HostURL, userEmail), nil)
 	if err != nil {
 		return nil, err
