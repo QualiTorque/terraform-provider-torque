@@ -318,3 +318,10 @@ type SpaceParameterRequest struct {
 	Sensitive   bool   `json:"sensitive"`
 	Description string `json:"description"`
 }
+
+type EnvironmentLabelsUpdateRequest struct {
+	EnvironmentId string         `json:"environment_id"`
+	SpaceName     string         `json:"space_name"`
+	AddedLabels   []KeyValuePair `json:"added_labels"`
+	RemovedLabels []KeyValuePair `json:"removed_labels"`
+}
