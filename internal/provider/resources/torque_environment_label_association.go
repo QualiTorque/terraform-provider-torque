@@ -189,15 +189,46 @@ func (r *TorqueEnvironmentLabelAssociationResource) Update(ctx context.Context, 
 		return
 	}
 
-	// err := r.client.UpdateEnvironmentLabel(state.Key.ValueString(), state.Value.ValueString(), data.Key.ValueString(), data.Value.ValueString())
-	// if err != nil {
-	// 	resp.Diagnostics.AddError(
-	// 		"Error Updating Torque label",
-	// 		"Could not update label, unexpected error: "+err.Error(),
-	// 	)
-	// 	return
-	// }
+	stateLabels := state.Labels
+	planLabels := data.Labels
 
+	added_labels := []client.KeyValuePair{}
+	if len(planLabels) > 0 {
+		for _, label := range planLabels {
+			if !labelExists(label, stateLabels) {
+				added_labels = append(added_labels, client.KeyValuePair{
+					Key:   label.Key.ValueString(),
+					Value: label.Value.ValueString(),
+				})
+			}
+		}
+	}
+	removed_labels := []client.KeyValuePair{}
+	if len(stateLabels) > 0 {
+		for _, label := range stateLabels {
+			if !labelExists(label, planLabels) {
+				removed_labels = append(removed_labels, client.KeyValuePair{
+					Key:   label.Key.ValueString(),
+					Value: label.Value.ValueString(),
+				})
+			}
+		}
+	}
+	// if len(data.Labels) > 0 {
+	// 	for _, label := range data.Labels {
+
+	// 		removed_labels = append(removed_labels, client.KeyValuePair{
+	// 			Key:   label.Key.ValueString(),
+	// 			Value: label.Value.ValueString(),
+	// 		})
+	// 	}
+	// }
+	fmt.Println(added_labels)
+	err := r.client.UpdateEnvironmentLabels(data.EnvironmentId.ValueString(), data.SpaceName.ValueString(), added_labels, removed_labels)
+	if err != nil {
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update environment labels, got error: %s", err))
+		return
+	}
 	diags = resp.State.Set(ctx, data)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
@@ -238,4 +269,13 @@ func (r *TorqueEnvironmentLabelAssociationResource) Delete(ctx context.Context, 
 
 func (r *TorqueEnvironmentLabelAssociationResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resource.ImportStatePassthroughID(ctx, path.Root("name"), req, resp)
+}
+
+func labelExists(label keyValuePairModel, labels []keyValuePairModel) bool {
+	for _, l := range labels {
+		if l.Key == label.Key && l.Value == label.Value {
+			return true
+		}
+	}
+	return false
 }
