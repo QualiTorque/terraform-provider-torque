@@ -1,3 +1,3 @@
-# Torque group module
+# Torque catalog item module
 
-Configuration in this directory creates a Torque group that can be used to manage users in a Torque account or spaces.
+Configuration in this directory publishes a blueprint to the self-service catalog so it can launched by end users.

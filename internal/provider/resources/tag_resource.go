@@ -3,10 +3,15 @@ package resources
 import (
 	"context"
 	"fmt"
+	"strings"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/qualitorque/terraform-provider-torque/client"
@@ -25,9 +30,6 @@ type TorqueTagResource struct {
 	client *client.Client
 }
 
-// POST  https://portal.qtorque.io/api/settings/tags
-// {"name":"tomera","value":"unassigned_tag_value","scope":"space","description":"asd","possible_values":["a","b"]}
-
 // TorqueTagResourceModel describes the resource data model.
 type TorqueTagResourceModel struct {
 	Name           types.String `tfsdk:"name"`
@@ -44,7 +46,7 @@ func (r *TorqueTagResource) Metadata(ctx context.Context, req resource.MetadataR
 func (r *TorqueTagResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "Creation of a new Torque space with associated entities (users, repos, etc...)",
+		MarkdownDescription: "Creation of a new Torque Tag, it's scope, value and/or possible values",
 
 		Attributes: map[string]schema.Attribute{
 			"name": schema.StringAttribute{
@@ -60,6 +62,12 @@ func (r *TorqueTagResource) Schema(ctx context.Context, req resource.SchemaReque
 				MarkdownDescription: "Tag scope. Possible values: account, space, blueprint, environment",
 				Required:            true,
 				Computed:            false,
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.RequiresReplace(),
+				},
+				Validators: []validator.String{
+					stringvalidator.OneOf([]string{"account", "space", "blueprint", "environment"}...),
+				},
 			},
 			"description": schema.StringAttribute{
 				MarkdownDescription: "Tag description",
@@ -104,15 +112,21 @@ func (r *TorqueTagResource) Create(ctx context.Context, req resource.CreateReque
 	if resp.Diagnostics.HasError() {
 		return
 	}
-
-	var possible []string
+	var possibleValues []string
+	var possible_value string
 	if !data.PossibleValues.IsNull() {
 		for _, pos_value := range data.PossibleValues.Elements() {
-			possible = append(possible, pos_value.String())
+			if strings.HasPrefix(pos_value.String(), "\"") && strings.HasSuffix(pos_value.String(), "\"") {
+				// Remove the surrounding quotes so they can be later marshalled successfully
+				possible_value = pos_value.String()[1 : len(pos_value.String())-1]
+				possibleValues = append(possibleValues, possible_value)
+			} else {
+				possibleValues = append(possibleValues, pos_value.String())
+			}
 		}
 	}
 
-	err := r.client.AddTag(data.Name.ValueString(), data.Value.ValueString(), data.Description.ValueString(), possible, data.Scope.ValueString())
+	err := r.client.AddTag(data.Name.ValueString(), data.Value.ValueString(), data.Description.ValueString(), possibleValues, data.Scope.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create tag, got error: %s", err))
 		return
@@ -135,13 +149,17 @@ func (r *TorqueTagResource) Read(ctx context.Context, req resource.ReadRequest, 
 		return
 	}
 
-	// If applicable, this is a great opportunity to initialize any necessary
-	// provider client data and make a call using it.
-	// httpResp, err := r.client.Do(httpReq)
-	// if err != nil {
-	//     resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read example, got error: %s", err))
-	//     return
-	// }
+	tag, err := r.client.GetTag(data.Name.ValueString())
+	if err != nil {
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read tag, got error: %s", err))
+		return
+	}
+
+	data.Name = types.StringValue(tag.Name)
+	data.Value = types.StringValue(tag.Value)
+	data.Description = types.StringValue(tag.Description)
+	data.Scope = types.StringValue(tag.Scope)
+	data.PossibleValues, _ = types.ListValueFrom(ctx, types.StringType, tag.PossibleValues)
 
 	// Save updated data into Terraform state.
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
@@ -149,21 +167,33 @@ func (r *TorqueTagResource) Read(ctx context.Context, req resource.ReadRequest, 
 
 func (r *TorqueTagResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 	var data TorqueTagResourceModel
-
+	var currentName string
 	// Read Terraform plan data into the model
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
-
+	req.State.GetAttribute(ctx, path.Root("name"), &currentName)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	// If applicable, this is a great opportunity to initialize any necessary
-	// provider client data and make a call using it.
-	// httpResp, err := r.client.Do(httpReq)
-	// if err != nil {
-	//     resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update example, got error: %s", err))
-	//     return
-	// }
+	var possibleValues []string
+	var possible_value string
+	if !data.PossibleValues.IsNull() {
+		for _, pos_value := range data.PossibleValues.Elements() {
+			if strings.HasPrefix(pos_value.String(), "\"") && strings.HasSuffix(pos_value.String(), "\"") {
+				// Remove the surrounding quotes so they can be later marshalled successfully
+				possible_value = pos_value.String()[1 : len(pos_value.String())-1]
+				possibleValues = append(possibleValues, possible_value)
+			} else {
+				possibleValues = append(possibleValues, pos_value.String())
+			}
+		}
+	}
+
+	err := r.client.UpdateTag(currentName, data.Name.ValueString(), data.Value.ValueString(), data.Description.ValueString(), possibleValues, data.Scope.ValueString())
+	if err != nil {
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update tag, got error: %s", err))
+		return
+	}
 
 	// Save updated data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
@@ -179,7 +209,7 @@ func (r *TorqueTagResource) Delete(ctx context.Context, req resource.DeleteReque
 		return
 	}
 
-	// Delete the space.
+	// Delete the tag.
 	err := r.client.RemoveTag(data.Name.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to delete tag, got error: %s", err))

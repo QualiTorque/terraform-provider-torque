@@ -102,14 +102,14 @@ func (c *Client) GetSpaceParameter(space_name string, parameter_name string) (Pa
 		return ParameterRequest{}, err
 	}
 
-	param := ParameterRequest{}
 	for _, n := range params {
 		if parameter_name == n.Name {
-			param = n
+			return n, nil
 		}
 	}
 
-	return param, nil
+	return ParameterRequest{}, fmt.Errorf("parameter '%s' not found in space '%s'", parameter_name, space_name)
+
 }
 
 func (c *Client) GetAccountParameter(parameter_name string) (*ParameterRequest, error) {
@@ -162,10 +162,39 @@ func (c *Client) UpdateAccountParameter(name string, value string, sensitive boo
 
 	payload, err := json.Marshal(data)
 	if err != nil {
-		log.Fatalf("impossible to marshall update group request: %s", err)
+		log.Fatalf("impossible to marshall update parameter request: %s", err)
 	}
 
 	req, err := http.NewRequest("PUT", fmt.Sprintf("%sapi/settings/parameters/%s", c.HostURL, name), bytes.NewReader(payload))
+	if err != nil {
+		return err
+	}
+
+	req.Header.Add("Content-Type", "application/json")
+	req.Header.Add("Accept", "application/json")
+
+	_, err = c.doRequest(req, &c.Token)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (c *Client) UpdateSpaceParameter(space_name string, name string, value string, sensitive bool, description string) error {
+
+	data := SpaceParameterRequest{
+		Value:       value,
+		Sensitive:   sensitive,
+		Description: description,
+	}
+
+	payload, err := json.Marshal(data)
+	if err != nil {
+		log.Fatalf("impossible to marshall update space parameter request: %s", err)
+	}
+
+	req, err := http.NewRequest("PUT", fmt.Sprintf("%sapi/spaces/%s/settings/parameters/%s", c.HostURL, space_name, name), bytes.NewReader(payload))
 	if err != nil {
 		return err
 	}

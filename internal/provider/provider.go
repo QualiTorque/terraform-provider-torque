@@ -49,7 +49,13 @@ func (p *torqueProvider) Metadata(ctx context.Context, req provider.MetadataRequ
 // Schema defines the provider-level schema for configuration data.
 func (p *torqueProvider) Schema(_ context.Context, _ provider.SchemaRequest, resp *provider.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		Description: "Interact with Torque.",
+		Description: `
+		Use Torque provider to interact with Torque by Quali.<br/><br/>
+		Torque by Quali is an Environment-as-a-Service (EaaS) control plane and self-service catalog allowing you to deploy and manage cloud environments  
+		comprising the infrastructure, applications,and any dependencies or external services necessary for applications or services to rely on.<br/><br/>
+		For more information, visit [Quali's Torque Documentation](https://docs.qtorque.io)  
+		For experimenting with Torque, visit [Quali's Torque Playground](https://www.quali.com/watch-see-the-torque-playground-in-action/)
+		`,
 		Attributes: map[string]schema.Attribute{
 			"host": schema.StringAttribute{
 				Description: "URI for Torque API. May also be provided via TORQUE_HOST environment variable.",
@@ -60,7 +66,7 @@ func (p *torqueProvider) Schema(_ context.Context, _ provider.SchemaRequest, res
 				Optional:    true,
 			},
 			"token": schema.StringAttribute{
-				Description: "Token for Torque API. May also be provided via TORUQE_TOKEN environment variable.",
+				Description: "Token for Torque API. May also be provided via TORQUE_TOKEN environment variable.",
 				Optional:    true,
 				Sensitive:   true,
 			},
@@ -216,6 +222,7 @@ func (p *torqueProvider) Resources(ctx context.Context) []func() resource.Resour
 		resources.NewTorqueSpaceGitlabEnterpriseRepositoryResource,
 		resources.NewTorqueAssetLibraryItemResource,
 		resources.NewTorqueSpaceLabelResource,
+		resources.NewTorqueSpaceLabelAssociationResource,
 	}
 }
 

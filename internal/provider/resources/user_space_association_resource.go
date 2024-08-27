@@ -37,7 +37,7 @@ func (r *TorqueUserSpaceAssociationResource) Metadata(ctx context.Context, req r
 
 func (r *TorqueUserSpaceAssociationResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Associate Torque space with existing registered agent",
+		MarkdownDescription: "Associate Torque space with existing registered user",
 
 		Attributes: map[string]schema.Attribute{
 			"space_name": schema.StringAttribute{
@@ -45,11 +45,11 @@ func (r *TorqueUserSpaceAssociationResource) Schema(ctx context.Context, req res
 				Required:            true,
 			},
 			"user_email": schema.StringAttribute{
-				Description: "List of users emails",
+				Description: "The user email address",
 				Required:    true,
 			},
 			"user_role": schema.StringAttribute{
-				Description: "The role of the users in the space.",
+				Description: "The role of the user in the space.",
 				Required:    true,
 			},
 		},

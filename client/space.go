@@ -10,8 +10,6 @@ import (
 )
 
 func (c *Client) CreateSpace(name string, color string, icon string) error {
-	fmt.Println(c.HostURL + "api/spaces")
-
 	space := Space{
 		Name:  name,
 		Color: color,
@@ -40,8 +38,6 @@ func (c *Client) CreateSpace(name string, color string, icon string) error {
 }
 
 func (c *Client) DeleteSpace(name string) error {
-	fmt.Println(c.HostURL + "api/spaces")
-
 	req, err := http.NewRequest("DELETE", fmt.Sprintf("%sapi/spaces/%s", c.HostURL, name), nil)
 	if err != nil {
 		return err
@@ -306,52 +302,6 @@ func (c *Client) SetBlueprintTagValue(space_name string, tag_name string, tag_va
 	return nil
 }
 
-func (c *Client) PublishBlueprintInSpace(space_name string, repo_name string, blueprint_name string) error {
-	data := CatalogItemRequest{
-		BlueprintName:  blueprint_name,
-		RepositoryName: repo_name,
-	}
-
-	payload, err := json.Marshal(data)
-	if err != nil {
-		log.Fatalf("impossible to marshall agent association: %s", err)
-	}
-
-	req, err := http.NewRequest("POST", fmt.Sprintf("%sapi/spaces/%s/catalog", c.HostURL, space_name), bytes.NewReader(payload))
-	if err != nil {
-		return err
-	}
-
-	req.Header.Add("Content-Type", "application/json")
-	req.Header.Add("Accept", "application/json")
-
-	_, err = c.doRequest(req, &c.Token)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (c *Client) UnpublishBlueprintInSpace(space_name string, repo_name string, blueprint_name string) error {
-	fmt.Println(c.HostURL + "api/spaces")
-
-	req, err := http.NewRequest("DELETE", fmt.Sprintf("%sapi/spaces/%s/catalog/%s?repository_name=%s", c.HostURL, space_name, blueprint_name, repo_name), nil)
-	if err != nil {
-		return err
-	}
-
-	req.Header.Add("Content-Type", "application/json")
-	req.Header.Add("Accept", "application/json")
-
-	_, err = c.doRequest(req, &c.Token)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
 func (c *Client) AddGroupToSpace(groupName string, description string, idpId string, users []string, accountRole string, spaceRole []SpaceRole) error {
 
 	data := GroupRequest{
@@ -388,55 +338,6 @@ func (c *Client) DeleteGroup(group_name string) error {
 	fmt.Println(c.HostURL + "api/spaces")
 
 	req, err := http.NewRequest("DELETE", fmt.Sprintf("%sapi/groups/%s", c.HostURL, group_name), nil)
-	if err != nil {
-		return err
-	}
-
-	req.Header.Add("Content-Type", "application/json")
-	req.Header.Add("Accept", "application/json")
-
-	_, err = c.doRequest(req, &c.Token)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (c *Client) AddAWSCostTarget(name string, target_type string, role_arn string, external_id string) error {
-
-	data := AwsCostTaret{
-		Name:       name,
-		Type:       target_type,
-		ARN:        role_arn,
-		ExternalId: external_id,
-	}
-
-	payload, err := json.Marshal(data)
-	if err != nil {
-		log.Fatalf("impossible to marshall aws cost target request: %s", err)
-	}
-
-	req, err := http.NewRequest("POST", fmt.Sprintf("%sapi/settings/costtargets", c.HostURL), bytes.NewReader(payload))
-	if err != nil {
-		return err
-	}
-
-	req.Header.Add("Content-Type", "application/json")
-	req.Header.Add("Accept", "application/json")
-
-	_, err = c.doRequest(req, &c.Token)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (c *Client) DeleteCostTarget(target_name string) error {
-	fmt.Println(c.HostURL + "api/spaces")
-
-	req, err := http.NewRequest("DELETE", fmt.Sprintf("%sapi/settings/costtargets/%s", c.HostURL, target_name), nil)
 	if err != nil {
 		return err
 	}

@@ -1,3 +1,3 @@
-# Torque group module
+# Torque asset library item module
 
-Configuration in this directory creates a Torque group that can be used to manage users in a Torque account or spaces.
+Configuration in this directory adds a blueprint to the asset-library so it can serve as a building block in other blueprints.

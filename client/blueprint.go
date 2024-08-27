@@ -7,8 +7,6 @@ import (
 )
 
 func (c *Client) GetBlueprint(space_name string, name string) (*Blueprint, error) {
-	fmt.Println(c.HostURL + "api/spaces")
-
 	req, err := http.NewRequest("GET", fmt.Sprintf("%sapi/spaces/%s/blueprints", c.HostURL, space_name), nil)
 
 	if err != nil {

@@ -104,9 +104,9 @@ type TagNameValue struct {
 }
 
 type Tag struct {
-	Name           string   `json:"tag_name"`
-	Value          string   `json:"tag_value"`
-	Scope          string   `json:"tag_scope"`
+	Name           string   `json:"name"`
+	Value          string   `json:"value"`
+	Scope          string   `json:"scope"`
 	Description    string   `json:"description"`
 	PossibleValues []string `json:"possible_values"`
 }
@@ -145,8 +145,9 @@ type SpaceRole struct {
 	SpaceRole string `json:"space_role"`
 }
 
-type AwsCostTaret struct {
+type AwsCostTarget struct {
 	Name       string `json:"name"`
+	NewName    string `json:"new_name"`
 	Type       string `json:"type"`
 	ARN        string `json:"role_arn"`
 	ExternalId string `json:"external_id"`
@@ -302,7 +303,18 @@ type spaceDefinition struct {
 }
 
 type Label struct {
-	// SpaceName string `json:"space_name"`
 	Name  string `json:"name"`
 	Color string `json:"color"`
+}
+
+type CatalogItemLabelsRequest struct {
+	BlueprintName  string   `json:"blueprint_name"`
+	RepositoryName string   `json:"repository_name"`
+	Labels         []string `json:"labels"`
+}
+
+type SpaceParameterRequest struct {
+	Value       string `json:"value"`
+	Sensitive   bool   `json:"sensitive"`
+	Description string `json:"description"`
 }
