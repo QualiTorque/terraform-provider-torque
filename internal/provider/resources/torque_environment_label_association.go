@@ -143,15 +143,24 @@ func (r *TorqueEnvironmentLabelAssociationResource) Read(ctx context.Context, re
 	if resp.Diagnostics.HasError() {
 		return
 	}
-
+	var env_labels []keyValuePairModel
+	labels, err := r.client.GetEnvironmentLabels(data.SpaceName.ValueString(), data.EnvironmentId.ValueString())
+	if len(labels) > 0 {
+		for _, label := range labels {
+			env_labels = append(env_labels, keyValuePairModel{
+				Key:   types.StringValue(label.Key),
+				Value: types.StringValue(label.Value),
+			})
+		}
+	}
 	// label, err := r.client.GetEnvironmentLabel(data.Key.ValueString())
-	// if err != nil {
-	// 	resp.Diagnostics.AddError(
-	// 		"Error Reading label details",
-	// 		"Could not read Torque label name "+data.Value.ValueString()+": "+err.Error(),
-	// 	)
-	// 	return
-	// }
+	if err != nil {
+		resp.Diagnostics.AddError(
+			"Error Reading environment labels details",
+			"Could not read Torque label name "+data.EnvironmentId.ValueString()+": "+err.Error(),
+		)
+		return
+	}
 
 	// Treat HTTP 404 Not Found status as a signal to recreate resource
 	// and return early
@@ -163,6 +172,7 @@ func (r *TorqueEnvironmentLabelAssociationResource) Read(ctx context.Context, re
 	// data.Key = types.StringValue(label.Key)
 	// data.Value = types.StringValue(label.Value)
 	// Set refreshed state
+	data.Labels = env_labels
 	diags = resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {

@@ -136,3 +136,11 @@ func (c *Client) UpdateEnvironmentLabels(environment_id string, space_name strin
 
 	return nil
 }
+
+func (c *Client) GetEnvironmentLabels(space_name string, environment_id string) ([]KeyValuePair, error) {
+	environment, _, err := c.GetEnvironmentDetails(space_name, environment_id)
+	if err != nil {
+		return nil, err
+	}
+	return environment.Details.Definition.Labels, nil
+}

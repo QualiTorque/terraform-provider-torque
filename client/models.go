@@ -207,6 +207,7 @@ type EnvironmentDefinition struct {
 	Metadata EnvironmentMetadata `json:"metadata"`
 	Inputs   []NameValuePair     `json:"inputs"`
 	Tags     []NameValuePair     `json:"tags"`
+	Labels   []KeyValuePair      `json:"labels"`
 }
 
 type EnvironmentState struct {
