@@ -16,11 +16,6 @@ import (
 	"github.com/qualitorque/terraform-provider-torque/client"
 )
 
-// const (
-// 	blueprint_name     = "ec2"
-// 	repository_name    = "TerraformProviderAcceptanceTests"
-// 	new_blueprint_name = "rds"
-// )
 
 func TestAssetLibraryItemResource(t *testing.T) {
 	spaceName := os.Getenv("TORQUE_SPACE")
@@ -118,17 +113,21 @@ func checkBlueprintAssetLibraryCondition(expectedInAssetLibrary bool, blueprint 
 
 		for i := 0; i < maxRetries; i++ {
 			bp, err := c.GetBlueprintFromAssetLibrary(space, blueprint)
+			if expectedInAssetLibrary && bp != nil {
+				// Blueprint is expected to be in the asset library and it is found
+				return nil
+			} else if !expectedInAssetLibrary && bp == nil {
+				// Blueprint is expected to be absent from the asset library and it is not found
+				return nil
+			}
 			if err != nil {
 				return err
 			}
-
-			if (bp != nil && expectedInAssetLibrary) || (bp == nil && !expectedInAssetLibrary) {
-				return nil
-			}
-
 			time.Sleep(delay)
 		}
-
-		return fmt.Errorf("expected blueprint in asset-library condition to be %v, got %s", expectedInAssetLibrary, err)
+		if expectedInAssetLibrary {
+			return fmt.Errorf("expected blueprint '%s' to be in the asset library, but it was not found after %d retries", blueprint, maxRetries)
+		}
+		return fmt.Errorf("expected blueprint '%s' to be absent from the asset library, but it was still found after %d retries", blueprint, maxRetries)
 	}
 }
