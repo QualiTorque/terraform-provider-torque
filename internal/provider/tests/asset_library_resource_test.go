@@ -9,6 +9,7 @@ import (
 	"regexp"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
@@ -111,12 +112,21 @@ func checkBlueprintAssetLibraryCondition(expectedInAssetLibrary bool, blueprint 
 		if err != nil {
 			return err
 		}
-		bp, err := c.GetBlueprintFromAssetLibrary(space, blueprint)
-		if bp != nil && expectedInAssetLibrary {
-			return nil
-		}
-		if bp == nil && !expectedInAssetLibrary {
-			return nil
+
+		const maxRetries = 5
+		const delay = time.Second * 2
+
+		for i := 0; i < maxRetries; i++ {
+			bp, err := c.GetBlueprintFromAssetLibrary(space, blueprint)
+			if err != nil {
+				return err
+			}
+
+			if (bp != nil && expectedInAssetLibrary) || (bp == nil && !expectedInAssetLibrary) {
+				return nil
+			}
+
+			time.Sleep(delay)
 		}
 
 		return fmt.Errorf("expected blueprint in asset-library condition to be %v, got %s", expectedInAssetLibrary, err)
