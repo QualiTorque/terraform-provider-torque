@@ -16,7 +16,6 @@ import (
 	"github.com/qualitorque/terraform-provider-torque/client"
 )
 
-
 func TestAssetLibraryItemResource(t *testing.T) {
 	spaceName := os.Getenv("TORQUE_SPACE")
 	var version = os.Getenv("VERSION")
