@@ -15,10 +15,6 @@ func TestEnvironmentLabelAssociationResource(t *testing.T) {
 		environment_id = "F2UXQBPCcWXY"
 	)
 
-	// randomSuffix := acctest.RandStringFromCharSet(6, acctest.CharSetAlphaNum)
-	// label := fmt.Sprintf("EnvLabel-%s", randomSuffix)
-
-	// newLabelName := fmt.Sprintf("MyNewEnvLabel-%s", randomSuffix)
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { testAccPreCheck(t) },
 		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
