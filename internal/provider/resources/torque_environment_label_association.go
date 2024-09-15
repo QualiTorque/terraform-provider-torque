@@ -121,7 +121,7 @@ func (r *TorqueEnvironmentLabelAssociationResource) Create(ctx context.Context, 
 			})
 		}
 	}
-	fmt.Println(added_labels)
+	
 	err := r.client.UpdateEnvironmentLabels(data.EnvironmentId.ValueString(), data.SpaceName.ValueString(), added_labels, nil)
 
 	if err != nil {
@@ -223,7 +223,7 @@ func (r *TorqueEnvironmentLabelAssociationResource) Update(ctx context.Context, 
 	// 		})
 	// 	}
 	// }
-	fmt.Println(added_labels)
+
 	err := r.client.UpdateEnvironmentLabels(data.EnvironmentId.ValueString(), data.SpaceName.ValueString(), added_labels, removed_labels)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update environment labels, got error: %s", err))
