@@ -98,8 +98,8 @@ type CodeCommitRepoSpaceAssociation struct {
 	Password   string `json:"git_password"`
 }
 
-type TagNameValue struct {
-	Name  string `json:"name"`
+type KeyValuePair struct {
+	Key   string `json:"key"`
 	Value string `json:"value"`
 }
 
@@ -205,19 +205,19 @@ type EnvironmentDetails struct {
 
 type EnvironmentDefinition struct {
 	Metadata EnvironmentMetadata `json:"metadata"`
-	Inputs   []KeyValuePair      `json:"inputs"`
-	Tags     []KeyValuePair      `json:"tags"`
+	Inputs   []NameValuePair     `json:"inputs"`
+	Tags     []NameValuePair     `json:"tags"`
 }
 
 type EnvironmentState struct {
-	Outputs   []KeyValuePair `json:"outputs"`
-	IsEac     bool           `json:"eac_synced"`
-	Execution Execution      `json:"execution"`
-	Errors    []Error        `json:"errors"`
-	Grains    []Grain        `json:"grains"`
+	Outputs   []NameValuePair `json:"outputs"`
+	IsEac     bool            `json:"eac_synced"`
+	Execution Execution       `json:"execution"`
+	Errors    []Error         `json:"errors"`
+	Grains    []Grain         `json:"grains"`
 }
 
-type KeyValuePair struct {
+type NameValuePair struct {
 	Name  string `json:"name"`
 	Value string `json:"value"`
 }
@@ -277,16 +277,16 @@ type GrainSource struct {
 }
 
 type IntrospectionItem struct {
-	GrainPath        string         `json:"grain_path"`
-	GrainType        string         `json:"grain_type"`
-	ResourceName     string         `json:"resource_name"`
-	ResourceType     string         `json:"resource_type"`
-	ResourceCategory string         `json:"resource_category"`
-	Status           string         `json:"status"`
-	Alias            string         `json:"alias"`
-	HasRunningAction bool           `json:"has_running_action"`
-	Attributes       []KeyValuePair `json:"attributes"`
-	CustomIcon       string         `json:"custom_icon"`
+	GrainPath        string          `json:"grain_path"`
+	GrainType        string          `json:"grain_type"`
+	ResourceName     string          `json:"resource_name"`
+	ResourceType     string          `json:"resource_type"`
+	ResourceCategory string          `json:"resource_category"`
+	Status           string          `json:"status"`
+	Alias            string          `json:"alias"`
+	HasRunningAction bool            `json:"has_running_action"`
+	Attributes       []NameValuePair `json:"attributes"`
+	CustomIcon       string          `json:"custom_icon"`
 }
 
 type Workflow struct {
