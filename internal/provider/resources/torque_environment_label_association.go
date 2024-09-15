@@ -121,7 +121,7 @@ func (r *TorqueEnvironmentLabelAssociationResource) Create(ctx context.Context, 
 			})
 		}
 	}
-	
+
 	err := r.client.UpdateEnvironmentLabels(data.EnvironmentId.ValueString(), data.SpaceName.ValueString(), added_labels, nil)
 
 	if err != nil {
