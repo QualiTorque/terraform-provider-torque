@@ -7,7 +7,6 @@ import (
 )
 
 func (c *Client) GetEnvironmentDetails(spaceName string, environmentId string) (*Environment, string, error) {
-	fmt.Printf("%sapi/spaces/%s/environments/%s", c.HostURL, spaceName, environmentId)
 	req, err := http.NewRequest("GET", fmt.Sprintf("%sapi/spaces/%s/environments/%s", c.HostURL, spaceName, environmentId), nil)
 	if err != nil {
 		return nil, "", err

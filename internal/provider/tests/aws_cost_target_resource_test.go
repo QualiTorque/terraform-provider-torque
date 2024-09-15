@@ -10,6 +10,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/hashicorp/terraform-plugin-testing/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 )
 
@@ -19,10 +20,10 @@ func TestAWSCostTargetResource(t *testing.T) {
 	var index = minorVresion[1]
 	new_aws_cost_target_name := fmt.Sprintf("new_aws_cost_target_%s", index)
 	aws_cost_target_name := fmt.Sprintf("aws_cost_target_%s", index)
-
+	random_account_num := fmt.Sprint(acctest.RandIntRange(100000000000, 999999999999))
+	aws_cost_target_role_arn := fmt.Sprintf("arn:aws:iam::%s:role/role", random_account_num)
+	new_aws_cost_target_role_arn := fmt.Sprintf("arn:aws:iam::%s:role/newrole", random_account_num)
 	const (
-		aws_cost_target_role_arn        = "arn:aws:iam::123456789012:role/role"
-		new_aws_cost_target_role_arn    = "arn:aws:iam::123456789012:role/newrole"
 		aws_cost_target_external_id     = "aws_cost_target_external_id"
 		new_aws_cost_target_external_id = "aws_cost_target_external_id2"
 		invalid_role_arn                = "some_arn"

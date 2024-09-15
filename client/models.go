@@ -308,6 +308,12 @@ type Label struct {
 	Color string `json:"color"`
 }
 
+type LabelRequest struct {
+	OriginalName string `json:"original_name"`
+	Name         string `json:"name"`
+	Color        string `json:"color"`
+}
+
 type CatalogItemLabelsRequest struct {
 	BlueprintName  string   `json:"blueprint_name"`
 	RepositoryName string   `json:"repository_name"`
