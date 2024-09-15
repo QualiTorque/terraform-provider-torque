@@ -106,3 +106,41 @@ func (c *Client) DeleteEnvironmentLabel(key string, value string) error {
 
 	return nil
 }
+
+func (c *Client) UpdateEnvironmentLabels(environment_id string, space_name string, added_labels []KeyValuePair, removed_labels []KeyValuePair) error {
+	data := EnvironmentLabelsUpdateRequest{
+		SpaceName:     space_name,
+		EnvironmentId: environment_id,
+		AddedLabels:   added_labels,
+		RemovedLabels: removed_labels,
+	}
+
+	payload, err := json.Marshal(data)
+
+	if err != nil {
+		log.Fatalf("impossible to marshall label update request: %s", err)
+	}
+
+	req, err := http.NewRequest("PUT", fmt.Sprintf("%sapi/spaces/%s/environments/%s/labels", c.HostURL, space_name, environment_id), bytes.NewReader(payload))
+	if err != nil {
+		return err
+	}
+
+	req.Header.Add("Content-Type", "application/json")
+	req.Header.Add("Accept", "application/json")
+
+	_, err = c.doRequest(req, &c.Token)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (c *Client) GetEnvironmentLabels(space_name string, environment_id string) ([]KeyValuePair, error) {
+	environment, _, err := c.GetEnvironmentDetails(space_name, environment_id)
+	if err != nil {
+		return nil, err
+	}
+	return environment.Details.Definition.Labels, nil
+}

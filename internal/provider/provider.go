@@ -224,6 +224,7 @@ func (p *torqueProvider) Resources(ctx context.Context) []func() resource.Resour
 		resources.NewTorqueSpaceLabelResource,
 		resources.NewTorqueSpaceLabelAssociationResource,
 		resources.NewTorqueEnvironmentLabelResource,
+		resources.NewTorqueEnvironmentLabelAssociationResource,
 	}
 }
 

@@ -207,6 +207,7 @@ type EnvironmentDefinition struct {
 	Metadata EnvironmentMetadata `json:"metadata"`
 	Inputs   []NameValuePair     `json:"inputs"`
 	Tags     []NameValuePair     `json:"tags"`
+	Labels   []KeyValuePair      `json:"labels"`
 }
 
 type EnvironmentState struct {
@@ -323,4 +324,11 @@ type SpaceParameterRequest struct {
 	Value       string `json:"value"`
 	Sensitive   bool   `json:"sensitive"`
 	Description string `json:"description"`
+}
+
+type EnvironmentLabelsUpdateRequest struct {
+	EnvironmentId string         `json:"environment_id"`
+	SpaceName     string         `json:"space_name"`
+	AddedLabels   []KeyValuePair `json:"added_labels"`
+	RemovedLabels []KeyValuePair `json:"removed_labels"`
 }
