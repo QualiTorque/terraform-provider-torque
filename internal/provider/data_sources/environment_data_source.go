@@ -78,7 +78,7 @@ type grainSourceModel struct {
 }
 
 type errorModel struct {
-	Message types.String `tfsdk:"name"`
+	Message types.String `tfsdk:"message"`
 }
 
 type collaboratorModel struct {
