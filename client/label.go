@@ -63,10 +63,11 @@ func (c *Client) GetLabel(space_name string, name string) (*Label, error) {
 	return &label, nil
 }
 
-func (c *Client) UpdateLabel(current_name string, space_name string, name string, color string) error {
-	data := Label{
-		Name:  name,
-		Color: color,
+func (c *Client) UpdateLabel(original_name string, space_name string, name string, color string) error {
+	data := LabelRequest{
+		OriginalName: original_name,
+		Name:         name,
+		Color:        color,
 	}
 
 	payload, err := json.Marshal(data)
@@ -74,7 +75,7 @@ func (c *Client) UpdateLabel(current_name string, space_name string, name string
 		log.Fatalf("impossible to marshall label update request: %s", err)
 	}
 
-	req, err := http.NewRequest("PUT", fmt.Sprintf("%sapi/spaces/%s/labels/update/%s", c.HostURL, space_name, current_name), bytes.NewReader(payload))
+	req, err := http.NewRequest("PUT", fmt.Sprintf("%sapi/spaces/%s/labels/update", c.HostURL, space_name), bytes.NewReader(payload))
 	if err != nil {
 		return err
 	}
@@ -91,7 +92,7 @@ func (c *Client) UpdateLabel(current_name string, space_name string, name string
 }
 
 func (c *Client) DeleteLabel(space_name string, name string) error {
-	req, err := http.NewRequest("DELETE", fmt.Sprintf("%sapi/spaces/%s/labels/%s", c.HostURL, space_name, name), nil)
+	req, err := http.NewRequest("DELETE", fmt.Sprintf("%sapi/spaces/%s/labels?name=%s", c.HostURL, space_name, name), nil)
 	if err != nil {
 		return err
 	}
