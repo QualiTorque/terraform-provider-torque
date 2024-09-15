@@ -114,9 +114,9 @@ func (c *Client) UpdateEnvironmentLabels(environment_id string, space_name strin
 		AddedLabels:   added_labels,
 		RemovedLabels: removed_labels,
 	}
-	fmt.Println(data)
+
 	payload, err := json.Marshal(data)
-	fmt.Println(string(payload))
+
 	if err != nil {
 		log.Fatalf("impossible to marshall label update request: %s", err)
 	}
