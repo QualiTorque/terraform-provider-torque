@@ -129,7 +129,7 @@ func (r *TorqueCatalogItemResource) Read(ctx context.Context, req resource.ReadR
 		return
 	}
 
-	if blueprint != nil && !blueprint.Published {
+	if blueprint != nil && !req.State.Raw.IsNull() && !blueprint.Published {
 		resp.Diagnostics.AddError("Blueprint not published to catalog", "Blueprint was found in space but it is not published to catalog")
 		return
 	}
