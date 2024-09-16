@@ -22,17 +22,17 @@ terraform {
 }
 
 provider "torque" {
-  # host  = "https://portal.qtorque.io/"
-  # space = "space"
-  # token = "111111111111"
+  host  = "https://portal.qtorque.io/"
+  space = "space"
+  token = "111111111111"
 }
 
 resource "torque_gitlab_enterprise_repository_space_association" "repository" {
-  space_name      = "TorqueTerraformProvider"
-  repository_name = "private-playground"
-  repository_url  = "https://gitlab.qualilabs.net/qtorque/private-playground"
-  token           = "glpat-Xp-RDVkNN6ZKuVysoMNM"
-  branch          = "master"
+  space_name      = "space_name"
+  repository_name = "repository_name"
+  repository_url  = "repository_url"
+  token           = "token"
+  branch          = "branch"
   credential_name = "credentials"
 }
 ```
