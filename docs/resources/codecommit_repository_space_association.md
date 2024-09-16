@@ -47,6 +47,7 @@ resource "torque_codecommit_repository_space_association" "repository" {
 
 - `aws_region` (String) AWS Region that hosts the CodeCommit Repository, i.e eu-west-1
 - `branch` (String) Repository branch to use for blueprints and automation assets
+- `credential_name` (String) The name of the Credentials to use/create. Must be unique in the space.
 - `external_id` (String) External ID used in the IAM role trust policy.
 - `git_password` (String) Git Password
 - `git_username` (String) Git Username

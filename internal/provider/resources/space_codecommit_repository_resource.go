@@ -37,6 +37,7 @@ type TorqueSpaceCodeCommitRepositoryResourceModel struct {
 	Password       types.String `tfsdk:"git_password"`
 	Branch         types.String `tfsdk:"branch"`
 	RepositoryName types.String `tfsdk:"repository_name"`
+	CredentialName types.String `tfsdk:"credential_name"`
 }
 
 func (r *TorqueSpaceCodeCommitRepositoryResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
@@ -111,6 +112,13 @@ func (r *TorqueSpaceCodeCommitRepositoryResource) Schema(ctx context.Context, re
 					stringplanmodifier.RequiresReplace(),
 				},
 			},
+			"credential_name": schema.StringAttribute{
+				Description: "The name of the Credentials to use/create. Must be unique in the space.",
+				Required:    true,
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.RequiresReplace(),
+				},
+			},
 		},
 	}
 }
@@ -145,7 +153,7 @@ func (r *TorqueSpaceCodeCommitRepositoryResource) Create(ctx context.Context, re
 	}
 
 	err := r.client.OnboardCodeCommitRepoToSpace(data.SpaceName.ValueString(), data.RepositoryName.ValueString(), data.RoleArn.ValueString(),
-		data.RepositoryUrl.ValueString(), data.AwsRegion.ValueString(), data.Branch.ValueString(), data.ExternalId.ValueString(), data.Username.ValueString(), data.Password.ValueString())
+		data.RepositoryUrl.ValueString(), data.AwsRegion.ValueString(), data.Branch.ValueString(), data.ExternalId.ValueString(), data.Username.ValueString(), data.Password.ValueString(), data.CredentialName.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to onboard repository to space, got error: %s", err))
 		return
