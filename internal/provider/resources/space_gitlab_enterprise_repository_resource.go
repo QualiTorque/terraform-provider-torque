@@ -29,11 +29,11 @@ type TorqueSpaceGitlabEnterpriseRepositoryResource struct {
 
 type TorqueSpaceGitlabEnterpriseRepositoryResourceModel struct {
 	SpaceName      types.String `tfsdk:"space_name"`
-	BaseUrl        types.String `tfsdk:"base_url"`
 	RepositoryName types.String `tfsdk:"repository_name"`
 	RepositoryUrl  types.String `tfsdk:"repository_url"`
 	Token          types.String `tfsdk:"token"`
 	Branch         types.String `tfsdk:"branch"`
+	CredentialName types.String `tfsdk:"credential_name"`
 }
 
 func (r *TorqueSpaceGitlabEnterpriseRepositoryResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
@@ -48,13 +48,6 @@ func (r *TorqueSpaceGitlabEnterpriseRepositoryResource) Schema(ctx context.Conte
 			"space_name": schema.StringAttribute{
 				MarkdownDescription: "Existing Torque Space name",
 				Required:            true,
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.RequiresReplace(),
-				},
-			},
-			"base_url": schema.StringAttribute{
-				Description: "Repository base URL. For example: https://gitlab-on-prem.example.com/",
-				Required:    true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.RequiresReplace(),
 				},
@@ -82,6 +75,13 @@ func (r *TorqueSpaceGitlabEnterpriseRepositoryResource) Schema(ctx context.Conte
 			},
 			"branch": schema.StringAttribute{
 				Description: "Repository branch to use for blueprints and automation assets",
+				Required:    true,
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.RequiresReplace(),
+				},
+			},
+			"credential_name": schema.StringAttribute{
+				Description: "The name of the Credentials to use/create. Must be unique in the space.",
 				Required:    true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.RequiresReplace(),
@@ -120,8 +120,8 @@ func (r *TorqueSpaceGitlabEnterpriseRepositoryResource) Create(ctx context.Conte
 		return
 	}
 
-	err := r.client.OnboardGitlabEnterpriseRepoToSpace(data.SpaceName.ValueString(), data.BaseUrl.ValueString(), data.RepositoryName.ValueString(),
-		data.RepositoryUrl.ValueString(), data.Token.ValueString(), data.Branch.ValueString())
+	err := r.client.OnboardGitlabEnterpriseRepoToSpace(data.SpaceName.ValueString(), data.RepositoryName.ValueString(),
+		data.RepositoryUrl.ValueString(), data.Token.ValueString(), data.Branch.ValueString(), data.CredentialName.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to onboard repository to space, got error: %s", err))
 		return
