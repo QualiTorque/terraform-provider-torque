@@ -80,22 +80,23 @@ type RepoSpaceAssociation struct {
 }
 
 type GitlabEnterpriseRepoSpaceAssociation struct {
-	BaseUrl string `json:"base_url"`
-	Name    string `json:"repository_name"`
-	URL     string `json:"repository_url"`
-	Token   string `json:"token"`
-	Branch  string `json:"branch"`
+	Name           string `json:"repository_name"`
+	URL            string `json:"repository_url"`
+	Token          string `json:"token"`
+	Branch         string `json:"branch"`
+	CredentialName string `json:"credential_name"`
 }
 
 type CodeCommitRepoSpaceAssociation struct {
-	URL        string `json:"repository_url"`
-	RoleArn    string `json:"role_arn"`
-	Region     string `json:"aws_region"`
-	Branch     string `json:"branch"`
-	Name       string `json:"repository_name"`
-	ExternalId string `json:"external_id"`
-	Username   string `json:"git_username"`
-	Password   string `json:"git_password"`
+	URL            string `json:"repository_url"`
+	RoleArn        string `json:"role_arn"`
+	Region         string `json:"region"`
+	Branch         string `json:"branch"`
+	Name           string `json:"repository_name"`
+	ExternalId     string `json:"external_id"`
+	Username       string `json:"username"`
+	Password       string `json:"password"`
+	CredentialName string `json:"credential_name"`
 }
 
 type KeyValuePair struct {

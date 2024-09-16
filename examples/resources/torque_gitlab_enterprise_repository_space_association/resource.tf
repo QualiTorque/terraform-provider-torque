@@ -14,9 +14,9 @@ provider "torque" {
 
 resource "torque_gitlab_enterprise_repository_space_association" "repository" {
   space_name      = "space_name"
-  base_url        = "base_url"
   repository_name = "repository_name"
   repository_url  = "repository_url"
   token           = "token"
   branch          = "branch"
+  credential_name = "credentials"
 }
