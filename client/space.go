@@ -180,16 +180,6 @@ func (c *Client) SetSpaceTagValue(space_name string, tag_name string, tag_value 
 }
 
 func (c *Client) DeleteSpaceTagValue(space_name string, tag_name string) error {
-	// data := NameValuePair{
-	// 	Name:  tag_name,
-	// 	Value: tag_value,
-	// }
-
-	// payload, err := json.Marshal(data)
-	// if err != nil {
-	// 	log.Fatalf("impossible to marshall space tag key value association: %s", err)
-	// }
-
 	req, err := http.NewRequest("DELETE", fmt.Sprintf("%sapi/spaces/%s/settings/tags/%s", c.HostURL, space_name, tag_name), nil)
 	if err != nil {
 		return err
