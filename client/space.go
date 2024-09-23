@@ -196,9 +196,24 @@ func (c *Client) DeleteSpaceTagValue(space_name string, tag_name string) error {
 	return nil
 }
 
-func (c *Client) SetBlueprintTagValue(space_name string, tag_name string, tag_value string, repo_name string, blueprint_name string) error {
-	fmt.Println(c.HostURL + "api/spaces")
+func (c *Client) DeleteBlueprintTagValue(space_name string, tag_name string, repository_name string, blueprint_name string) error {
+	req, err := http.NewRequest("DELETE", fmt.Sprintf("%sapi/spaces/%s/repositories/%s/blueprints/%s/settings/tags/%s", c.HostURL, space_name, repository_name, blueprint_name, tag_name), nil)
+	if err != nil {
+		return err
+	}
 
+	req.Header.Add("Content-Type", "application/json")
+	req.Header.Add("Accept", "application/json")
+
+	_, err = c.doRequest(req, &c.Token)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (c *Client) CreateBlueprintTagValue(space_name string, tag_name string, tag_value string, repo_name string, blueprint_name string) error {
 	data := NameValuePair{
 		Name:  tag_name,
 		Value: tag_value,
@@ -210,6 +225,33 @@ func (c *Client) SetBlueprintTagValue(space_name string, tag_name string, tag_va
 	}
 	// /api/spaces/devnet/repositories/qtorque/blueprints/Elasticsearch/settings/tags
 	req, err := http.NewRequest("POST", fmt.Sprintf("%sapi/spaces/%s/repositories/%s/blueprints/%s/settings/tags", c.HostURL, space_name, repo_name, blueprint_name), bytes.NewReader(payload))
+	if err != nil {
+		return err
+	}
+
+	req.Header.Add("Content-Type", "application/json")
+	req.Header.Add("Accept", "application/json")
+
+	_, err = c.doRequest(req, &c.Token)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (c *Client) SetBlueprintTagValue(space_name string, tag_name string, tag_value string, repo_name string, blueprint_name string) error {
+	data := NameValuePair{
+		Name:  tag_name,
+		Value: tag_value,
+	}
+
+	payload, err := json.Marshal(data)
+	if err != nil {
+		log.Fatalf("impossible to marshall blueprint tag key value association: %s", err)
+	}
+
+	req, err := http.NewRequest("PUT", fmt.Sprintf("%sapi/spaces/%s/repositories/%s/blueprints/%s/settings/tags/%s", c.HostURL, space_name, repo_name, blueprint_name, tag_name), bytes.NewReader(payload))
 	if err != nil {
 		return err
 	}

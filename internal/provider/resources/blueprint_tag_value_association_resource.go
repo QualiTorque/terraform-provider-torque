@@ -3,6 +3,7 @@ package resources
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -95,11 +96,19 @@ func (r *TorqueTagBlueprintValueAssociationResource) Create(ctx context.Context,
 		return
 	}
 
-	err := r.client.SetBlueprintTagValue(data.SpaceName.ValueString(), data.TagName.ValueString(),
+	err := r.client.CreateBlueprintTagValue(data.SpaceName.ValueString(), data.TagName.ValueString(),
 		data.TagValue.ValueString(), data.RepositoryName.ValueString(), data.BlueprintName.ValueString())
-	if err != nil {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to set blueprint tag value in space, got error: %s", err))
-		return
+	if err != nil && strings.Contains(err.Error(), "422") {
+		new_err := r.client.SetBlueprintTagValue(data.SpaceName.ValueString(), data.TagName.ValueString(), data.TagValue.ValueString(), data.RepositoryName.ValueString(), data.BlueprintName.ValueString())
+		if new_err != nil {
+			resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create tag value in blueprint, got error: %s", err))
+			return
+		}
+	} else {
+		if err != nil {
+			resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create tag value in blueprint, got error: %s", err))
+			return
+		}
 	}
 
 	tflog.Trace(ctx, "Resource Created Successful!")
@@ -112,12 +121,19 @@ func (r *TorqueTagBlueprintValueAssociationResource) Read(ctx context.Context, r
 	var data TorqueTagBlueprintValueAssociationResourceModel
 
 	// Read Terraform prior state data into the model.
-	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
-
+	diags := req.State.Get(ctx, &data)
+	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
-
+	tag, err := r.client.GetBlueprintTag(data.SpaceName.ValueString(), data.TagName.ValueString(), data.RepositoryName.ValueString(), data.BlueprintName.ValueString())
+	if err != nil {
+		resp.Diagnostics.AddError(
+			"Error Reading tag details",
+			"Could not read blueprint tag "+data.TagName.ValueString()+": "+err.Error(),
+		)
+		return
+	}
 	// If applicable, this is a great opportunity to initialize any necessary
 	// provider client data and make a call using it.
 	// httpResp, err := r.client.Do(httpReq)
@@ -125,9 +141,15 @@ func (r *TorqueTagBlueprintValueAssociationResource) Read(ctx context.Context, r
 	//     resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read example, got error: %s", err))
 	//     return
 	// }
+	data.TagName = types.StringValue(tag.Name)
+	data.TagValue = types.StringValue(tag.Value)
 
 	// Save updated data into Terraform state.
-	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
+	diags = resp.State.Set(ctx, &data)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
 }
 
 func (r *TorqueTagBlueprintValueAssociationResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
@@ -139,7 +161,11 @@ func (r *TorqueTagBlueprintValueAssociationResource) Update(ctx context.Context,
 	if resp.Diagnostics.HasError() {
 		return
 	}
-
+	err := r.client.SetBlueprintTagValue(data.SpaceName.ValueString(), data.TagName.ValueString(), data.TagValue.ValueString(), data.RepositoryName.ValueString(), data.BlueprintName.ValueString())
+	if err != nil {
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to set tag value in space, got error: %s", err))
+		return
+	}
 	// If applicable, this is a great opportunity to initialize any necessary
 	// provider client data and make a call using it.
 	// httpResp, err := r.client.Do(httpReq)
@@ -150,6 +176,10 @@ func (r *TorqueTagBlueprintValueAssociationResource) Update(ctx context.Context,
 
 	// Save updated data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
+
+	if resp.Diagnostics.HasError() {
+		return
+	}
 }
 
 func (r *TorqueTagBlueprintValueAssociationResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
@@ -161,7 +191,16 @@ func (r *TorqueTagBlueprintValueAssociationResource) Delete(ctx context.Context,
 	if resp.Diagnostics.HasError() {
 		return
 	}
+	err := r.client.DeleteBlueprintTagValue(data.SpaceName.ValueString(), data.TagName.ValueString(), data.RepositoryName.ValueString(), data.BlueprintName.ValueString())
+	if err != nil {
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to delete tag value in space, got error: %s", err))
+		return
+	}
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 
+	if resp.Diagnostics.HasError() {
+		return
+	}
 }
 
 func (r *TorqueTagBlueprintValueAssociationResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {

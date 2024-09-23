@@ -65,6 +65,33 @@ func (c *Client) GetTag(tag_name string) (*Tag, error) {
 	return nil, fmt.Errorf("tag %s not found", tag_name)
 }
 
+func (c *Client) GetBlueprintTag(space_name string, tag_name string, repo_name string, blueprint_name string) (NameValuePair, error) {
+	req, err := http.NewRequest("GET", fmt.Sprintf("%sapi/spaces/%s/repositories/%s/blueprints/%s/settings/tags", c.HostURL, space_name, repo_name, blueprint_name), nil)
+	if err != nil {
+		return NameValuePair{}, err
+	}
+
+	req.Header.Add("Content-Type", "application/json")
+	req.Header.Add("Accept", "application/json")
+
+	body, err := c.doRequest(req, &c.Token)
+	if err != nil {
+		return NameValuePair{}, err
+	}
+	tags := []NameValuePair{}
+	err = json.Unmarshal(body, &tags)
+	if err != nil {
+		return NameValuePair{}, err
+	}
+
+	for _, tag := range tags {
+		if tag.Name == tag_name {
+			return tag, nil
+		}
+	}
+	return NameValuePair{}, fmt.Errorf("Tag '%s' not found", tag_name)
+}
+
 func (c *Client) UpdateTag(current_name string, name string, value string, description string, possible_values []string, scope string) error {
 	tag := Tag{
 		Name:           name,
