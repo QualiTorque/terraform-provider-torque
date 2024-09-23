@@ -125,9 +125,7 @@ func (c *Client) GetSpaceBlueprints(space_name string) ([]Blueprint, error) {
 	return blueprints, nil
 }
 
-func (c *Client) SetSpaceTagValue(space_name string, tag_name string, tag_value string) error {
-	fmt.Println(c.HostURL + "api/spaces")
-
+func (c *Client) CreateSpaceTagValue(space_name string, tag_name string, tag_value string) error {
 	data := NameValuePair{
 		Name:  tag_name,
 		Value: tag_value,
@@ -139,6 +137,60 @@ func (c *Client) SetSpaceTagValue(space_name string, tag_name string, tag_value 
 	}
 
 	req, err := http.NewRequest("POST", fmt.Sprintf("%sapi/spaces/%s/settings/tags", c.HostURL, space_name), bytes.NewReader(payload))
+	if err != nil {
+		return err
+	}
+
+	req.Header.Add("Content-Type", "application/json")
+	req.Header.Add("Accept", "application/json")
+
+	_, err = c.doRequest(req, &c.Token)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (c *Client) SetSpaceTagValue(space_name string, tag_name string, tag_value string) error {
+	data := NameValuePair{
+		Name:  tag_name,
+		Value: tag_value,
+	}
+
+	payload, err := json.Marshal(data)
+	if err != nil {
+		log.Fatalf("impossible to marshall space tag key value association: %s", err)
+	}
+
+	req, err := http.NewRequest("PUT", fmt.Sprintf("%sapi/spaces/%s/settings/tags/%s", c.HostURL, space_name, tag_name), bytes.NewReader(payload))
+	if err != nil {
+		return err
+	}
+
+	req.Header.Add("Content-Type", "application/json")
+	req.Header.Add("Accept", "application/json")
+
+	_, err = c.doRequest(req, &c.Token)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (c *Client) DeleteSpaceTagValue(space_name string, tag_name string) error {
+	// data := NameValuePair{
+	// 	Name:  tag_name,
+	// 	Value: tag_value,
+	// }
+
+	// payload, err := json.Marshal(data)
+	// if err != nil {
+	// 	log.Fatalf("impossible to marshall space tag key value association: %s", err)
+	// }
+
+	req, err := http.NewRequest("DELETE", fmt.Sprintf("%sapi/spaces/%s/settings/tags/%s", c.HostURL, space_name, tag_name), nil)
 	if err != nil {
 		return err
 	}

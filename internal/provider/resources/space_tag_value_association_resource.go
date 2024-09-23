@@ -85,9 +85,9 @@ func (r *TorqueTagSpaceValueAssociationResource) Create(ctx context.Context, req
 		return
 	}
 
-	err := r.client.SetSpaceTagValue(data.SpaceName.ValueString(), data.TagName.ValueString(), data.TagValue.ValueString())
+	err := r.client.CreateSpaceTagValue(data.SpaceName.ValueString(), data.TagName.ValueString(), data.TagValue.ValueString())
 	if err != nil {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to set tag value in space, got error: %s", err))
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create tag value in space, got error: %s", err))
 		return
 	}
 
@@ -101,12 +101,19 @@ func (r *TorqueTagSpaceValueAssociationResource) Read(ctx context.Context, req r
 	var data TorqueTagSpaceValueAssociationResourceModel
 
 	// Read Terraform prior state data into the model.
-	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
-
+	diags := req.State.Get(ctx, &data)
+	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
-
+	tag, err := r.client.GetSpaceTag(data.SpaceName.ValueString(), data.TagName.ValueString())
+	if err != nil {
+		resp.Diagnostics.AddError(
+			"Error Reading tag details",
+			"Could not read space tag name "+data.TagName.ValueString()+": "+err.Error(),
+		)
+		return
+	}
 	// If applicable, this is a great opportunity to initialize any necessary
 	// provider client data and make a call using it.
 	// httpResp, err := r.client.Do(httpReq)
@@ -114,14 +121,31 @@ func (r *TorqueTagSpaceValueAssociationResource) Read(ctx context.Context, req r
 	//     resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read example, got error: %s", err))
 	//     return
 	// }
+	data.TagName = types.StringValue(tag.Name)
+	data.TagValue = types.StringValue(tag.Value)
 
 	// Save updated data into Terraform state.
-	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
+	diags = resp.State.Set(ctx, &data)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
 }
 
 func (r *TorqueTagSpaceValueAssociationResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 	var data TorqueTagSpaceValueAssociationResourceModel
 
+	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
+
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	err := r.client.SetSpaceTagValue(data.SpaceName.ValueString(), data.TagName.ValueString(), data.TagValue.ValueString())
+	if err != nil {
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to set tag value in space, got error: %s", err))
+		return
+	}
 	// Read Terraform plan data into the model
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
 
@@ -143,7 +167,17 @@ func (r *TorqueTagSpaceValueAssociationResource) Update(ctx context.Context, req
 
 func (r *TorqueTagSpaceValueAssociationResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
 	var data TorqueTagSpaceValueAssociationResourceModel
+	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
 
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	err := r.client.DeleteSpaceTagValue(data.SpaceName.ValueString(), data.TagName.ValueString())
+	if err != nil {
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to delete tag value in space, got error: %s", err))
+		return
+	}
 	// Read Terraform prior state data into the model.
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
 
