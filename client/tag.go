@@ -133,3 +133,30 @@ func (c *Client) GetSpaceTags(space_name string) ([]Tag, error) {
 	}
 	return blueprint, nil
 }
+
+func (c *Client) GetSpaceTag(space_name string, tag_name string) (NameValuePair, error) {
+	req, err := http.NewRequest("GET", fmt.Sprintf("%sapi/spaces/%s/settings/tags", c.HostURL, space_name), nil)
+	if err != nil {
+		return NameValuePair{}, err
+	}
+
+	req.Header.Add("Content-Type", "application/json")
+	req.Header.Add("Accept", "application/json")
+
+	body, err := c.doRequest(req, &c.Token)
+	if err != nil {
+		return NameValuePair{}, err
+	}
+	tags := []NameValuePair{}
+	err = json.Unmarshal(body, &tags)
+	if err != nil {
+		return NameValuePair{}, err
+	}
+	// var tag NameValuePair
+	for _, tag := range tags {
+		if tag.Name == tag_name {
+			return tag, nil
+		}
+	}
+	return NameValuePair{}, fmt.Errorf("Tag '%s' not found in space '%s'", tag_name, space_name)
+}
