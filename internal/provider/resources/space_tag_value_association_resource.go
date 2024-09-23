@@ -3,6 +3,7 @@ package resources
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -86,11 +87,13 @@ func (r *TorqueTagSpaceValueAssociationResource) Create(ctx context.Context, req
 	}
 
 	err := r.client.CreateSpaceTagValue(data.SpaceName.ValueString(), data.TagName.ValueString(), data.TagValue.ValueString())
-	if err != nil {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create tag value in space, got error: %s", err))
-		return
+	if err != nil && strings.Contains(err.Error(), "422") {
+		new_err := r.client.SetSpaceTagValue(data.SpaceName.ValueString(), data.TagName.ValueString(), data.TagValue.ValueString())
+		if new_err != nil {
+			resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create tag value in space, got error: %s", err))
+			return
+		}
 	}
-
 	tflog.Trace(ctx, "Resource Created Successful!")
 
 	// Save data into Terraform state.
