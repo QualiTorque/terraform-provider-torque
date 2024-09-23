@@ -104,6 +104,11 @@ func (r *TorqueTagBlueprintValueAssociationResource) Create(ctx context.Context,
 			resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create tag value in blueprint, got error: %s", err))
 			return
 		}
+	} else {
+		if err != nil {
+			resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create tag value in blueprint, got error: %s", err))
+			return
+		}
 	}
 
 	tflog.Trace(ctx, "Resource Created Successful!")
