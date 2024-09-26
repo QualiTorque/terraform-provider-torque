@@ -47,4 +47,7 @@ resource "torque_gitlab_enterprise_repository_space_association" "repository" {
 - `repository_name` (String) The name of the GitlabEnterprise repository to onboard. In this example, repo_name
 - `repository_url` (String) The url of the specific GitlabEnterprise repository/project to onboard. For example: https://gitlab-on-prem.example.com/repo_name
 - `space_name` (String) Existing Torque Space name
-- `token` (String) Authentication Token to the project/repository
+
+### Optional
+
+- `token` (String) Authentication Token to the project/repository. If omitted, existing credentials provided in the credential_name field will be used for authentication. If provided, a new credentials object will be created.

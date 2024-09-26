@@ -44,7 +44,7 @@ func (c *Client) OnboardCodeCommitRepoToSpace(space_name string, repository_name
 	return nil
 }
 
-func (c *Client) OnboardGitlabEnterpriseRepoToSpace(space_name string, repository_name string, repository_url string, token string, branch string, credential_name string) error {
+func (c *Client) OnboardGitlabEnterpriseRepoToSpace(space_name string, repository_name string, repository_url string, token *string, branch string, credential_name string) error {
 	data := GitlabEnterpriseRepoSpaceAssociation{
 		Token:          token,
 		Name:           repository_name,
