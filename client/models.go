@@ -80,11 +80,11 @@ type RepoSpaceAssociation struct {
 }
 
 type GitlabEnterpriseRepoSpaceAssociation struct {
-	Name           string `json:"repository_name"`
-	URL            string `json:"repository_url"`
+	Name           string  `json:"repository_name"`
+	URL            string  `json:"repository_url"`
 	Token          *string `json:"token"`
-	Branch         string `json:"branch"`
-	CredentialName string `json:"credential_name"`
+	Branch         string  `json:"branch"`
+	CredentialName string  `json:"credential_name"`
 }
 
 type CodeCommitRepoSpaceAssociation struct {
