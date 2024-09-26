@@ -67,8 +67,8 @@ func (r *TorqueSpaceGitlabEnterpriseRepositoryResource) Schema(ctx context.Conte
 				},
 			},
 			"token": schema.StringAttribute{
-				Description: "Authentication Token to the project/repository",
-				Required:    true,
+				Description: "Authentication Token to the project/repository. If omitted, existing credentials provided in the credential_name field will be used for authentication. If provided, a new credentials object will be created.",
+				Optional:    true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.RequiresReplace(),
 				},
@@ -121,7 +121,7 @@ func (r *TorqueSpaceGitlabEnterpriseRepositoryResource) Create(ctx context.Conte
 	}
 
 	err := r.client.OnboardGitlabEnterpriseRepoToSpace(data.SpaceName.ValueString(), data.RepositoryName.ValueString(),
-		data.RepositoryUrl.ValueString(), data.Token.ValueString(), data.Branch.ValueString(), data.CredentialName.ValueString())
+		data.RepositoryUrl.ValueString(), data.Token.ValueStringPointer(), data.Branch.ValueString(), data.CredentialName.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to onboard repository to space, got error: %s", err))
 		return
