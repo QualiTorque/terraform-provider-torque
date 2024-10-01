@@ -121,7 +121,7 @@ func (r *TorqueTagSpaceValueAssociationResource) Read(ctx context.Context, req r
 	}
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Error Reading tag details bla bla",
+			"Error Reading tag details",
 			"Could not read space tag value of "+data.TagName.ValueString()+": "+err.Error(),
 		)
 		return
