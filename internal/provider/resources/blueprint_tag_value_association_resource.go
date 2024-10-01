@@ -98,19 +98,18 @@ func (r *TorqueTagBlueprintValueAssociationResource) Create(ctx context.Context,
 
 	err := r.client.CreateBlueprintTagValue(data.SpaceName.ValueString(), data.TagName.ValueString(),
 		data.TagValue.ValueString(), data.RepositoryName.ValueString(), data.BlueprintName.ValueString())
-	if err != nil && strings.Contains(err.Error(), "422") {
-		new_err := r.client.SetBlueprintTagValue(data.SpaceName.ValueString(), data.TagName.ValueString(), data.TagValue.ValueString(), data.RepositoryName.ValueString(), data.BlueprintName.ValueString())
-		if new_err != nil {
-			resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create tag value in blueprint, got error: %s", err))
-			return
-		}
-	} else {
-		if err != nil {
+	if err != nil {
+		if strings.Contains(err.Error(), "422") {
+			new_err := r.client.SetBlueprintTagValue(data.SpaceName.ValueString(), data.TagName.ValueString(), data.TagValue.ValueString(), data.RepositoryName.ValueString(), data.BlueprintName.ValueString())
+			if new_err != nil {
+				resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to set tag value in blueprint, got error: %s", err))
+				return
+			}
+		} else {
 			resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create tag value in blueprint, got error: %s", err))
 			return
 		}
 	}
-
 	tflog.Trace(ctx, "Resource Created Successful!")
 
 	// Save data into Terraform state.
@@ -127,6 +126,10 @@ func (r *TorqueTagBlueprintValueAssociationResource) Read(ctx context.Context, r
 		return
 	}
 	tag, err := r.client.GetBlueprintTag(data.SpaceName.ValueString(), data.TagName.ValueString(), data.RepositoryName.ValueString(), data.BlueprintName.ValueString())
+	if tag == (client.NameValuePair{}) {
+		resp.State.RemoveResource(ctx)
+		return
+	}
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Error Reading tag details",

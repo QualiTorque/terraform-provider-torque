@@ -87,9 +87,14 @@ func (r *TorqueTagSpaceValueAssociationResource) Create(ctx context.Context, req
 	}
 
 	err := r.client.CreateSpaceTagValue(data.SpaceName.ValueString(), data.TagName.ValueString(), data.TagValue.ValueString())
-	if err != nil && strings.Contains(err.Error(), "422") {
-		new_err := r.client.SetSpaceTagValue(data.SpaceName.ValueString(), data.TagName.ValueString(), data.TagValue.ValueString())
-		if new_err != nil {
+	if err != nil {
+		if strings.Contains(err.Error(), "422") {
+			newErr := r.client.SetSpaceTagValue(data.SpaceName.ValueString(), data.TagName.ValueString(), data.TagValue.ValueString())
+			if newErr != nil {
+				resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to set tag value in space, got error: %s", newErr))
+				return
+			}
+		} else {
 			resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create tag value in space, got error: %s", err))
 			return
 		}
@@ -110,10 +115,14 @@ func (r *TorqueTagSpaceValueAssociationResource) Read(ctx context.Context, req r
 		return
 	}
 	tag, err := r.client.GetSpaceTag(data.SpaceName.ValueString(), data.TagName.ValueString())
+	if tag == (client.NameValuePair{}) {
+		resp.State.RemoveResource(ctx)
+		return
+	}
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Error Reading tag details",
-			"Could not read space tag name "+data.TagName.ValueString()+": "+err.Error(),
+			"Could not read space tag value of "+data.TagName.ValueString()+": "+err.Error(),
 		)
 		return
 	}
