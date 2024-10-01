@@ -98,12 +98,13 @@ func (r *TorqueTagBlueprintValueAssociationResource) Create(ctx context.Context,
 
 	err := r.client.CreateBlueprintTagValue(data.SpaceName.ValueString(), data.TagName.ValueString(),
 		data.TagValue.ValueString(), data.RepositoryName.ValueString(), data.BlueprintName.ValueString())
-	if err != nil && strings.Contains(err.Error(), "422") {
-		new_err := r.client.SetBlueprintTagValue(data.SpaceName.ValueString(), data.TagName.ValueString(), data.TagValue.ValueString(), data.RepositoryName.ValueString(), data.BlueprintName.ValueString())
-		if new_err != nil {
-			resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create tag value in blueprint, got error: %s", err))
-			return
-		}
+	if err != nil {
+		if strings.Contains(err.Error(), "422") {
+			new_err := r.client.SetBlueprintTagValue(data.SpaceName.ValueString(), data.TagName.ValueString(), data.TagValue.ValueString(), data.RepositoryName.ValueString(), data.BlueprintName.ValueString())
+			if new_err != nil {
+				resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to set tag value in blueprint, got error: %s", err))
+				return
+			}
 	} else {
 		if err != nil {
 			resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create tag value in blueprint, got error: %s", err))
