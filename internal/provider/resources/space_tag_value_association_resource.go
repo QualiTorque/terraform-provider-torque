@@ -115,10 +115,14 @@ func (r *TorqueTagSpaceValueAssociationResource) Read(ctx context.Context, req r
 		return
 	}
 	tag, err := r.client.GetSpaceTag(data.SpaceName.ValueString(), data.TagName.ValueString())
+	if tag == (client.NameValuePair{}) {
+		resp.State.RemoveResource(ctx)
+		return
+	}
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Error Reading tag details",
-			"Could not read space tag name "+data.TagName.ValueString()+": "+err.Error(),
+			"Error Reading tag details bla bla",
+			"Could not read space tag value of "+data.TagName.ValueString()+": "+err.Error(),
 		)
 		return
 	}

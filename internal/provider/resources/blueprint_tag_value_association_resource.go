@@ -106,10 +106,8 @@ func (r *TorqueTagBlueprintValueAssociationResource) Create(ctx context.Context,
 				return
 			}
 		} else {
-			if err != nil {
-				resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create tag value in blueprint, got error: %s", err))
-				return
-			}
+			resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create tag value in blueprint, got error: %s", err))
+			return
 		}
 	}
 	tflog.Trace(ctx, "Resource Created Successful!")
@@ -128,6 +126,10 @@ func (r *TorqueTagBlueprintValueAssociationResource) Read(ctx context.Context, r
 		return
 	}
 	tag, err := r.client.GetBlueprintTag(data.SpaceName.ValueString(), data.TagName.ValueString(), data.RepositoryName.ValueString(), data.BlueprintName.ValueString())
+	if tag == (client.NameValuePair{}) {
+		resp.State.RemoveResource(ctx)
+		return
+	}
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Error Reading tag details",
