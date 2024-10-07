@@ -333,3 +333,17 @@ type EnvironmentLabelsUpdateRequest struct {
 	AddedLabels   []KeyValuePair `json:"added_labels"`
 	RemovedLabels []KeyValuePair `json:"removed_labels"`
 }
+
+type GitCredentialsRequest struct {
+	SpaceName       string         `json:"space_name"`
+	Name            string         `json:"name"`
+	Description     string         `json:"description"`
+	CredentialData  CredentialData `json:"credential_data"`
+	CloudType       string         `json:"cloud_type"`
+	CloudIdentifier string         `json:"cloud_identifier"`
+}
+
+type CredentialData struct {
+	Token string `json:"token"`
+	Type  string `json:"type"`
+}
