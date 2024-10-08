@@ -334,7 +334,7 @@ type EnvironmentLabelsUpdateRequest struct {
 	RemovedLabels []KeyValuePair `json:"removed_labels"`
 }
 
-type GitCredentialsRequest struct {
+type GitCredentials struct {
 	SpaceName       string         `json:"space_name"`
 	Name            string         `json:"name"`
 	Description     string         `json:"description"`

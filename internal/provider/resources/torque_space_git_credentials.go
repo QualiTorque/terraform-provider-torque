@@ -4,11 +4,13 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/qualitorque/terraform-provider-torque/client"
 )
@@ -28,13 +30,11 @@ type TorqueSpaceGitCredentialsResource struct {
 
 // TorqueSpaceGitCredentialsResourceModel describes the resource data model.
 type TorqueSpaceGitCredentialsResourceModel struct {
-	SpaceName       types.String `tfsdk:"space_name"`
-	Name            types.String `tfsdk:"name"`
-	Description     types.String `tfsdk:"description"`
-	// CloudIdentifier types.String `tfsdk:"cloud_identifier"`
-	// CloudType       types.String `tfsdk:"cloud_type"`
-	Token           types.String `tfsdk:"token"`
-	Type            types.String `tfsdk:"type"`
+	SpaceName   types.String `tfsdk:"space_name"`
+	Name        types.String `tfsdk:"name"`
+	Description types.String `tfsdk:"description"`
+	Token       types.String `tfsdk:"token"`
+	Type        types.String `tfsdk:"type"`
 }
 
 func (r *TorqueSpaceGitCredentialsResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
@@ -44,60 +44,42 @@ func (r *TorqueSpaceGitCredentialsResource) Metadata(ctx context.Context, req re
 func (r *TorqueSpaceGitCredentialsResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "Creation of a new catalog item by publishing an existing blueprint to the self-service catalog.",
+		MarkdownDescription: "Creation of a new git credentials resource in a specific space, which can later be used to onboard a git repository. Supported repositories are github, gitlab enterprise, azure devops and bitbucket.",
 
 		Attributes: map[string]schema.Attribute{
 			"space_name": schema.StringAttribute{
-				MarkdownDescription: "Name of the space to configure",
+				MarkdownDescription: "Name of the space to create the credentials in.",
 				Required:            true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.RequiresReplace(),
 				},
 			},
 			"name": schema.StringAttribute{
-				MarkdownDescription: "The name of the blueprint to publish in the catalog",
+				MarkdownDescription: "The name of the credentials.",
 				Required:            true,
 				Computed:            false,
-				// PlanModifiers: []planmodifier.String{
-				// 	stringplanmodifier.RequiresReplace(),
-				// },
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.RequiresReplace(),
+				},
 			},
 			"description": schema.StringAttribute{
-				MarkdownDescription: "The name of the repository where the blueprint resides. \"Stored in Torque\" will be stored in \"qtorque\" repository",
+				MarkdownDescription: "Description of the credentials.",
 				Required:            true,
 				Computed:            false,
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.RequiresReplace(),
-				},
 			},
-			// "cloud_identifier": schema.StringAttribute{
-			// 	MarkdownDescription: "The name of the blueprint to publish in the catalog",
-			// 	Required:            true,
-			// 	Computed:            false,
-			// 	PlanModifiers: []planmodifier.String{
-			// 		stringplanmodifier.RequiresReplace(),
-			// 	},
-			// },
-			// "cloud_type": schema.StringAttribute{
-			// 	MarkdownDescription: "The name of the repository where the blueprint resides. \"Stored in Torque\" will be stored in \"qtorque\" repository",
-			// 	Required:            true,
-			// 	Computed:            false,
-			// 	PlanModifiers: []planmodifier.String{
-			// 		stringplanmodifier.RequiresReplace(),
-			// 	},
-			// },
 			"token": schema.StringAttribute{
-				MarkdownDescription: "The name of the blueprint to publish in the catalog",
+				MarkdownDescription: "Access token the credentials will use.",
 				Required:            true,
 				Computed:            false,
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.RequiresReplace(),
-				},
+				Sensitive:           true,
 			},
 			"type": schema.StringAttribute{
-				MarkdownDescription: "The name of the repository where the blueprint resides. \"Stored in Torque\" will be stored in \"qtorque\" repository",
+				MarkdownDescription: "Type of git repository these credentials are for. Supported types are github, bitbucket, azureDevops and gitlabEnterprise.",
 				Required:            true,
 				Computed:            false,
+				Validators: []validator.String{
+					stringvalidator.OneOf([]string{"github", "bitbucket", "azureDevops", "gitlabEnterprise"}...),
+				},
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.RequiresReplace(),
 				},
@@ -136,7 +118,7 @@ func (r *TorqueSpaceGitCredentialsResource) Create(ctx context.Context, req reso
 	}
 	err := r.client.CreateSpaceGitCredentials(data.SpaceName.ValueString(), data.Name.ValueString(), data.Description.ValueString(), data.Type.ValueString(), data.Token.ValueString())
 	if err != nil {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create environment label, got error: %s", err))
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create space git credentials, got error: %s", err))
 		return
 	}
 	// Save data into Terraform state.
@@ -161,17 +143,26 @@ func (r *TorqueSpaceGitCredentialsResource) Update(ctx context.Context, req reso
 	if resp.Diagnostics.HasError() {
 		return
 	}
-
+	err := r.client.UpdateSpaceGitCredentials(data.SpaceName.ValueString(), data.Name.ValueString(), data.Description.ValueString(), data.Type.ValueString(), data.Token.ValueString())
+	if err != nil {
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update space git credentials, got error: %s", err))
+		return
+	}
 	// Save updated data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
 func (r *TorqueSpaceGitCredentialsResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
 	var data TorqueSpaceGitCredentialsResourceModel
-
-	// Read Terraform prior state data into the model.
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
-
+	if resp.Diagnostics.HasError() {
+		return
+	}
+	err := r.client.DeleteSpaceGitCredentials(data.SpaceName.ValueString(), data.Name.ValueString())
+	if err != nil {
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to delete space git credentials, got error: %s", err))
+		return
+	}
 }
 
 func (r *TorqueSpaceGitCredentialsResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
