@@ -22,15 +22,15 @@ terraform {
 }
 
 provider "torque" {
-  # host  = "https://portal.qtorque.io/"
-  # space = "space"
-  # token = "111111111111"
+  host  = "https://portal.qtorque.io/"
+  space = "space"
+  token = "111111111111"
 }
 
 resource "torque_space_tag_value_association" "tag_association" {
-  space_name = "TorqueTerraformProvider"
-  tag_name   = "rewrwerew"
-  tag_value  = "tag_value12"
+  space_name = "space"
+  tag_name   = "tag_name"
+  tag_value  = "tag_value"
 }
 ```
 

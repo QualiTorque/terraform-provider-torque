@@ -3,12 +3,12 @@
 page_title: "torque_space_git_credentials Resource - terraform-provider-torque"
 subcategory: ""
 description: |-
-  Creation of a new git credential resource in a specific space, which can later be used to onboard a git repository. Supported repositories are github, gitlab enterprise, azure devops and bitbucket.
+  Creation of a new git credentials resource in a specific space, which can later be used to onboard a git repository. Supported repositories are github, gitlab enterprise, azure devops and bitbucket.
 ---
 
 # torque_space_git_credentials (Resource)
 
-Creation of a new git credential resource in a specific space, which can later be used to onboard a git repository. Supported repositories are github, gitlab enterprise, azure devops and bitbucket.
+Creation of a new git credentials resource in a specific space, which can later be used to onboard a git repository. Supported repositories are github, gitlab enterprise, azure devops and bitbucket.
 
 ## Example Usage
 

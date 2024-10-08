@@ -24,7 +24,7 @@ func (c *Client) CreateSpaceGitCredentials(space_name string, name string, descr
 	}
 	payload, err := json.Marshal(credentials)
 	if err != nil {
-		log.Fatalf("impossible to marshall space: %s", err)
+		log.Fatalf("impossible to marshall credentials: %s", err)
 	}
 	req, err := http.NewRequest("POST", fmt.Sprintf("%sapi/spaces/%s/settings/credentialstore", c.HostURL, space_name), bytes.NewReader(payload))
 	if err != nil {
@@ -53,7 +53,7 @@ func (c *Client) DeleteSpaceGitCredentials(space_name string, credential_name st
 	}
 	payload, err := json.Marshal(request)
 	if err != nil {
-		log.Fatalf("impossible to marshall space: %s", err)
+		log.Fatalf("impossible to marshall credentials: %s", err)
 	}
 	req, err := http.NewRequest("DELETE", fmt.Sprintf("%sapi/spaces/%s/settings/credentialstore/%s", c.HostURL, space_name, credential_name), bytes.NewReader(payload))
 	if err != nil {
@@ -112,7 +112,7 @@ func (c *Client) UpdateSpaceGitCredentials(space_name string, name string, descr
 	}
 	payload, err := json.Marshal(credentials)
 	if err != nil {
-		log.Fatalf("impossible to marshall space: %s", err)
+		log.Fatalf("impossible to marshall credentials: %s", err)
 	}
 	req, err := http.NewRequest("PUT", fmt.Sprintf("%sapi/spaces/%s/settings/credentialstore/%s", c.HostURL, space_name, name), bytes.NewReader(payload))
 	if err != nil {
