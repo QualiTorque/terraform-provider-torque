@@ -42,6 +42,41 @@ func (c *Client) CreateSpaceGitCredentials(space_name string, name string, descr
 	return nil
 }
 
+func (c *Client) CreateGitCredentials(name string, description string, repo_type string, token string, allowed_space_names []string) error {
+	const cloudtype = "sourceControl"
+	credential_data := CredentialData{
+		Token: token,
+		Type:  repo_type,
+	}
+	credentials := AccountGitCredentials{
+		Name:              name,
+		Description:       description,
+		CloudType:         cloudtype,
+		CloudIdentifier:   repo_type,
+		CredentialData:    credential_data,
+		AllowedSpaceNames: allowed_space_names,
+		AllSpacesAllowed:  len(allowed_space_names) == 0 || allowed_space_names == nil,
+	}
+	payload, err := json.Marshal(credentials)
+	if err != nil {
+		log.Fatalf("impossible to marshall credentials: %s", err)
+	}
+	req, err := http.NewRequest("POST", fmt.Sprintf("%sapi/settings/credentialstore", c.HostURL), bytes.NewReader(payload))
+	if err != nil {
+		return err
+	}
+
+	req.Header.Add("Content-Type", "application/json")
+	req.Header.Add("Accept", "application/json")
+
+	_, err = c.doRequest(req, &c.Token)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (c *Client) DeleteSpaceGitCredentials(space_name string, credential_name string) error {
 	type DeleteSpaceCredentialRequest struct {
 		SpaceName      string `json:"space_name"`
@@ -56,6 +91,23 @@ func (c *Client) DeleteSpaceGitCredentials(space_name string, credential_name st
 		log.Fatalf("impossible to marshall credentials: %s", err)
 	}
 	req, err := http.NewRequest("DELETE", fmt.Sprintf("%sapi/spaces/%s/settings/credentialstore/%s", c.HostURL, space_name, credential_name), bytes.NewReader(payload))
+	if err != nil {
+		return err
+	}
+
+	req.Header.Add("Content-Type", "application/json")
+	req.Header.Add("Accept", "application/json")
+
+	_, err = c.doRequest(req, &c.Token)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (c *Client) DeleteGitCredentials(credential_name string) error {
+	req, err := http.NewRequest("DELETE", fmt.Sprintf("%sapi/settings/credentialstore/%s", c.HostURL, credential_name), nil)
 	if err != nil {
 		return err
 	}
@@ -96,6 +148,31 @@ func (c *Client) GetSpaceGitCredentials(space_name string, credential_name strin
 	return credentials, nil
 }
 
+func (c *Client) GetGitCredentials(credential_name string) (AccountGitCredentials, error) {
+	req, err := http.NewRequest("GET", fmt.Sprintf("%sapi/settings/credentialstore/%s", c.HostURL, credential_name), nil)
+
+	credentials := AccountGitCredentials{}
+
+	if err != nil {
+		return credentials, err
+	}
+
+	req.Header.Add("Content-Type", "application/json")
+	req.Header.Add("Accept", "application/json")
+
+	body, err := c.doRequest(req, &c.Token)
+	if err != nil {
+		return credentials, err
+	}
+
+	err = json.Unmarshal(body, &credentials)
+	if err != nil {
+		return credentials, err
+	}
+
+	return credentials, nil
+}
+
 func (c *Client) UpdateSpaceGitCredentials(space_name string, name string, description string, repo_type string, token string) error {
 	const cloudtype = "sourceControl"
 	credential_data := CredentialData{
@@ -115,6 +192,40 @@ func (c *Client) UpdateSpaceGitCredentials(space_name string, name string, descr
 		log.Fatalf("impossible to marshall credentials: %s", err)
 	}
 	req, err := http.NewRequest("PUT", fmt.Sprintf("%sapi/spaces/%s/settings/credentialstore/%s", c.HostURL, space_name, name), bytes.NewReader(payload))
+	if err != nil {
+		return err
+	}
+
+	req.Header.Add("Content-Type", "application/json")
+	req.Header.Add("Accept", "application/json")
+
+	_, err = c.doRequest(req, &c.Token)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (c *Client) UpdateGitCredentials(name string, description string, repo_type string, token string, allowed_space_names []string) error {
+	const cloudtype = "sourceControl"
+	credential_data := CredentialData{
+		Token: token,
+		Type:  repo_type,
+	}
+	credentials := AccountGitCredentials{
+		Name:              name,
+		Description:       description,
+		CloudType:         cloudtype,
+		CloudIdentifier:   repo_type,
+		CredentialData:    credential_data,
+		AllowedSpaceNames: allowed_space_names,
+	}
+	payload, err := json.Marshal(credentials)
+	if err != nil {
+		log.Fatalf("impossible to marshall credentials: %s", err)
+	}
+	req, err := http.NewRequest("PUT", fmt.Sprintf("%sapi/settings/credentialstore/%s", c.HostURL, name), bytes.NewReader(payload))
 	if err != nil {
 		return err
 	}
