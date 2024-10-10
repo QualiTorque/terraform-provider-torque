@@ -343,6 +343,16 @@ type GitCredentials struct {
 	CloudIdentifier string         `json:"cloud_identifier"`
 }
 
+type AccountGitCredentials struct {
+	Name              string         `json:"name"`
+	Description       string         `json:"description"`
+	CredentialData    CredentialData `json:"credential_data"`
+	CloudType         string         `json:"cloud_type"`
+	CloudIdentifier   string         `json:"cloud_identifier"`
+	AllowedSpaceNames []string       `json:"allowed_space_names"`
+	AllSpacesAllowed  bool           `json:"all_spaces_allowed"`
+}
+
 type CredentialData struct {
 	Token string `json:"token"`
 	Type  string `json:"type"`
