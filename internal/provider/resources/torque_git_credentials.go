@@ -37,7 +37,6 @@ type TorqueGitCredentialsResourceModel struct {
 	Token             types.String `tfsdk:"token"`
 	Type              types.String `tfsdk:"type"`
 	AllowedSpaceNames types.List   `tfsdk:"allowed_space_names"`
-	AllSpacesAllowed  types.Bool   `tfsdk:"all_spaces_allowed"`
 }
 
 func (r *TorqueGitCredentialsResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
@@ -80,21 +79,13 @@ func (r *TorqueGitCredentialsResource) Schema(ctx context.Context, req resource.
 				},
 			},
 			"allowed_space_names": schema.ListAttribute{
-				MarkdownDescription: "Access token the credentials will use.",
+				MarkdownDescription: "List of allowed spaces that can use the credentials. At least one space must be in the list if a list is provided. If the argument is not probvided, the credentials may be used in all spaces",
 				Required:            false,
 				Optional:            true,
 				ElementType:         types.StringType,
 				Validators: []validator.List{
 					listvalidator.SizeAtLeast(1), // Ensure the list has at least one entry if required
 				},
-			},
-			"all_spaces_allowed": schema.BoolAttribute{
-				MarkdownDescription: "Access token the credentials will use.",
-				Required:            false,
-				Optional:            true,
-				Computed:            true,
-				// Default:             booldefault.StaticBool(true),
-				// PlanModifiers: ,
 			},
 		},
 	}
@@ -134,9 +125,6 @@ func (r *TorqueGitCredentialsResource) Create(ctx context.Context, req resource.
 		for _, name := range data.AllowedSpaceNames.Elements() {
 			allowed_space_names = append(allowed_space_names, strings.Trim(name.String(), "\""))
 		}
-		data.AllSpacesAllowed = types.BoolValue(false)
-	} else {
-		data.AllSpacesAllowed = types.BoolValue(true)
 	}
 	err := r.client.CreateGitCredentials(data.Name.ValueString(), data.Description.ValueString(), data.Type.ValueString(), data.Token.ValueString(), allowed_space_names)
 	if err != nil {
@@ -159,26 +147,6 @@ func (r *TorqueGitCredentialsResource) Read(ctx context.Context, req resource.Re
 	if resp.Diagnostics.HasError() {
 		return
 	}
-
-	// credentials, err := r.client.GetGitCredentials(data.Name.ValueString())
-	// if err != nil {
-	// 	resp.Diagnostics.AddError(
-	// 		"Error Reading credentials details",
-	// 		"Could not read credentials name "+data.Name.ValueString()+": "+err.Error(),
-	// 	)
-	// 	return
-	// }
-	// data.Name = types.StringValue(credentials.Name)
-	// data.Description = types.StringValue(credentials.Description)
-	// data.Token = types.StringValue(state.Token.ValueString())
-	// data.Type = types.StringValue(credentials.CredentialData.Type)
-	// data.AllowedSpaceNames, _ = types.ListValueFrom(ctx, types.StringType, credentials.AllowedSpaceNames)
-	// data.AllSpacesAllowed = types.BoolValue(credentials.AllSpacesAllowed)
-	// diags = resp.State.Set(ctx, &data)
-	resp.Diagnostics.Append(diags...)
-	if resp.Diagnostics.HasError() {
-		return
-	}
 }
 
 func (r *TorqueGitCredentialsResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
@@ -196,14 +164,11 @@ func (r *TorqueGitCredentialsResource) Update(ctx context.Context, req resource.
 		for _, name := range data.AllowedSpaceNames.Elements() {
 			allowed_space_names = append(allowed_space_names, strings.Trim(name.String(), "\""))
 		}
-		data.AllSpacesAllowed = types.BoolValue(false)
-	} else {
-		data.AllSpacesAllowed = types.BoolValue(true)
 	}
 
 	err := r.client.UpdateGitCredentials(data.Name.ValueString(), data.Description.ValueString(), data.Type.ValueString(), data.Token.ValueString(), allowed_space_names)
 	if err != nil {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update space git credentials, got error: %s", err))
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update git credentials, got error: %s", err))
 		return
 	}
 	// Save updated data into Terraform state
@@ -218,7 +183,7 @@ func (r *TorqueGitCredentialsResource) Delete(ctx context.Context, req resource.
 	}
 	err := r.client.DeleteGitCredentials(data.Name.ValueString())
 	if err != nil {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to delete space git credentials, got error: %s", err))
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to delete git credentials, got error: %s", err))
 		return
 	}
 }
