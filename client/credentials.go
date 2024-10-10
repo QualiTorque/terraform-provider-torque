@@ -107,17 +107,6 @@ func (c *Client) DeleteSpaceGitCredentials(space_name string, credential_name st
 }
 
 func (c *Client) DeleteGitCredentials(credential_name string) error {
-	// type DeleteCredentialRequest struct {
-	// 	CredentialName string `json:"credential_name"`
-	// }
-	// request := DeleteCredentialRequest{
-	// 	SpaceName:      space_name,
-	// 	CredentialName: credential_name,
-	// }
-	// payload, err := json.Marshal(request)
-	// if err != nil {
-	// 	log.Fatalf("impossible to marshall credentials: %s", err)
-	// }
 	req, err := http.NewRequest("DELETE", fmt.Sprintf("%sapi/settings/credentialstore/%s", c.HostURL, credential_name), nil)
 	if err != nil {
 		return err
