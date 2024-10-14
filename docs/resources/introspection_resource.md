@@ -27,9 +27,21 @@ provider "torque" {
   token = "111111111111"
 }
 resource "torque_introspection_resource" "example" {
-  display_name       = "resource_name"
-  image              = "resource_image"
-  introspection_data = { "data1" : "value1" }
+  display_name = "resource_name"
+  image        = "resource_image"
+  introspection_data = {
+    "data1" : "value1"
+    "data2" : "value2"
+    "data3" : "value3"
+  }
+  links = [{
+    "icon" : "connect",
+    "href" : "https://example1.com"
+    },
+    {
+      "icon" : "connect",
+      "href" : "https://example2.com"
+  }]
 }
 ```
 
@@ -44,3 +56,12 @@ resource "torque_introspection_resource" "example" {
 
 - `image` (String) Example configurable attribute with default value
 - `introspection_data` (Map of String) Resource attribute to show in resource card. Note that only the first 4 attributes will be presented
+- `links` (Attributes List) List of links that will be available as button in the resource introspection card. (see [below for nested schema](#nestedatt--links))
+
+<a id="nestedatt--links"></a>
+### Nested Schema for `links`
+
+Required:
+
+- `href` (String) Button's link
+- `icon` (String) Button's icon

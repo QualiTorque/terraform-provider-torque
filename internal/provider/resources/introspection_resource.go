@@ -56,17 +56,17 @@ func (r *TorqueIntrospectionResource) Schema(ctx context.Context, req resource.S
 				Computed:            false,
 			},
 			"links": schema.ListNestedAttribute{
-				Description: "List of labels associated with the environment.",
+				Description: "List of links that will be available as buttons in the resource introspection card.",
 				Required:    false,
 				Optional:    true,
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
 						"icon": schema.StringAttribute{
-							Description: "Input's name",
+							Description: "Button's icon",
 							Required:    true,
 						},
 						"href": schema.StringAttribute{
-							Description: "Input's default value",
+							Description: "Button's link",
 							Required:    true,
 						},
 					},
