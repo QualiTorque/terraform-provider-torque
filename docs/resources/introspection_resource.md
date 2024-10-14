@@ -56,7 +56,7 @@ resource "torque_introspection_resource" "example" {
 
 - `image` (String) Example configurable attribute with default value
 - `introspection_data` (Map of String) Resource attribute to show in resource card. Note that only the first 4 attributes will be presented
-- `links` (Attributes List) List of links that will be available as button in the resource introspection card. (see [below for nested schema](#nestedatt--links))
+- `links` (Attributes List) List of links that will be available as buttons in the resource introspection card. (see [below for nested schema](#nestedatt--links))
 
 <a id="nestedatt--links"></a>
 ### Nested Schema for `links`
