@@ -27,6 +27,7 @@ type TorqueIntrospectionResourceModel struct {
 	DisplayName       types.String `tfsdk:"display_name"`
 	Image             types.String `tfsdk:"image"`
 	IntrospectionData types.Map    `tfsdk:"introspection_data"`
+	Links             types.List   `tfsdk:"links"`
 }
 
 func (r *TorqueIntrospectionResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
@@ -53,6 +54,23 @@ func (r *TorqueIntrospectionResource) Schema(ctx context.Context, req resource.S
 				ElementType:         types.StringType,
 				Optional:            true,
 				Computed:            false,
+			},
+			"links": schema.ListNestedAttribute{
+				Description: "List of labels associated with the environment.",
+				Required:    false,
+				Optional:    true,
+				NestedObject: schema.NestedAttributeObject{
+					Attributes: map[string]schema.Attribute{
+						"icon": schema.StringAttribute{
+							Description: "Input's name",
+							Required:    true,
+						},
+						"href": schema.StringAttribute{
+							Description: "Input's default value",
+							Required:    true,
+						},
+					},
+				},
 			},
 		},
 	}
