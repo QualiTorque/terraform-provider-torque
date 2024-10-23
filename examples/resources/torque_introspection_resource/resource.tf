@@ -22,9 +22,12 @@ resource "torque_introspection_resource" "example" {
   links = [{
     "icon" : "connect",
     "href" : "https://example1.com"
+    "label" : "label1"
     },
     {
-      "icon" : "connect",
+      "icon" : "power",
       "href" : "https://example2.com"
+      "label" : "label2"
+      "color" : "#ff0000" # this link will be colored red
   }]
 }

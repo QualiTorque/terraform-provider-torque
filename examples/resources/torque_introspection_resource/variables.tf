@@ -28,8 +28,9 @@ variable "resource_data" {
 variable "links" {
   description = "List of links that will be available as buttons in the resource introspection card."
   type = list(object({
-    icon = string, # Button's icon
-    href = string  # Button's link
+    icon  = string, # Button's icon
+    href  = string  # Button's link
+    label = string
   }))
   default = []
 }
