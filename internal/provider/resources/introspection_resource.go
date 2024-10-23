@@ -69,6 +69,15 @@ func (r *TorqueIntrospectionResource) Schema(ctx context.Context, req resource.S
 							Description: "Button's link",
 							Required:    true,
 						},
+						"label": schema.StringAttribute{
+							Description: "Description that will be shown on hover",
+							Required:    true,
+						},
+						"color": schema.StringAttribute{
+							Description: "Hex value for the link's color",
+							Optional:    true,
+							Required:    false,
+						},
 					},
 				},
 			},
