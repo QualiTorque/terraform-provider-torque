@@ -21,29 +21,42 @@ terraform {
   }
 }
 
-provider "torque" {
-  host  = "https://portal.qtorque.io/"
-  space = "space"
-  token = "111111111111"
-}
 resource "torque_introspection_resource" "example" {
-  display_name = "resource_name"
-  image        = "resource_image"
+  display_name = "Custom card"
+  image        = "https://raw.githubusercontent.com/QualiTorque/Torque-Samples/refs/heads/main/instructions/res_images/Tetris_logo_small.png"
   introspection_data = {
     "data1" : "value1"
     "data2" : "value2"
     "data3" : "value3"
   }
-  links = [{
-    "icon" : "connect",
-    "href" : "https://example1.com"
-    "label" : "label1"
+  links = [
+    {
+      "icon" : "upload",
+      "href" : "https://example1.com"
+      "label" : "example1"
+      "color" : "#0000ff"
     },
     {
-      "icon" : "power",
+      "icon" : "download",
       "href" : "https://example2.com"
-      "label" : "label2"
-      "color" : "#ff0000" # this link will be colored red
+      "label" : "example2"
+    },
+    {
+      "icon" : "copy",
+      "href" : "https://example3.com"
+      "label" : "example3"
+      "color" : "#ff0000"
+    },
+    {
+      "icon" : "play",
+      "href" : "https://example4.com"
+      "label" : "example4"
+    },
+    {
+      "icon" : "restart",
+      "href" : "https://example5.com"
+      "label" : "example5"
+      "color" : "#00ff00"
   }]
 }
 ```
@@ -57,7 +70,7 @@ resource "torque_introspection_resource" "example" {
 
 ### Optional
 
-- `image` (String) Example configurable attribute with default value
+- `image` (String) A link to an image for the custom resouce. Can be hosted only on the following domains: `*.githubusercontent.com`, `*.quali.com`, `*.cloudfront.net`  
 - `introspection_data` (Map of String) Resource attribute to show in resource card. Note that only the first 4 attributes will be presented
 - `links` (Attributes List) List of links that will be available as buttons in the resource introspection card. (see [below for nested schema](#nestedatt--links))
 
@@ -67,7 +80,7 @@ resource "torque_introspection_resource" "example" {
 Required:
 
 - `href` (String) Button's link
-- `icon` (String) Button's icon
+- `icon` (String) Button's icon. Can be only one of the following: connect, restart, play, pause, stop, download, upload
 - `label` (String) Description that will be shown on hover
 
 Optional:

@@ -62,7 +62,7 @@ func (r *TorqueIntrospectionResource) Schema(ctx context.Context, req resource.S
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
 						"icon": schema.StringAttribute{
-							Description: "Button's icon",
+							Description: "Button's icon. Can be only one of the following: connect, restart, play, pause, stop, download, upload",
 							Required:    true,
 						},
 						"href": schema.StringAttribute{
