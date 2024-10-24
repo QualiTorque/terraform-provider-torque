@@ -3,9 +3,11 @@ package resources
 import (
 	"context"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 )
@@ -45,7 +47,7 @@ func (r *TorqueIntrospectionResource) Schema(ctx context.Context, req resource.S
 				Required:            true,
 			},
 			"image": schema.StringAttribute{
-				MarkdownDescription: "Example configurable attribute with default value",
+				MarkdownDescription: "A link to an image for the custom resource. Can be hosted only on the following domains: `*.githubusercontent.com`, `*.quali.com`, `*.cloudfront.net`  ",
 				Optional:            true,
 				Computed:            false,
 			},
@@ -64,6 +66,9 @@ func (r *TorqueIntrospectionResource) Schema(ctx context.Context, req resource.S
 						"icon": schema.StringAttribute{
 							Description: "Button's icon. Can be only one of the following: connect, restart, play, pause, stop, download, upload",
 							Required:    true,
+							Validators: []validator.String{
+								stringvalidator.OneOf([]string{"connect", "restart", "play", "pause", "stop", "download", "upload"}...),
+							},
 						},
 						"href": schema.StringAttribute{
 							Description: "Button's link",
