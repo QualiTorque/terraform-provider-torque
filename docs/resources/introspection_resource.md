@@ -75,7 +75,7 @@ resource "torque_introspection_resource" "example" {
 
 ### Optional
 
-- `image` (String) A link to an image for the custom resouce. Can be hosted only on the following domains: `*.githubusercontent.com`, `*.quali.com`, `*.cloudfront.net`
+- `image` (String) A link to an image for the custom resource. Can be hosted only on the following domains: `*.githubusercontent.com`, `*.quali.com`, `*.cloudfront.net`
 - `introspection_data` (Map of String) Resource attribute to show in resource card. Note that only the first 4 attributes will be presented
 - `links` (Attributes List) List of links that will be available as buttons in the resource introspection card. (see [below for nested schema](#nestedatt--links))
 
