@@ -1,18 +1,7 @@
-// Flaky Test!
+// Copyright (c) HashiCorp, Inc.
+// SPDX-License-Identifier: MPL-2.0
 
-// // Copyright (c) HashiCorp, Inc.
-// // SPDX-License-Identifier: MPL-2.0
-
-// package tests
-
-// import (
-// 	"fmt"
-// 	"regexp"
-// 	"testing"
-
-// 	"github.com/hashicorp/terraform-plugin-testing/helper/acctest"
-// 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
-// )
+package tests
 
 // func TestTagResource(t *testing.T) {
 // 	randomSuffix := acctest.RandStringFromCharSet(6, acctest.CharSetAlphaNum)
