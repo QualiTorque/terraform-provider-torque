@@ -248,9 +248,16 @@ type EnvironmentInitiator struct {
 	InitiatorEmail string `json:"email"`
 }
 
+// Data Source Collaborators
 type EnvironmentCollaboratorsInfo struct {
 	Collaborators   []EnvironmentCollaborator `json:"collaborators"`
 	AllSpaceMembers bool                      `json:"all_space_members"`
+}
+
+// Resource Collaborators
+type Collaborators struct {
+	Collaborators   []string `json:"collaborators_emails"`
+	AllSpaceMembers bool     `json:"all_space_members"`
 }
 
 type EnvironmentCollaborator struct {
@@ -297,6 +304,18 @@ type Workflow struct {
 	Description     string          `json:"description"`
 	SpaceDefinition spaceDefinition `json:"space_definition"`
 	Name            string          `json:"name"`
+}
+
+type EnvironmentWorkflow struct {
+	Name            string            `json:"name"`
+	Schedules       []Schedule        `json:"schedules"`
+	Reminder        int64             `json:"reminder"`
+	InputsOverrides map[string]string `json:"inputs_overrides"`
+}
+
+type Schedule struct {
+	Scheduler  string `json:"scheduler"`
+	Overridden bool   `json:"overridden"`
 }
 
 type spaceDefinition struct {
@@ -356,4 +375,27 @@ type AccountGitCredentials struct {
 type CredentialData struct {
 	Token string `json:"token"`
 	Type  string `json:"type"`
+}
+
+type BlueprintSource struct {
+	BlueprintName  *string `tfsdk:"blueprint_name"`
+	RepositoryName *string `tfsdk:"repository_name"`
+	Branch         *string `tfsdk:"branch"`
+	Commit         *string `tfsdk:"commit"`
+}
+
+type EnvironmentRequest struct {
+	EnvironmentName  string                `json:"environment_name"`
+	BlueprintName    string                `json:"blueprint_name"`
+	OwnerEmail       string                `json:"owner_email"`
+	Description      string                `json:"description"`
+	Inputs           map[string]string     `json:"inputs"`
+	Tags             map[string]string     `json:"tags"`
+	Collaborators    Collaborators         `json:"collaborators"`
+	Automation       bool                  `json:"automation"`
+	ScheduledEndTime string                `json:"scheduled_end_time"`
+	Duration         string                `json:"duration"`
+	Id               string                `json:"id"`
+	BlueprintSource  BlueprintSource       `json:"blueprint_source"`
+	Workflows        []EnvironmentWorkflow `json:"workflows"`
 }
