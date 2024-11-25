@@ -53,10 +53,8 @@ func (c *Client) doRequest(req *http.Request, authToken *string) ([]byte, error)
 	if err != nil {
 		return nil, err
 	}
-
-	if res.StatusCode != http.StatusOK {
+	if res.StatusCode != http.StatusOK && res.StatusCode != http.StatusAccepted {
 		return nil, fmt.Errorf("status: %d, body: %s", res.StatusCode, body)
 	}
-
 	return body, err
 }
