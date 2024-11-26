@@ -248,13 +248,13 @@ type EnvironmentInitiator struct {
 	InitiatorEmail string `json:"email"`
 }
 
-// Data Source Collaborators
+// Data Source Collaborators.
 type EnvironmentCollaboratorsInfo struct {
 	Collaborators   []EnvironmentCollaborator `json:"collaborators"`
 	AllSpaceMembers bool                      `json:"all_space_members"`
 }
 
-// Resource Collaborators
+// Resource Collaborators.
 type Collaborators struct {
 	Collaborators   []string `json:"collaborators_emails"`
 	AllSpaceMembers bool     `json:"all_space_members"`
