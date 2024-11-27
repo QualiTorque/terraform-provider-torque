@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
@@ -111,6 +112,9 @@ func (r *TorqueEnvironmentResource) Schema(ctx context.Context, req resource.Sch
 				Required:            false,
 				Computed:            false,
 				Optional:            true,
+				PlanModifiers: []planmodifier.Map{
+					mapplanmodifier.RequiresReplace(),
+				},
 			},
 			"description": schema.StringAttribute{
 				MarkdownDescription: "The new environment description that will be presented in the Torque UI following the launch of the environment.",
@@ -124,6 +128,9 @@ func (r *TorqueEnvironmentResource) Schema(ctx context.Context, req resource.Sch
 				Required:            false,
 				Computed:            false,
 				Optional:            true,
+				PlanModifiers: []planmodifier.Map{
+					mapplanmodifier.RequiresReplace(),
+				},
 			},
 			"collaborators": schema.ObjectAttribute{
 				MarkdownDescription: "Object of collaborators to add to the environment. Provide collaborators_emails list of strings representing emails of users in the account or set all_space_users to true to add everyone in the space",
@@ -146,18 +153,30 @@ func (r *TorqueEnvironmentResource) Schema(ctx context.Context, req resource.Sch
 					"blueprint_name": schema.StringAttribute{
 						Optional:            true,
 						MarkdownDescription: "Sandbox blueprint name",
+						PlanModifiers: []planmodifier.String{
+							stringplanmodifier.RequiresReplace(),
+						},
 					},
 					"repository_name": schema.StringAttribute{
 						Optional:            true,
 						MarkdownDescription: "The name of the repo to be used. This repository should be on-boarded to the space prior to launching the environment. In case you want to launch a 'Stored in Torque' Blueprint, you should set this field to 'qtorque'",
+						PlanModifiers: []planmodifier.String{
+							stringplanmodifier.RequiresReplace(),
+						},
 					},
 					"branch": schema.StringAttribute{
 						Optional:            true,
 						MarkdownDescription: "Use this field to provide a branch from which the blueprint yaml will be launched",
+						PlanModifiers: []planmodifier.String{
+							stringplanmodifier.RequiresReplace(),
+						},
 					},
 					"commit": schema.StringAttribute{
 						Optional:            true,
 						MarkdownDescription: "Use this field to provide a specific commit id from which the blueprint yaml will be launched",
+						PlanModifiers: []planmodifier.String{
+							stringplanmodifier.RequiresReplace(),
+						},
 					},
 				},
 			},
@@ -198,7 +217,10 @@ func (r *TorqueEnvironmentResource) Schema(ctx context.Context, req resource.Sch
 				Required:            false,
 				Computed:            true,
 				Optional:            true,
-				Default:             stringdefault.StaticString("someemail@quali.com"),
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.RequiresReplace(),
+				},
+				Default: stringdefault.StaticString("someemail@quali.com"),
 			},
 			"workflows": schema.ListNestedAttribute{
 				MarkdownDescription: "Array of workflows that will be attached and enabled on the new environment.",
@@ -376,13 +398,45 @@ func (r *TorqueEnvironmentResource) Create(ctx context.Context, req resource.Cre
 
 func (r *TorqueEnvironmentResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	var data TorqueEnvironmentResourceModel
+	var state TorqueEnvironmentResourceModel
 
-	// Read Terraform prior state data into the model.
-	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
-
+	resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
+
+	environment_data, _, err := r.client.GetEnvironmentDetails(state.Space.ValueString(), state.Id.ValueString())
+	if err != nil {
+		resp.Diagnostics.AddError(
+			"Unable to Read Torque environment",
+			err.Error(),
+		)
+		return
+	}
+	data.EnvironmentName = types.StringValue(environment_data.Details.Definition.Metadata.Name)
+	data.BlueprintName = types.StringValue(environment_data.Details.Definition.Metadata.BlueprintName)
+	data.Space = types.StringValue(environment_data.Details.Definition.Metadata.SpaceName)
+	data.Id = types.StringValue(environment_data.Details.Id)
+	data.OwnerEmail = types.StringValue(environment_data.Owner.OwnerEmail)
+	data.Description = state.Description
+	inputs := make(map[string]types.String)
+	for _, input := range environment_data.Details.Definition.Inputs {
+		inputs[input.Name] = types.StringValue(input.Value)
+	}
+	data.Inputs, _ = types.MapValueFrom(ctx, types.StringType, inputs)
+
+	tags := make(map[string]types.String)
+	for _, tag := range environment_data.Details.Definition.Tags {
+		tags[tag.Name] = types.StringValue(tag.Value)
+	}
+	data.Tags, _ = types.MapValueFrom(ctx, types.StringType, tags)
+
+	data.Collaborators = nil
+	data.Automation = types.BoolValue(environment_data.IsEAC)
+	data.ScheduledEndTime = types.StringValue("")
+	data.Duration = types.StringValue("")
+	data.BlueprintSource = nil
+	data.Workflows = nil
 
 	// If applicable, this is a great opportunity to initialize any necessary
 	// provider client data and make a call using it.
@@ -456,10 +510,9 @@ func (r *TorqueEnvironmentResource) Delete(ctx context.Context, req resource.Del
 	// Terminate the Environment.
 	err := r.client.TerminateEnvironment(data.Space.ValueString(), data.Id.ValueString())
 	if err != nil {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to delete Environment, got error: %s", err))
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to terminate Environment, got error: %s", err))
 		return
 	}
-
 }
 
 func (r *TorqueEnvironmentResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
