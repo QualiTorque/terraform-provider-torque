@@ -70,6 +70,23 @@ func (c *Client) CreateEnvironment(Space string, BlueprintName string, Environme
 	return body, nil
 }
 
+func (c *Client) UpdateEnvironmentName(Space string, Id string, Name string) error {
+	req, err := http.NewRequest("PUT", fmt.Sprintf("%sapi/spaces/%s/environments/%s/update_v2/%s/rename", c.HostURL, Space, Id, Name), nil)
+	if err != nil {
+		return err
+	}
+
+	req.Header.Add("Content-Type", "application/json")
+	req.Header.Add("Accept", "application/json")
+
+	_, err = c.doRequest(req, &c.Token)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (c *Client) TerminateEnvironment(Space string, Id string) error {
 	fmt.Println(c.HostURL + "api/spaces/" + Space + "/environments/" + Id)
 

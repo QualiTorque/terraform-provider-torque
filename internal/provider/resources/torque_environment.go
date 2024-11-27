@@ -11,7 +11,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
@@ -84,6 +86,9 @@ func (r *TorqueEnvironmentResource) Schema(ctx context.Context, req resource.Sch
 			"blueprint_name": schema.StringAttribute{
 				MarkdownDescription: "Name of the Torque blueprint that the torque environment will be launched from.",
 				Required:            true,
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.RequiresReplace(),
+				},
 			},
 			"environment_name": schema.StringAttribute{
 				MarkdownDescription: "The name for the newly created environment. Environment name can contain any character including special character and spaces.",
@@ -161,6 +166,9 @@ func (r *TorqueEnvironmentResource) Schema(ctx context.Context, req resource.Sch
 				Required:            false,
 				Computed:            false,
 				Optional:            true,
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.RequiresReplace(),
+				},
 			},
 			"scheduled_end_time": schema.StringAttribute{
 				MarkdownDescription: "Environment scheduled end time in ISO 8601 format For example, 2021-10-06T08:27:05.215Z. NOTE: Environment request cannot include both 'duration' and 'scheduled_end_time' fields.",
@@ -182,6 +190,7 @@ func (r *TorqueEnvironmentResource) Schema(ctx context.Context, req resource.Sch
 			"id": schema.StringAttribute{
 				MarkdownDescription: "Id of the environment",
 				Required:            false,
+				Optional:            true,
 				Computed:            true,
 			},
 			"owner_email": schema.StringAttribute{
@@ -388,14 +397,35 @@ func (r *TorqueEnvironmentResource) Read(ctx context.Context, req resource.ReadR
 }
 
 func (r *TorqueEnvironmentResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	// var data TorqueEnvironmentResourceModel
-
+	var plan TorqueEnvironmentResourceModel
+	var state TorqueEnvironmentResourceModel
 	// Read Terraform plan data into the model
-	// resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
+	resp.Diagnostics.Append(req.Plan.Get(ctx, &plan)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
 
-	// if resp.Diagnostics.HasError() {
-	// 	return
-	// }
+	// Read Terraform state data into the model
+	resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+	plan.Id = state.Id
+	if plan.EnvironmentName != state.EnvironmentName {
+		// Call the specific API for handling environment name changes
+		err := r.client.UpdateEnvironmentName(state.Space.ValueString(), state.Id.ValueString(), plan.EnvironmentName.ValueString())
+		if err != nil {
+			resp.Diagnostics.AddError(
+				"Environment update failed",
+				fmt.Sprintf("Failed to update environment name from '%s' to '%s': %s",
+					state.EnvironmentName, plan.EnvironmentName, err.Error()),
+			)
+			return
+		}
+	}
+	if resp.Diagnostics.HasError() {
+		return
+	}
 	// // If applicable, this is a great opportunity to initialize any necessary
 	// // provider client data and make a call using it.
 	// // httpResp, err := r.client.Do(httpReq)
@@ -404,12 +434,13 @@ func (r *TorqueEnvironmentResource) Update(ctx context.Context, req resource.Upd
 	// //     return
 	// // }
 
-	// // Save updated data into Terraform state
-	// resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
-	resp.Diagnostics.AddError(
-		"Resource updates of resource type torque_account are not permitted",
-		"Cannot change details of torque account, use terraform destroy to delete it or create a new one",
-	)
+	// Save updated data into Terraform state
+	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
+	// Do not permit changes in environment resource
+	// resp.Diagnostics.AddError(
+	// 	"Resource updates of resource type torque_environment are not permitted",
+	// 	"Cannot change details of torque_environment, use terraform destroy to delete it or create a new one",
+	// )
 }
 
 func (r *TorqueEnvironmentResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
