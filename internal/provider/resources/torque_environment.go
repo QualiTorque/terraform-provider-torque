@@ -11,7 +11,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
@@ -81,7 +83,7 @@ func (r *TorqueEnvironmentResource) Metadata(ctx context.Context, req resource.M
 func (r *TorqueEnvironmentResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "Creation of a new Torque Environment",
+		MarkdownDescription: "Warning: This terraform resource is still in Beta. Creation of a new Torque Environment",
 
 		Attributes: map[string]schema.Attribute{
 			"blueprint_name": schema.StringAttribute{
@@ -96,12 +98,12 @@ func (r *TorqueEnvironmentResource) Schema(ctx context.Context, req resource.Sch
 				Required:            true,
 			},
 			"duration": schema.StringAttribute{
-				MarkdownDescription: "Environment duration time in ISO 8601 format: 'P{days}DT{hours}H{minutes}M{seconds}S]]' For example, P0DT2H3M4S. NOTE: Environment request cannot include both 'duration' and 'scheduled_end_time' fields.",
+				MarkdownDescription: "Environment duration time in ISO 8601 format: 'P{days}DT{hours}H{minutes}M{seconds}S]]' For example, P0DT2H3M4S. NOTE: Environment request cannot include both 'duration' and 'scheduled_end_time' fields.  If both are not specified the environment will be always on.",
 				Optional:            true,
 				Computed:            false,
 				Validators: []validator.String{
-					// Validate only this attribute or other_attr is configured.
-					stringvalidator.ExactlyOneOf(path.Expressions{
+					// Validate only this attribute or other_attr is configured or neither.
+					stringvalidator.ConflictsWith(path.Expressions{
 						path.MatchRoot("scheduled_end_time"),
 					}...),
 				},
@@ -149,34 +151,25 @@ func (r *TorqueEnvironmentResource) Schema(ctx context.Context, req resource.Sch
 				Required:            false,
 				Computed:            false,
 				Optional:            true,
+				PlanModifiers: []planmodifier.Object{
+					objectplanmodifier.RequiresReplace(),
+				},
 				Attributes: map[string]schema.Attribute{
 					"blueprint_name": schema.StringAttribute{
 						Optional:            true,
 						MarkdownDescription: "Sandbox blueprint name",
-						PlanModifiers: []planmodifier.String{
-							stringplanmodifier.RequiresReplace(),
-						},
 					},
 					"repository_name": schema.StringAttribute{
 						Optional:            true,
 						MarkdownDescription: "The name of the repo to be used. This repository should be on-boarded to the space prior to launching the environment. In case you want to launch a 'Stored in Torque' Blueprint, you should set this field to 'qtorque'",
-						PlanModifiers: []planmodifier.String{
-							stringplanmodifier.RequiresReplace(),
-						},
 					},
 					"branch": schema.StringAttribute{
 						Optional:            true,
 						MarkdownDescription: "Use this field to provide a branch from which the blueprint yaml will be launched",
-						PlanModifiers: []planmodifier.String{
-							stringplanmodifier.RequiresReplace(),
-						},
 					},
 					"commit": schema.StringAttribute{
 						Optional:            true,
 						MarkdownDescription: "Use this field to provide a specific commit id from which the blueprint yaml will be launched",
-						PlanModifiers: []planmodifier.String{
-							stringplanmodifier.RequiresReplace(),
-						},
 					},
 				},
 			},
@@ -190,12 +183,12 @@ func (r *TorqueEnvironmentResource) Schema(ctx context.Context, req resource.Sch
 				},
 			},
 			"scheduled_end_time": schema.StringAttribute{
-				MarkdownDescription: "Environment scheduled end time in ISO 8601 format For example, 2021-10-06T08:27:05.215Z. NOTE: Environment request cannot include both 'duration' and 'scheduled_end_time' fields.",
+				MarkdownDescription: "Environment scheduled end time in ISO 8601 format For example, 2021-10-06T08:27:05.215Z. NOTE: Environment request cannot include both 'duration' and 'scheduled_end_time' fields. If both are not specified the environment will be always on.",
 				Computed:            false,
 				Optional:            true,
 				Validators: []validator.String{
-					// Validate only this attribute or other_attr is configured.
-					stringvalidator.ExactlyOneOf(path.Expressions{
+					// Validate only this attribute or other_attr is configured or neither.
+					stringvalidator.ConflictsWith(path.Expressions{
 						path.MatchRoot("duration"),
 					}...),
 				},
@@ -205,6 +198,9 @@ func (r *TorqueEnvironmentResource) Schema(ctx context.Context, req resource.Sch
 				Required:            false,
 				Computed:            false,
 				Optional:            true,
+				PlanModifiers: []planmodifier.Bool{
+					boolplanmodifier.RequiresReplace(),
+				},
 			},
 			"id": schema.StringAttribute{
 				MarkdownDescription: "Id of the environment",
