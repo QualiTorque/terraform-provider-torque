@@ -212,11 +212,12 @@ type EnvironmentDefinition struct {
 }
 
 type EnvironmentState struct {
-	Outputs   []NameValuePair `json:"outputs"`
-	IsEac     bool            `json:"eac_synced"`
-	Execution Execution       `json:"execution"`
-	Errors    []Error         `json:"errors"`
-	Grains    []Grain         `json:"grains"`
+	Outputs      []NameValuePair `json:"outputs"`
+	IsEac        bool            `json:"eac_synced"`
+	Execution    Execution       `json:"execution"`
+	Errors       []Error         `json:"errors"`
+	Grains       []Grain         `json:"grains"`
+	CurrentState string          `json:"current_state"`
 }
 
 type NameValuePair struct {

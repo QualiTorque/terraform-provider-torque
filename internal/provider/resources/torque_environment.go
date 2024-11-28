@@ -512,6 +512,7 @@ func (r *TorqueEnvironmentResource) Update(ctx context.Context, req resource.Upd
 
 func (r *TorqueEnvironmentResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
 	var data TorqueEnvironmentResourceModel
+	const Inactive = "inactive"
 	// var env *client.Environment
 	// Read Terraform prior state data into the model.
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
@@ -519,8 +520,8 @@ func (r *TorqueEnvironmentResource) Delete(ctx context.Context, req resource.Del
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	env, _, env_error := r.client.GetEnvironmentDetails(data.Space.ValueString(), data.Id.ValueString())
-	if env.Details.State. {
+	env, _, _ := r.client.GetEnvironmentDetails(data.Space.ValueString(), data.Id.ValueString())
+	if env.Details.State.CurrentState == Inactive {
 		return
 	}
 	// Terminate the Environment.
@@ -528,10 +529,10 @@ func (r *TorqueEnvironmentResource) Delete(ctx context.Context, req resource.Del
 	if err != nil {
 		new_err := r.client.ForceTerminateEnvironment(data.Space.ValueString(), data.Id.ValueString())
 		if new_err != nil {
-			resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to force terminate Environment, got error: %s", new_err))
+			resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to force terminate Environment, env status:%s, got error: %s", env.Details.State.CurrentState, new_err))
 			return
 		}
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to terminate Environment, got error: %s", err))
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to terminate Environment, env_status:%s, got error: %s", env.Details.State.CurrentState, err))
 		return
 	}
 }
