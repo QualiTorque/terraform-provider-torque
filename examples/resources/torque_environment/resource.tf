@@ -19,10 +19,10 @@ resource "torque_environment" "example" {
   owner_email      = "someone@company.com"
   duration         = "PT2H" # ISO 8601 duration format - must not be specified together with scheduled_end_time. Both can be omitted to create always-on environment.
   space            = "MySpace"
-  force_destroy    = false
+  force_destroy    = true
   inputs = {
     "agent" = "playground",
-    "name"  = "amir"
+    "name"  = "name"
   }
   description = "This is a sample environment created using Torque."
   tags = {

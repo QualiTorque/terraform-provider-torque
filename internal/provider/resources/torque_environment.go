@@ -84,8 +84,7 @@ func (r *TorqueEnvironmentResource) Metadata(ctx context.Context, req resource.M
 
 func (r *TorqueEnvironmentResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: `Warning: This terraform resource is still in Beta.
+		MarkdownDescription: `Warning: This terraform resource is still in Beta. Use with caution. Issues may be reported in the provider's GitHub repository.
 
 		Launches a new Torque Environment from an existing blueprint.
 		
@@ -95,7 +94,9 @@ func (r *TorqueEnvironmentResource) Schema(ctx context.Context, req resource.Sch
 		- Force destroy - Whether the environment should be force terminated upon failure to terminate it.,
 		
 		### Limitations:
-		- Environment duration cannot be extended.`,
+		- Environment duration cannot be extended.
+		- Environment resource state is not refreshed with actual environment if it drifted
+		- Terminated environment will be removed when running terraform destroy, but other values of the environment concrete state might cause terraform destroy to fail`,
 
 		Attributes: map[string]schema.Attribute{
 			"blueprint_name": schema.StringAttribute{
@@ -492,8 +493,8 @@ func (r *TorqueEnvironmentResource) Update(ctx context.Context, req resource.Upd
 	if plan.Collaborators.AllSpaceMembers != state.Collaborators.AllSpaceMembers || !reflect.DeepEqual(plan.Collaborators.CollaboratorsEmails, state.Collaborators.CollaboratorsEmails) {
 		collaborators_emails := []string{}
 		if !plan.Collaborators.CollaboratorsEmails.IsNull() {
-			for _, label := range plan.Collaborators.CollaboratorsEmails.Elements() {
-				collaborators_emails = append(collaborators_emails, strings.Trim(label.String(), "\""))
+			for _, email := range plan.Collaborators.CollaboratorsEmails.Elements() {
+				collaborators_emails = append(collaborators_emails, strings.Trim(email.String(), "\""))
 			}
 		}
 		err := r.client.UpdateEnvironmentCollaborators(state.Space.ValueString(), state.Id.ValueString(), collaborators_emails, plan.Collaborators.AllSpaceMembers.ValueBool())
@@ -513,7 +514,6 @@ func (r *TorqueEnvironmentResource) Update(ctx context.Context, req resource.Upd
 func (r *TorqueEnvironmentResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
 	var data TorqueEnvironmentResourceModel
 	const Inactive = "inactive"
-	// var env *client.Environment
 	// Read Terraform prior state data into the model.
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
 

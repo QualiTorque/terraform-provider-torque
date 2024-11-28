@@ -3,7 +3,7 @@
 page_title: "torque_environment Resource - terraform-provider-torque"
 subcategory: ""
 description: |-
-  Warning: This terraform resource is still in Beta.
+  Warning: This terraform resource is still in Beta. Use with caution. Issues may be reported in the provider's GitHub repository.
   	Launches a new Torque Environment from an existing blueprint.
   	
   	### Supported Updates:
@@ -13,11 +13,13 @@ description: |-
   	
   	### Limitations:
   	- Environment duration cannot be extended.
+  	- Environment resource state is not refreshed with actual environment if it drifted
+  	- Terminated environment will be removed when running terraform destroy, but other values of the environment concrete state might cause terraform destroy to fail
 ---
 
 # torque_environment (Resource)
 
-Warning: This terraform resource is still in Beta.
+Warning: This terraform resource is still in Beta. Use with caution. Issues may be reported in the provider's GitHub repository.
 
 		Launches a new Torque Environment from an existing blueprint.
 		
@@ -28,6 +30,8 @@ Warning: This terraform resource is still in Beta.
 		
 		### Limitations:
 		- Environment duration cannot be extended.
+		- Environment resource state is not refreshed with actual environment if it drifted
+		- Terminated environment will be removed when running terraform destroy, but other values of the environment concrete state might cause terraform destroy to fail
 
 ## Example Usage
 
@@ -53,10 +57,10 @@ resource "torque_environment" "example" {
   owner_email      = "someone@company.com"
   duration         = "PT2H" # ISO 8601 duration format - must not be specified together with scheduled_end_time. Both can be omitted to create always-on environment.
   space            = "MySpace"
-  force_destroy    = false
+  force_destroy    = true
   inputs = {
     "agent" = "playground",
-    "name"  = "amir"
+    "name"  = "name"
   }
   description = "This is a sample environment created using Torque."
   tags = {
