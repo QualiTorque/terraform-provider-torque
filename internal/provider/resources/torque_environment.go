@@ -476,7 +476,7 @@ func (r *TorqueEnvironmentResource) Update(ctx context.Context, req resource.Upd
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	
+
 	if plan.EnvironmentName != state.EnvironmentName {
 		err := r.client.UpdateEnvironmentName(state.Space.ValueString(), state.Id.ValueString(), plan.EnvironmentName.ValueString())
 		if err != nil {
@@ -527,7 +527,7 @@ func (r *TorqueEnvironmentResource) Delete(ctx context.Context, req resource.Del
 	if err != nil {
 		new_err := r.client.ForceTerminateEnvironment(data.Space.ValueString(), data.Id.ValueString())
 		if new_err != nil {
-			resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to force terminate Environment, got error: %s", err))
+			resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to force terminate Environment, got error: %s", new_err))
 			return
 		}
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to terminate Environment, got error: %s", err))
