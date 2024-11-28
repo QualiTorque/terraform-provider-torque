@@ -9,7 +9,10 @@ description: |-
   	### Supported Updates:
   	- Environment name
   	- Collaborators
-  	- Force destroy - Whether the environment should be force terminated upon failure to terminate it.
+  	- Force destroy - Whether the environment should be force terminated upon failure to terminate it.,
+  	
+  	### Limitations:
+  	- Environment duration cannot be extended.
 ---
 
 # torque_environment (Resource)
@@ -21,7 +24,10 @@ Warning: This terraform resource is still in Beta.
 		### Supported Updates:
 		- Environment name
 		- Collaborators
-		- Force destroy - Whether the environment should be force terminated upon failure to terminate it.
+		- Force destroy - Whether the environment should be force terminated upon failure to terminate it.,
+		
+		### Limitations:
+		- Environment duration cannot be extended.
 
 ## Example Usage
 
@@ -34,13 +40,20 @@ terraform {
   }
 }
 
+provider "torque" {
+  host  = "https://portal.qtorque.io/"
+  space = "space"
+  token = "111111111111"
+}
+
+
 resource "torque_environment" "example" {
   blueprint_name   = "Hello World"
-  environment_name = "Sample Environment1"
-  owner_email      = "amir.r@quali.com"
-  # duration         = "PT2H" # ISO 8601 duration format
-  space         = "amir"
-  force_destroy = true #TODO
+  environment_name = "Sample Environment"
+  owner_email      = "someone@company.com"
+  duration         = "PT2H" # ISO 8601 duration format - must not be specified together with scheduled_end_time. Both can be omitted to create always-on environment.
+  space            = "MySpace"
+  force_destroy    = false
   inputs = {
     "agent" = "playground",
     "name"  = "amir"
@@ -59,26 +72,26 @@ resource "torque_environment" "example" {
     branch          = "main"
     commit          = "abcd1234"
   }
-  # scheduled_end_time = "2024-12-31T23:59:59Z"
-  # workflows = [
-  #   {
-  #     name = "sample-workflow"
+  scheduled_end_time = "2024-12-31T23:59:59Z" # must not be specified together with duration. Both can be omitted to create always-on environment.
+  workflows = [                               # built-in Torque Workflows
+    {
+      name = "sample-workflow"
 
-  #     schedules = [
-  #       {
-  #         scheduler  = "0 12 * * *" # CRON expression for scheduling
-  #         overridden = true
-  #       }
-  #     ]
+      schedules = [
+        {
+          scheduler  = "0 12 * * *" # CRON expression for scheduling
+          overridden = true
+        }
+      ]
 
-  #     reminder = 15 # in minutes before execution
+      reminder = 15 # in minutes before execution
 
-  #     inputs_overrides = {
-  #       "key1" = "value1"
-  #       "key2" = "value2"
-  #     }
-  #   }
-  # ]
+      inputs_overrides = {
+        "key1" = "value1"
+        "key2" = "value2"
+      }
+    }
+  ]
 }
 ```
 
