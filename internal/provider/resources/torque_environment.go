@@ -71,6 +71,7 @@ type TorqueEnvironmentResourceModel struct {
 	Tags             types.Map             `tfsdk:"tags"`
 	Collaborators    *CollaboratorsModel   `tfsdk:"collaborators"`
 	Automation       types.Bool            `tfsdk:"automation"`
+	ForceDestroy     types.Bool            `tfsdk:"force_destroy"`
 	ScheduledEndTime types.String          `tfsdk:"scheduled_end_time"`
 	Duration         types.String          `tfsdk:"duration"`
 	BlueprintSource  *BlueprintSourceModel `tfsdk:"blueprint_source"`
@@ -84,7 +85,17 @@ func (r *TorqueEnvironmentResource) Metadata(ctx context.Context, req resource.M
 func (r *TorqueEnvironmentResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "Warning: This terraform resource is still in Beta. Creation of a new Torque Environment",
+		MarkdownDescription: `Warning: This terraform resource is still in Beta.
+
+		Launches a new Torque Environment from an existing blueprint.
+		
+		### Supported Updates:
+		- Environment name
+		- Collaborators
+		- Force destroy - Whether the environment should be force terminated upon failure to terminate it.,
+		
+		### Limitations:
+		- Environment duration cannot be extended.`,
 
 		Attributes: map[string]schema.Attribute{
 			"blueprint_name": schema.StringAttribute{
@@ -204,14 +215,10 @@ func (r *TorqueEnvironmentResource) Schema(ctx context.Context, req resource.Sch
 				MarkdownDescription: "Indicates if the environment was launched from automation using integrated pipeline tool, For example: Jenkins, GitHub Actions and GitLal CI.",
 				Required:            false,
 				Computed:            true,
-				// Optional:            true,
 				Default:             booldefault.StaticBool(true),
-				// PlanModifiers: []planmodifier.Bool{
-				// 	boolplanmodifier.RequiresReplace(),
-				// },
 			},
 			"force_destroy": schema.BoolAttribute{
-				MarkdownDescription: "Indicates whether the environment should be force terminated if errors occured during the initial teardown.",
+				MarkdownDescription: "Indicates whether the environment should be force terminated if any errors occurred during the initial teardown.",
 				Required:            false,
 				Computed:            true,
 				Optional:            true,
@@ -394,15 +401,6 @@ func (r *TorqueEnvironmentResource) Create(ctx context.Context, req resource.Cre
 	}
 	data.Id = types.StringValue(id)
 
-	// owner_email, ok := responseBody["owner_email"]
-	// if !ok {
-	// 	resp.Diagnostics.AddError("Owner email error", "Owner does not exist")
-	// 	return
-	// }
-	// if owner_email != "" {
-	// 	data.OwnerEmail = types.StringValue(owner_email)
-	// }
-
 	tflog.Trace(ctx, "Resource Created Successful!")
 
 	// Save data into Terraform state.
@@ -478,9 +476,8 @@ func (r *TorqueEnvironmentResource) Update(ctx context.Context, req resource.Upd
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	plan.Id = state.Id
+	
 	if plan.EnvironmentName != state.EnvironmentName {
-		// Call the specific API for handling environment name changes
 		err := r.client.UpdateEnvironmentName(state.Space.ValueString(), state.Id.ValueString(), plan.EnvironmentName.ValueString())
 		if err != nil {
 			resp.Diagnostics.AddError(
@@ -511,33 +508,8 @@ func (r *TorqueEnvironmentResource) Update(ctx context.Context, req resource.Upd
 			return
 		}
 	}
-
-	// if !plan.Collaborators.Equal(state.Collaborators.AllSpaceMembers) {
-	// 	// The collaborators attribute has changed, call the API to update
-	// 	err := r.updateCollaboratorsAPI(ctx, plan.Collaborators)
-	// 	if err != nil {
-	// 		resp.Diagnostics.AddError(
-	// 			"Error Updating Collaborators",
-	// 			fmt.Sprintf("Could not update collaborators: %s", err),
-	// 		)
-	// 		return
-	// 	}
-	// }
-	// // If applicable, this is a great opportunity to initialize any necessary
-	// // provider client data and make a call using it.
-	// // httpResp, err := r.client.Do(httpReq)
-	// // if err != nil {
-	// //     resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update example, got error: %s", err))
-	// //     return
-	// // }
-
 	// Save updated data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
-	// Do not permit changes in environment resource
-	// resp.Diagnostics.AddError(
-	// 	"Resource updates of resource type torque_environment are not permitted",
-	// 	"Cannot change details of torque_environment, use terraform destroy to delete it or create a new one",
-	// )
 }
 
 func (r *TorqueEnvironmentResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
@@ -553,6 +525,11 @@ func (r *TorqueEnvironmentResource) Delete(ctx context.Context, req resource.Del
 	// Terminate the Environment.
 	err := r.client.TerminateEnvironment(data.Space.ValueString(), data.Id.ValueString())
 	if err != nil {
+		new_err := r.client.ForceTerminateEnvironment(data.Space.ValueString(), data.Id.ValueString())
+		if new_err != nil {
+			resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to force terminate Environment, got error: %s", err))
+			return
+		}
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to terminate Environment, got error: %s", err))
 		return
 	}

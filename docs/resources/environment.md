@@ -3,12 +3,25 @@
 page_title: "torque_environment Resource - terraform-provider-torque"
 subcategory: ""
 description: |-
-  Warning: This terraform resource is still in Beta. Creation of a new Torque Environment
+  Warning: This terraform resource is still in Beta.
+  	Launches a new Torque Environment from an existing blueprint.
+  	
+  	### Supported Updates:
+  	- Environment name
+  	- Collaborators
+  	- Force destroy - Whether the environment should be force terminated upon failure to terminate it.
 ---
 
 # torque_environment (Resource)
 
-Warning: This terraform resource is still in Beta. Creation of a new Torque Environment
+Warning: This terraform resource is still in Beta.
+
+		Launches a new Torque Environment from an existing blueprint.
+		
+		### Supported Updates:
+		- Environment name
+		- Collaborators
+		- Force destroy - Whether the environment should be force terminated upon failure to terminate it.
 
 ## Example Usage
 
@@ -26,8 +39,8 @@ resource "torque_environment" "example" {
   environment_name = "Sample Environment1"
   owner_email      = "amir.r@quali.com"
   # duration         = "PT2H" # ISO 8601 duration format
-  space = "amir"
-  # destroy          = true #TODO
+  space         = "amir"
+  force_destroy = true #TODO
   inputs = {
     "agent" = "playground",
     "name"  = "amir"
@@ -47,7 +60,6 @@ resource "torque_environment" "example" {
     commit          = "abcd1234"
   }
   # scheduled_end_time = "2024-12-31T23:59:59Z"
-  automation = true
   # workflows = [
   #   {
   #     name = "sample-workflow"
@@ -80,12 +92,11 @@ resource "torque_environment" "example" {
 
 ### Optional
 
-- `automation` (Boolean) Indicates if the environment was launched from automation using integrated pipeline tool, For example: Jenkins, GitHub Actions and GitLal CI.
 - `blueprint_source` (Attributes) Additional details about the blueprint repository to be used. By default, this information is taken from the repository already confiured in the space. (see [below for nested schema](#nestedatt--blueprint_source))
 - `collaborators` (Object) Object of collaborators to add to the environment. Provide collaborators_emails list of strings representing emails of users in the account or set all_space_users to true to add everyone in the space (see [below for nested schema](#nestedatt--collaborators))
 - `description` (String) The new environment description that will be presented in the Torque following the launch of the environment.
 - `duration` (String) Environment duration time in ISO 8601 format: 'P{days}DT{hours}H{minutes}M{seconds}S]]' For example, P0DT2H3M4S. NOTE: Environment request cannot include both 'duration' and 'scheduled_end_time' fields.  If both are not specified the environment will be always on.
-- `force_destroy` (Boolean) Indicates whether the environment should be force terminated if errors occured during the initial teardown.
+- `force_destroy` (Boolean) Indicates whether the environment should be force terminated if any errors occurred during the initial teardown.
 - `inputs` (Map of String) Dictionary of key-value string pairs that will be used as values for the blueprint inputs. In case a value is not provided the input default value will be used. If a default value is not set, a validation error will be thrown upon launch. For example: { 'region': 'eu-west-1', 'application version': '1.0.8' }
 - `owner_email` (String) The email of the user that should be set as the owner of the new environment. if omitted the current user will be used.
 - `scheduled_end_time` (String) Environment scheduled end time in ISO 8601 format For example, 2021-10-06T08:27:05.215Z. NOTE: Environment request cannot include both 'duration' and 'scheduled_end_time' fields. If both are not specified the environment will be always on.
@@ -95,6 +106,7 @@ resource "torque_environment" "example" {
 
 ### Read-Only
 
+- `automation` (Boolean) Indicates if the environment was launched from automation using integrated pipeline tool, For example: Jenkins, GitHub Actions and GitLal CI.
 - `id` (String) Id of the environment
 
 <a id="nestedatt--blueprint_source"></a>
