@@ -12,7 +12,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
@@ -143,9 +143,6 @@ func (r *TorqueEnvironmentResource) Schema(ctx context.Context, req resource.Sch
 				Computed:            false,
 				Optional:            true,
 				Required:            false,
-				// PlanModifiers: []planmodifier.Object{
-				// 	objectplanmodifier.RequiresReplace(),
-				// },
 				AttributeTypes: map[string]attr.Type{
 					"collaborators_emails": types.ListType{
 						ElemType: types.StringType,
@@ -206,20 +203,25 @@ func (r *TorqueEnvironmentResource) Schema(ctx context.Context, req resource.Sch
 			"automation": schema.BoolAttribute{
 				MarkdownDescription: "Indicates if the environment was launched from automation using integrated pipeline tool, For example: Jenkins, GitHub Actions and GitLal CI.",
 				Required:            false,
-				Computed:            false,
+				Computed:            true,
+				// Optional:            true,
+				Default:             booldefault.StaticBool(true),
+				// PlanModifiers: []planmodifier.Bool{
+				// 	boolplanmodifier.RequiresReplace(),
+				// },
+			},
+			"force_destroy": schema.BoolAttribute{
+				MarkdownDescription: "Indicates whether the environment should be force terminated if errors occured during the initial teardown.",
+				Required:            false,
+				Computed:            true,
 				Optional:            true,
-				PlanModifiers: []planmodifier.Bool{
-					boolplanmodifier.RequiresReplace(),
-				},
+				Default:             booldefault.StaticBool(false),
 			},
 			"id": schema.StringAttribute{
 				MarkdownDescription: "Id of the environment",
 				Required:            false,
 				Optional:            false,
 				Computed:            true,
-				PlanModifiers:       []planmodifier.String{
-					// No need for RequiresReplace or anything else that will trigger changes.
-				},
 			},
 			"owner_email": schema.StringAttribute{
 				MarkdownDescription: "The email of the user that should be set as the owner of the new environment. if omitted the current user will be used.",
