@@ -38,7 +38,7 @@ resource "torque_environment" "example" {
   }
   collaborators = {
     collaborators_emails = []
-    all_space_members    = false
+    all_space_members    = true
   }
   blueprint_source = {
     blueprint_name  = "custom-blueprint"
@@ -76,22 +76,25 @@ resource "torque_environment" "example" {
 ### Required
 
 - `blueprint_name` (String) Name of the Torque blueprint that the torque environment will be launched from.
-- `environment_name` (String) The name for the newly created environment. Environment name can contain any character including special character and spaces.
+- `environment_name` (String) The name for the newly created environment. Environment name can contain any character including special character and spaces and doesn't have to be unique.
 
 ### Optional
 
 - `automation` (Boolean) Indicates if the environment was launched from automation using integrated pipeline tool, For example: Jenkins, GitHub Actions and GitLal CI.
 - `blueprint_source` (Attributes) Additional details about the blueprint repository to be used. By default, this information is taken from the repository already confiured in the space. (see [below for nested schema](#nestedatt--blueprint_source))
 - `collaborators` (Object) Object of collaborators to add to the environment. Provide collaborators_emails list of strings representing emails of users in the account or set all_space_users to true to add everyone in the space (see [below for nested schema](#nestedatt--collaborators))
-- `description` (String) The new environment description that will be presented in the Torque UI following the launch of the environment.
+- `description` (String) The new environment description that will be presented in the Torque following the launch of the environment.
 - `duration` (String) Environment duration time in ISO 8601 format: 'P{days}DT{hours}H{minutes}M{seconds}S]]' For example, P0DT2H3M4S. NOTE: Environment request cannot include both 'duration' and 'scheduled_end_time' fields.  If both are not specified the environment will be always on.
-- `id` (String) Id of the environment
 - `inputs` (Map of String) Dictionary of key-value string pairs that will be used as values for the blueprint inputs. In case a value is not provided the input default value will be used. If a default value is not set, a validation error will be thrown upon launch. For example: { 'region': 'eu-west-1', 'application version': '1.0.8' }
 - `owner_email` (String) The email of the user that should be set as the owner of the new environment. if omitted the current user will be used.
 - `scheduled_end_time` (String) Environment scheduled end time in ISO 8601 format For example, 2021-10-06T08:27:05.215Z. NOTE: Environment request cannot include both 'duration' and 'scheduled_end_time' fields. If both are not specified the environment will be always on.
 - `space` (String) The space where this environment will be launched
 - `tags` (Map of String) Environment blueprint tags /// Dictionary of key-value string pairs that will be used to tag deployed resources in the environment. In case a configured tag value is not provided the tag default value will be used. Note that tags that were configured in the account and space level will be set regardless of this field. For example: { 'activity_type': 'demo'}
 - `workflows` (Attributes List) Array of workflows that will be attached and enabled on the new environment. (see [below for nested schema](#nestedatt--workflows))
+
+### Read-Only
+
+- `id` (String) Id of the environment
 
 <a id="nestedatt--blueprint_source"></a>
 ### Nested Schema for `blueprint_source`

@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"reflect"
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
@@ -142,9 +143,9 @@ func (r *TorqueEnvironmentResource) Schema(ctx context.Context, req resource.Sch
 				Computed:            false,
 				Optional:            true,
 				Required:            false,
-				PlanModifiers: []planmodifier.Object{
-					objectplanmodifier.RequiresReplace(),
-				},
+				// PlanModifiers: []planmodifier.Object{
+				// 	objectplanmodifier.RequiresReplace(),
+				// },
 				AttributeTypes: map[string]attr.Type{
 					"collaborators_emails": types.ListType{
 						ElemType: types.StringType,
@@ -214,8 +215,11 @@ func (r *TorqueEnvironmentResource) Schema(ctx context.Context, req resource.Sch
 			"id": schema.StringAttribute{
 				MarkdownDescription: "Id of the environment",
 				Required:            false,
-				Optional:            true,
+				Optional:            false,
 				Computed:            true,
+				PlanModifiers:       []planmodifier.String{
+					// No need for RequiresReplace or anything else that will trigger changes.
+				},
 			},
 			"owner_email": schema.StringAttribute{
 				MarkdownDescription: "The email of the user that should be set as the owner of the new environment. if omitted the current user will be used.",
@@ -388,14 +392,14 @@ func (r *TorqueEnvironmentResource) Create(ctx context.Context, req resource.Cre
 	}
 	data.Id = types.StringValue(id)
 
-	owner_email, ok := responseBody["owner_email"]
-	if !ok {
-		resp.Diagnostics.AddError("Owner email error", "Owner does not exist")
-		return
-	}
-	if owner_email != "" {
-		data.OwnerEmail = types.StringValue(owner_email)
-	}
+	// owner_email, ok := responseBody["owner_email"]
+	// if !ok {
+	// 	resp.Diagnostics.AddError("Owner email error", "Owner does not exist")
+	// 	return
+	// }
+	// if owner_email != "" {
+	// 	data.OwnerEmail = types.StringValue(owner_email)
+	// }
 
 	tflog.Trace(ctx, "Resource Created Successful!")
 
@@ -404,46 +408,46 @@ func (r *TorqueEnvironmentResource) Create(ctx context.Context, req resource.Cre
 }
 
 func (r *TorqueEnvironmentResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
-	var data TorqueEnvironmentResourceModel
-	var state TorqueEnvironmentResourceModel
+	// var data TorqueEnvironmentResourceModel
+	// var state TorqueEnvironmentResourceModel
 
-	resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
-	if resp.Diagnostics.HasError() {
-		return
-	}
+	// resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
+	// if resp.Diagnostics.HasError() {
+	// 	return
+	// }
 
-	environment_data, _, err := r.client.GetEnvironmentDetails(state.Space.ValueString(), state.Id.ValueString())
-	if err != nil {
-		resp.Diagnostics.AddError(
-			"Unable to Read Torque environment",
-			err.Error(),
-		)
-		return
-	}
-	data.EnvironmentName = types.StringValue(environment_data.Details.Definition.Metadata.Name)
-	data.BlueprintName = types.StringValue(environment_data.Details.Definition.Metadata.BlueprintName)
-	data.Space = types.StringValue(environment_data.Details.Definition.Metadata.SpaceName)
-	data.Id = types.StringValue(environment_data.Details.Id)
-	data.OwnerEmail = types.StringValue(environment_data.Owner.OwnerEmail)
-	data.Description = state.Description
-	inputs := make(map[string]types.String)
-	for _, input := range environment_data.Details.Definition.Inputs {
-		inputs[input.Name] = types.StringValue(input.Value)
-	}
-	data.Inputs, _ = types.MapValueFrom(ctx, types.StringType, inputs)
+	// environment_data, _, err := r.client.GetEnvironmentDetails(state.Space.ValueString(), state.Id.ValueString())
+	// if err != nil {
+	// 	resp.Diagnostics.AddError(
+	// 		"Unable to Read Torque environment",
+	// 		err.Error(),
+	// 	)
+	// 	return
+	// }
+	// data.EnvironmentName = types.StringValue(environment_data.Details.Definition.Metadata.Name)
+	// data.BlueprintName = types.StringValue(environment_data.Details.Definition.Metadata.BlueprintName)
+	// data.Space = types.StringValue(environment_data.Details.Definition.Metadata.SpaceName)
+	// data.Id = types.StringValue(environment_data.Details.Id)
+	// data.OwnerEmail = types.StringValue(environment_data.Owner.OwnerEmail)
+	// data.Description = state.Description
+	// inputs := make(map[string]types.String)
+	// for _, input := range environment_data.Details.Definition.Inputs {
+	// 	inputs[input.Name] = types.StringValue(input.Value)
+	// }
+	// data.Inputs, _ = types.MapValueFrom(ctx, types.StringType, inputs)
 
-	tags := make(map[string]types.String)
-	for _, tag := range environment_data.Details.Definition.Tags {
-		tags[tag.Name] = types.StringValue(tag.Value)
-	}
-	data.Tags, _ = types.MapValueFrom(ctx, types.StringType, tags)
+	// tags := make(map[string]types.String)
+	// for _, tag := range environment_data.Details.Definition.Tags {
+	// 	tags[tag.Name] = types.StringValue(tag.Value)
+	// }
+	// data.Tags, _ = types.MapValueFrom(ctx, types.StringType, tags)
 
-	data.Collaborators = nil
-	data.Automation = types.BoolValue(environment_data.IsEAC)
-	data.ScheduledEndTime = types.StringValue("")
-	data.Duration = types.StringValue("")
-	data.BlueprintSource = nil
-	data.Workflows = nil
+	// data.Collaborators = nil
+	// data.Automation = types.BoolValue(environment_data.IsEAC)
+	// data.ScheduledEndTime = types.StringValue("")
+	// data.Duration = types.StringValue("")
+	// data.BlueprintSource = nil
+	// data.Workflows = nil
 
 	// If applicable, this is a great opportunity to initialize any necessary
 	// provider client data and make a call using it.
@@ -454,38 +458,68 @@ func (r *TorqueEnvironmentResource) Read(ctx context.Context, req resource.ReadR
 	// }
 
 	// Save updated data into Terraform state.
-	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
+	// resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
 func (r *TorqueEnvironmentResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 	var plan TorqueEnvironmentResourceModel
-	// var state TorqueEnvironmentResourceModel
-	// // Read Terraform plan data into the model
-	// resp.Diagnostics.Append(req.Plan.Get(ctx, &plan)...)
-	// if resp.Diagnostics.HasError() {
-	// 	return
-	// }
+	var state TorqueEnvironmentResourceModel
+	plan.Id = state.Id
+	// Read Terraform plan data into the model
+	resp.Diagnostics.Append(req.Plan.Get(ctx, &plan)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
 
-	// // Read Terraform state data into the model
-	// resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
-	// if resp.Diagnostics.HasError() {
-	// 	return
-	// }
-	// plan.Id = state.Id
-	// if plan.EnvironmentName != state.EnvironmentName {
-	// 	// Call the specific API for handling environment name changes
-	// 	err := r.client.UpdateEnvironmentName(state.Space.ValueString(), state.Id.ValueString(), plan.EnvironmentName.ValueString())
+	// Read Terraform state data into the model
+	resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+	plan.Id = state.Id
+	if plan.EnvironmentName != state.EnvironmentName {
+		// Call the specific API for handling environment name changes
+		err := r.client.UpdateEnvironmentName(state.Space.ValueString(), state.Id.ValueString(), plan.EnvironmentName.ValueString())
+		if err != nil {
+			resp.Diagnostics.AddError(
+				"Environment update failed",
+				fmt.Sprintf("Failed to update environment name from '%s' to '%s': %s",
+					state.EnvironmentName, plan.EnvironmentName, err.Error()),
+			)
+			return
+		}
+	}
+	if resp.Diagnostics.HasError() {
+		return
+	}
+	if plan.Collaborators.AllSpaceMembers != state.Collaborators.AllSpaceMembers || !reflect.DeepEqual(plan.Collaborators.CollaboratorsEmails, state.Collaborators.CollaboratorsEmails) {
+		collaborators_emails := []string{}
+		if !plan.Collaborators.CollaboratorsEmails.IsNull() {
+			for _, label := range plan.Collaborators.CollaboratorsEmails.Elements() {
+				collaborators_emails = append(collaborators_emails, strings.Trim(label.String(), "\""))
+			}
+		}
+		err := r.client.UpdateEnvironmentCollaborators(state.Space.ValueString(), state.Id.ValueString(), collaborators_emails, plan.Collaborators.AllSpaceMembers.ValueBool())
+		if err != nil {
+			resp.Diagnostics.AddError(
+				"Environment update failed",
+				fmt.Sprintf("Failed to update environment name from '%s' to '%s': %s",
+					state.EnvironmentName, plan.EnvironmentName, err.Error()),
+			)
+			return
+		}
+	}
+
+	// if !plan.Collaborators.Equal(state.Collaborators.AllSpaceMembers) {
+	// 	// The collaborators attribute has changed, call the API to update
+	// 	err := r.updateCollaboratorsAPI(ctx, plan.Collaborators)
 	// 	if err != nil {
 	// 		resp.Diagnostics.AddError(
-	// 			"Environment update failed",
-	// 			fmt.Sprintf("Failed to update environment name from '%s' to '%s': %s",
-	// 				state.EnvironmentName, plan.EnvironmentName, err.Error()),
+	// 			"Error Updating Collaborators",
+	// 			fmt.Sprintf("Could not update collaborators: %s", err),
 	// 		)
 	// 		return
 	// 	}
-	// }
-	// if resp.Diagnostics.HasError() {
-	// 	return
 	// }
 	// // If applicable, this is a great opportunity to initialize any necessary
 	// // provider client data and make a call using it.

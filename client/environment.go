@@ -87,6 +87,31 @@ func (c *Client) UpdateEnvironmentName(Space string, Id string, Name string) err
 	return nil
 }
 
+func (c *Client) UpdateEnvironmentCollaborators(Space string, Id string, CollaboratorsEmails []string, AllSpaceMembers bool) error {
+	collaborators := Collaborators{
+		Collaborators:   CollaboratorsEmails,
+		AllSpaceMembers: AllSpaceMembers,
+	}
+	payload, err := json.Marshal(collaborators)
+	if err != nil {
+		log.Fatalf("impossible to marshall Environment: %s", err)
+	}
+	req, err := http.NewRequest("PUT", fmt.Sprintf("%sapi/spaces/%s/environments/%s/collaborators", c.HostURL, Space, Id), bytes.NewReader(payload))
+	if err != nil {
+		return err
+	}
+
+	req.Header.Add("Content-Type", "application/json")
+	req.Header.Add("Accept", "application/json")
+
+	_, err = c.doRequest(req, &c.Token)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (c *Client) TerminateEnvironment(Space string, Id string) error {
 	fmt.Println(c.HostURL + "api/spaces/" + Space + "/environments/" + Id)
 
