@@ -12,10 +12,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -94,7 +94,7 @@ func (r *TorqueEnvironmentResource) Schema(ctx context.Context, req resource.Sch
 				},
 			},
 			"environment_name": schema.StringAttribute{
-				MarkdownDescription: "The name for the newly created environment. Environment name can contain any character including special character and spaces.",
+				MarkdownDescription: "The name for the newly created environment. Environment name can contain any character including special character and spaces and doesn't have to be unique.",
 				Required:            true,
 			},
 			"duration": schema.StringAttribute{
@@ -106,6 +106,9 @@ func (r *TorqueEnvironmentResource) Schema(ctx context.Context, req resource.Sch
 					stringvalidator.ConflictsWith(path.Expressions{
 						path.MatchRoot("scheduled_end_time"),
 					}...),
+				},
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.RequiresReplace(),
 				},
 			},
 			"inputs": schema.MapAttribute{
@@ -119,7 +122,7 @@ func (r *TorqueEnvironmentResource) Schema(ctx context.Context, req resource.Sch
 				},
 			},
 			"description": schema.StringAttribute{
-				MarkdownDescription: "The new environment description that will be presented in the Torque UI following the launch of the environment.",
+				MarkdownDescription: "The new environment description that will be presented in the Torque following the launch of the environment.",
 				Required:            false,
 				Computed:            false,
 				Optional:            true,
@@ -139,6 +142,9 @@ func (r *TorqueEnvironmentResource) Schema(ctx context.Context, req resource.Sch
 				Computed:            false,
 				Optional:            true,
 				Required:            false,
+				PlanModifiers: []planmodifier.Object{
+					objectplanmodifier.RequiresReplace(),
+				},
 				AttributeTypes: map[string]attr.Type{
 					"collaborators_emails": types.ListType{
 						ElemType: types.StringType,
@@ -192,6 +198,9 @@ func (r *TorqueEnvironmentResource) Schema(ctx context.Context, req resource.Sch
 						path.MatchRoot("duration"),
 					}...),
 				},
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.RequiresReplace(),
+				},
 			},
 			"automation": schema.BoolAttribute{
 				MarkdownDescription: "Indicates if the environment was launched from automation using integrated pipeline tool, For example: Jenkins, GitHub Actions and GitLal CI.",
@@ -216,13 +225,15 @@ func (r *TorqueEnvironmentResource) Schema(ctx context.Context, req resource.Sch
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.RequiresReplace(),
 				},
-				Default: stringdefault.StaticString("someemail@quali.com"),
 			},
 			"workflows": schema.ListNestedAttribute{
 				MarkdownDescription: "Array of workflows that will be attached and enabled on the new environment.",
 				Required:            false,
 				Computed:            false,
 				Optional:            true,
+				PlanModifiers: []planmodifier.List{
+					listplanmodifier.RequiresReplace(),
+				},
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
 						"name": schema.StringAttribute{
@@ -377,14 +388,14 @@ func (r *TorqueEnvironmentResource) Create(ctx context.Context, req resource.Cre
 	}
 	data.Id = types.StringValue(id)
 
-	// owner_email, ok := responseBody["owner_email"]
-	// if !ok {
-	// 	resp.Diagnostics.AddError("Owner email error", "Owner does not exist")
-	// 	return
-	// }
-	// if owner_email != "" {
-	// 	data.OwnerEmail = types.StringValue(owner_email)
-	// }
+	owner_email, ok := responseBody["owner_email"]
+	if !ok {
+		resp.Diagnostics.AddError("Owner email error", "Owner does not exist")
+		return
+	}
+	if owner_email != "" {
+		data.OwnerEmail = types.StringValue(owner_email)
+	}
 
 	tflog.Trace(ctx, "Resource Created Successful!")
 
@@ -448,34 +459,34 @@ func (r *TorqueEnvironmentResource) Read(ctx context.Context, req resource.ReadR
 
 func (r *TorqueEnvironmentResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 	var plan TorqueEnvironmentResourceModel
-	var state TorqueEnvironmentResourceModel
-	// Read Terraform plan data into the model
-	resp.Diagnostics.Append(req.Plan.Get(ctx, &plan)...)
-	if resp.Diagnostics.HasError() {
-		return
-	}
+	// var state TorqueEnvironmentResourceModel
+	// // Read Terraform plan data into the model
+	// resp.Diagnostics.Append(req.Plan.Get(ctx, &plan)...)
+	// if resp.Diagnostics.HasError() {
+	// 	return
+	// }
 
-	// Read Terraform state data into the model
-	resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
-	if resp.Diagnostics.HasError() {
-		return
-	}
-	plan.Id = state.Id
-	if plan.EnvironmentName != state.EnvironmentName {
-		// Call the specific API for handling environment name changes
-		err := r.client.UpdateEnvironmentName(state.Space.ValueString(), state.Id.ValueString(), plan.EnvironmentName.ValueString())
-		if err != nil {
-			resp.Diagnostics.AddError(
-				"Environment update failed",
-				fmt.Sprintf("Failed to update environment name from '%s' to '%s': %s",
-					state.EnvironmentName, plan.EnvironmentName, err.Error()),
-			)
-			return
-		}
-	}
-	if resp.Diagnostics.HasError() {
-		return
-	}
+	// // Read Terraform state data into the model
+	// resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
+	// if resp.Diagnostics.HasError() {
+	// 	return
+	// }
+	// plan.Id = state.Id
+	// if plan.EnvironmentName != state.EnvironmentName {
+	// 	// Call the specific API for handling environment name changes
+	// 	err := r.client.UpdateEnvironmentName(state.Space.ValueString(), state.Id.ValueString(), plan.EnvironmentName.ValueString())
+	// 	if err != nil {
+	// 		resp.Diagnostics.AddError(
+	// 			"Environment update failed",
+	// 			fmt.Sprintf("Failed to update environment name from '%s' to '%s': %s",
+	// 				state.EnvironmentName, plan.EnvironmentName, err.Error()),
+	// 		)
+	// 		return
+	// 	}
+	// }
+	// if resp.Diagnostics.HasError() {
+	// 	return
+	// }
 	// // If applicable, this is a great opportunity to initialize any necessary
 	// // provider client data and make a call using it.
 	// // httpResp, err := r.client.Do(httpReq)
