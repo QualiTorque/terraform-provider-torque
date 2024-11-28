@@ -464,19 +464,17 @@ func (r *TorqueEnvironmentResource) Read(ctx context.Context, req resource.ReadR
 func (r *TorqueEnvironmentResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 	var plan TorqueEnvironmentResourceModel
 	var state TorqueEnvironmentResourceModel
-	plan.Id = state.Id
 	// Read Terraform plan data into the model
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &plan)...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
-
 	// Read Terraform state data into the model
 	resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
-
+	plan.Id = state.Id
 	if plan.EnvironmentName != state.EnvironmentName {
 		err := r.client.UpdateEnvironmentName(state.Space.ValueString(), state.Id.ValueString(), plan.EnvironmentName.ValueString())
 		if err != nil {
@@ -514,14 +512,17 @@ func (r *TorqueEnvironmentResource) Update(ctx context.Context, req resource.Upd
 
 func (r *TorqueEnvironmentResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
 	var data TorqueEnvironmentResourceModel
-
+	// var env *client.Environment
 	// Read Terraform prior state data into the model.
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
 
 	if resp.Diagnostics.HasError() {
 		return
 	}
-
+	env, _, env_error := r.client.GetEnvironmentDetails(data.Space.ValueString(), data.Id.ValueString())
+	if env.Details.State. {
+		return
+	}
 	// Terminate the Environment.
 	err := r.client.TerminateEnvironment(data.Space.ValueString(), data.Id.ValueString())
 	if err != nil {
