@@ -22,7 +22,7 @@ const (
 	has_access_to_all_spaces = "true"
 	account_role             = "Admin"
 	permission               = "MANAGE_ACCOUNT"
-	permissions_length       = "17"
+	permissions_length       = "20"
 	non_existent_user        = "nonexistent@example.com"
 	timezone                 = ""
 )
