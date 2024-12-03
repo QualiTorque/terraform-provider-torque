@@ -8,6 +8,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/qualitorque/terraform-provider-torque/client"
@@ -46,10 +48,16 @@ func (r *TorqueTagBlueprintValueAssociationResource) Schema(ctx context.Context,
 			"space_name": schema.StringAttribute{
 				MarkdownDescription: "Existing Torque Space name",
 				Required:            true,
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.RequiresReplace(),
+				},
 			},
 			"tag_name": schema.StringAttribute{
 				Description: "The Tag name configured at the account level with a 'blueprint' scope",
 				Required:    true,
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.RequiresReplace(),
+				},
 			},
 			"tag_value": schema.StringAttribute{
 				Description: "The tag value to be set for the blueprint",
@@ -58,6 +66,9 @@ func (r *TorqueTagBlueprintValueAssociationResource) Schema(ctx context.Context,
 			"blueprint_name": schema.StringAttribute{
 				Description: "The blueprint to be used",
 				Required:    true,
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.RequiresReplace(),
+				},
 			},
 			"repository_name": schema.StringAttribute{
 				Description: "The blueprint repository where the blueprint is stored. for \"stored in Torque\" use 'qtorque'",
