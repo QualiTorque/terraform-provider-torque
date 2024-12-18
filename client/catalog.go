@@ -79,3 +79,32 @@ func (c *Client) EditCatalogItemLabels(space_name string, blueprint_name string,
 
 	return nil
 }
+
+func (c *Client) AllowLaunch(blueprint_name string, repository_name string, space_name string, launch_allowed bool) error {
+	data := WorkflowRequest{
+		BlueprintName:  blueprint_name,
+		RepositoryName: repository_name,
+		SpaceName:      space_name,
+		LaunchAllowed:  launch_allowed,
+	}
+
+	payload, err := json.Marshal(data)
+	if err != nil {
+		log.Fatalf("impossible to marshall workflow request: %s", err)
+	}
+
+	req, err := http.NewRequest("PUT", fmt.Sprintf("%sapi/spaces/%s/catalog/launch_allowed", c.HostURL, space_name), bytes.NewReader(payload))
+	if err != nil {
+		return err
+	}
+
+	req.Header.Add("Content-Type", "application/json")
+	req.Header.Add("Accept", "application/json")
+
+	_, err = c.doRequest(req, &c.Token)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}

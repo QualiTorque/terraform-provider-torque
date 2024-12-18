@@ -400,3 +400,10 @@ type EnvironmentRequest struct {
 	BlueprintSource  BlueprintSource       `json:"blueprint_source"`
 	Workflows        []EnvironmentWorkflow `json:"workflows"`
 }
+
+type WorkflowRequest struct {
+	BlueprintName  string `json:"blueprint_name"`
+	RepositoryName string `json:"repository_name"`
+	SpaceName      string `json:"space_name"`
+	LaunchAllowed  bool   `json:"launch_allowed"`
+}
