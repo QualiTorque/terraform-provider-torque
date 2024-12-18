@@ -7,8 +7,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/qualitorque/terraform-provider-torque/client"
 )
 
@@ -30,7 +31,7 @@ type TorqueWorkflowResourceModel struct {
 	Name          types.String `tfsdk:"name"`
 	SpaceName     types.String `tfsdk:"space_name"`
 	RepoName      types.String `tfsdk:"repository_name"`
-	LaunchAllowed types.String `tfsdk:"launch_allowed"`
+	LaunchAllowed types.Bool   `tfsdk:"launch_allowed"`
 }
 
 func (r *TorqueWorkflowResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
@@ -40,7 +41,7 @@ func (r *TorqueWorkflowResource) Metadata(ctx context.Context, req resource.Meta
 func (r *TorqueWorkflowResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "Enables an existing Torque workflow so it will be allowed to launch and executed.",
+		MarkdownDescription: "Enables an existing Torque workflow so it will be allowed to be launched and executed.",
 
 		Attributes: map[string]schema.Attribute{
 			"name": schema.StringAttribute{
@@ -48,24 +49,32 @@ func (r *TorqueWorkflowResource) Schema(ctx context.Context, req resource.Schema
 				Optional:            false,
 				Computed:            false,
 				Required:            true,
-			},
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.RequiresReplace(),
+				}},
 			"space_name": schema.StringAttribute{
 				MarkdownDescription: "Space the workflow belongs to",
 				Optional:            false,
 				Computed:            false,
 				Required:            true,
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.RequiresReplace(),
+				},
 			},
 			"repository_name": schema.StringAttribute{
 				MarkdownDescription: "Repository where the workflow source code is",
 				Optional:            false,
 				Computed:            false,
 				Required:            true,
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.RequiresReplace(),
+				},
 			},
-			"launch_allowed": schema.StringAttribute{
+			"launch_allowed": schema.BoolAttribute{
 				MarkdownDescription: "Indicates whether this workflow is enabled and allowed to be launched",
 				Optional:            false,
-				Computed:            false,
-				Required:            true,
+				Computed:            true,
+				Required:            false,
 			},
 		},
 	}
@@ -100,95 +109,23 @@ func (r *TorqueWorkflowResource) Create(ctx context.Context, req resource.Create
 		return
 	}
 
-	err := r.client.CreateSpace(data.Name.ValueString(), data.Color.ValueString(), data.Icon.ValueString())
+	data.LaunchAllowed = types.BoolValue(true)
+	err := r.client.AllowLaunch(data.Name.ValueString(), data.RepoName.ValueString(), data.SpaceName.ValueString(), data.LaunchAllowed.ValueBool())
 	if err != nil {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create space, got error: %s", err))
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to enable workflow, got error: %s", err))
 		return
 	}
-
-	tflog.Trace(ctx, "Resource Created Successful!")
 
 	// Save data into Terraform state.
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
 func (r *TorqueWorkflowResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
-	var data TorqueWorkflowResourceModel
 
-	diags := req.State.Get(ctx, &data)
-	resp.Diagnostics.Append(diags...)
-	if resp.Diagnostics.HasError() {
-		return
-	}
-
-	space, err := r.client.GetSpace(data.Name.ValueString())
-	if err != nil {
-		resp.Diagnostics.AddError(
-			"Error Reading group details",
-			"Could not read Torque group name "+data.Name.ValueString()+": "+err.Error(),
-		)
-		return
-	}
-
-	// Treat HTTP 404 Not Found status as a signal to recreate resource
-	// and return early
-	if space.Name == "" {
-		tflog.Error(ctx, "Space not found in Torque")
-		resp.State.RemoveResource(ctx)
-		return
-	}
-
-	data.Color = types.StringValue(space.Color)
-	data.Icon = types.StringValue(space.Icon)
-
-	// Set refreshed state
-	diags = resp.State.Set(ctx, &data)
-	resp.Diagnostics.Append(diags...)
-	if resp.Diagnostics.HasError() {
-		return
-	}
 }
 
 func (r *TorqueWorkflowResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var plan, state TorqueWorkflowResourceModel
 
-	resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
-	diags := req.Plan.Get(ctx, &plan)
-
-	current_space := state.Name
-
-	resp.Diagnostics.Append(diags...)
-	if resp.Diagnostics.HasError() {
-		return
-	}
-
-	// Update existing order
-	err := r.client.UpdateSpace(current_space.ValueString(), plan.Name.ValueString(), plan.Color.ValueString(), plan.Icon.ValueString())
-	if err != nil {
-		resp.Diagnostics.AddError(
-			"Error Updating Torque space",
-			"Could not update Torque Space name, unexpected error: "+err.Error(),
-		)
-		return
-	}
-
-	space, err := r.client.GetSpace(plan.Name.ValueString())
-	if err != nil {
-		resp.Diagnostics.AddError(
-			"Error Reading space details",
-			"Could not read Torque Space name "+plan.Name.ValueString()+": "+err.Error(),
-		)
-		return
-	}
-
-	plan.Color = types.StringValue(space.Color)
-	plan.Icon = types.StringValue(space.Icon)
-
-	diags = resp.State.Set(ctx, plan)
-	resp.Diagnostics.Append(diags...)
-	if resp.Diagnostics.HasError() {
-		return
-	}
 }
 
 func (r *TorqueWorkflowResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
@@ -200,16 +137,15 @@ func (r *TorqueWorkflowResource) Delete(ctx context.Context, req resource.Delete
 	if resp.Diagnostics.HasError() {
 		return
 	}
+	data.LaunchAllowed = types.BoolValue(false)
 
-	// Delete the space.
-	err := r.client.DeleteSpace(data.Name.ValueString())
+	err := r.client.AllowLaunch(data.Name.ValueString(), data.RepoName.ValueString(), data.SpaceName.ValueString(), data.LaunchAllowed.ValueBool())
 	if err != nil {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to delete space, got error: %s", err))
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to disable workflow, got error: %s", err))
 		return
 	}
-
 }
 
 func (r *TorqueWorkflowResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
-	resource.ImportStatePassthroughID(ctx, path.Root("space_name"), req, resp)
+	resource.ImportStatePassthroughID(ctx, path.Root("name"), req, resp)
 }
