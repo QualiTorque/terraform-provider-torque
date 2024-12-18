@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -32,6 +33,7 @@ type TorqueWorkflowResourceModel struct {
 	SpaceName     types.String `tfsdk:"space_name"`
 	RepoName      types.String `tfsdk:"repository_name"`
 	LaunchAllowed types.Bool   `tfsdk:"launch_allowed"`
+	SelfService   types.Bool   `tfsdk:"self_service"`
 }
 
 func (r *TorqueWorkflowResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
@@ -76,6 +78,13 @@ func (r *TorqueWorkflowResource) Schema(ctx context.Context, req resource.Schema
 				Computed:            true,
 				Required:            false,
 			},
+			"self_service": schema.BoolAttribute{
+				MarkdownDescription: "Indicates whether this workflow is displayed in the self-service catalog",
+				Optional:            true,
+				Required:            false,
+				Computed:            true,
+				Default:             booldefault.StaticBool(false),
+			},
 		},
 	}
 }
@@ -115,7 +124,13 @@ func (r *TorqueWorkflowResource) Create(ctx context.Context, req resource.Create
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to enable workflow, got error: %s", err))
 		return
 	}
-
+	if !data.SelfService.IsNull() && !data.SelfService.IsUnknown() && data.SelfService.ValueBool() {
+		err := r.client.PublishBlueprintInSpace(data.SpaceName.ValueString(), data.RepoName.ValueString(), data.Name.ValueString())
+		if err != nil {
+			resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to publish workflow to self-service catalog, got error: %s", err))
+			return
+		}
+	}
 	// Save data into Terraform state.
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
@@ -143,6 +158,13 @@ func (r *TorqueWorkflowResource) Delete(ctx context.Context, req resource.Delete
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to disable workflow, got error: %s", err))
 		return
+	}
+	if !data.SelfService.IsNull() && !data.SelfService.IsUnknown() && data.SelfService.ValueBool() {
+		err := r.client.UnpublishBlueprintInSpace(data.SpaceName.ValueString(), data.RepoName.ValueString(), data.Name.ValueString())
+		if err != nil {
+			resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to unpublish workflow to self-service catalog, got error: %s", err))
+			return
+		}
 	}
 }
 
