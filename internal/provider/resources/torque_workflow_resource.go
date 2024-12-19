@@ -34,7 +34,6 @@ type TorqueWorkflowResourceModel struct {
 	RepoName      types.String `tfsdk:"repository_name"`
 	LaunchAllowed types.Bool   `tfsdk:"launch_allowed"`
 	SelfService   types.Bool   `tfsdk:"self_service"`
-	// SpaceWorkflow types.Bool   `tfsdk:"space_workflow"`
 }
 
 func (r *TorqueWorkflowResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
@@ -44,7 +43,7 @@ func (r *TorqueWorkflowResource) Metadata(ctx context.Context, req resource.Meta
 func (r *TorqueWorkflowResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "Enables an existing Torque workflow so it will be allowed to be launched and executed.",
+		MarkdownDescription: "Allows to enable and publish existing Torque workflow so it will be allowed to be executed and displayed in the self-service catalog.",
 
 		Attributes: map[string]schema.Attribute{
 			"name": schema.StringAttribute{
