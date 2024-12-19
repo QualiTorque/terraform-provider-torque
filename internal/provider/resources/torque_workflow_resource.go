@@ -84,7 +84,7 @@ func (r *TorqueWorkflowResource) Schema(ctx context.Context, req resource.Schema
 				Optional:            true,
 				Required:            false,
 				Computed:            true,
-				Default:             booldefault.StaticBool(false),
+				// Default:             booldefault.StaticBool(false),
 			},
 		},
 	}
@@ -131,11 +131,16 @@ func (r *TorqueWorkflowResource) Create(ctx context.Context, req resource.Create
 	for _, workflow := range workflows {
 		if workflow.Name == data.Name.ValueString() {
 			if workflow.Scope == SpaceScope {
+				if !data.SelfService.ValueBool() {
+					resp.Diagnostics.AddError("Client Error", "Workflows with Space scope cannot have self_service attribute set to false. Destroy the resource to unpublish it.")
+					return
+				}
 				err := r.client.PublishBlueprintInSpace(data.SpaceName.ValueString(), data.RepoName.ValueString(), data.Name.ValueString())
 				if err != nil {
 					resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to publish workflow to self-service catalog, got error: %s", err))
 					return
 				}
+				data.SelfService = types.BoolValue(true)
 			} else {
 				data.LaunchAllowed = types.BoolValue(true)
 				err := r.client.AllowLaunch(data.Name.ValueString(), data.RepoName.ValueString(), data.SpaceName.ValueString(), data.LaunchAllowed.ValueBool())
