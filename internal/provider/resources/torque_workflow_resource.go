@@ -34,6 +34,7 @@ type TorqueWorkflowResourceModel struct {
 	RepoName      types.String `tfsdk:"repository_name"`
 	LaunchAllowed types.Bool   `tfsdk:"launch_allowed"`
 	SelfService   types.Bool   `tfsdk:"self_service"`
+	Scope         types.String `tfsdk:"scope"`
 }
 
 func (r *TorqueWorkflowResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
@@ -80,11 +81,17 @@ func (r *TorqueWorkflowResource) Schema(ctx context.Context, req resource.Schema
 				Default:             booldefault.StaticBool(true),
 			},
 			"self_service": schema.BoolAttribute{
-				MarkdownDescription: "Indicates whether this workflow is displayed in the self-service catalog",
+				MarkdownDescription: "Indicates whether this workflow is displayed in the self-service catalog. For workflows with Space scope, then this field can be ommitted and will always be true.",
 				Optional:            true,
 				Required:            false,
 				Computed:            true,
 				// Default:             booldefault.StaticBool(false),
+			},
+			"scope": schema.StringAttribute{
+				MarkdownDescription: "Scope of this workflow workflow. Can be either Space, Environment or Environment Resource",
+				Optional:            false,
+				Required:            false,
+				Computed:            true,
 			},
 		},
 	}
@@ -130,9 +137,10 @@ func (r *TorqueWorkflowResource) Create(ctx context.Context, req resource.Create
 	}
 	for _, workflow := range workflows {
 		if workflow.Name == data.Name.ValueString() {
+			data.Scope = types.StringValue(workflow.Scope)
 			if workflow.Scope == SpaceScope {
-				if !data.SelfService.ValueBool() {
-					resp.Diagnostics.AddError("Client Error", "Workflows with Space scope cannot have self_service attribute set to false. Destroy the resource to unpublish it.")
+				if !data.SelfService.IsUnknown() && !data.SelfService.ValueBool() {
+					resp.Diagnostics.AddError("Invalid Configuration", "Workflows with Space scope cannot have 'self_service' attribute set to false. Remove the attribute or Remove the resource if you wish to unpublish it from the self-service catalog.")
 					return
 				}
 				err := r.client.PublishBlueprintInSpace(data.SpaceName.ValueString(), data.RepoName.ValueString(), data.Name.ValueString())
@@ -158,6 +166,7 @@ func (r *TorqueWorkflowResource) Create(ctx context.Context, req resource.Create
 			}
 		}
 	}
+
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
@@ -167,13 +176,18 @@ func (r *TorqueWorkflowResource) Read(ctx context.Context, req resource.ReadRequ
 
 func (r *TorqueWorkflowResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 	var data TorqueWorkflowResourceModel
+	var state TorqueWorkflowResourceModel
 
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
+	resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
 
 	if resp.Diagnostics.HasError() {
 		return
 	}
-
+	if state.Scope == types.StringValue(SpaceScope) {
+		resp.Diagnostics.AddError("Invalid Configuration", "Workflows with Space scope cannot have 'self_service' attribute set to false. Remove the resource to unpublish it.")
+		return
+	}
 	if data.SelfService.ValueBool() {
 		err := r.client.PublishBlueprintInSpace(data.SpaceName.ValueString(), data.RepoName.ValueString(), data.Name.ValueString())
 		if err != nil {
@@ -188,6 +202,7 @@ func (r *TorqueWorkflowResource) Update(ctx context.Context, req resource.Update
 		}
 	}
 	// Save updated data into Terraform state
+	data.Scope = state.Scope
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
