@@ -407,3 +407,8 @@ type WorkflowRequest struct {
 	SpaceName      string `json:"space_name"`
 	LaunchAllowed  bool   `json:"launch_allowed"`
 }
+
+type SpaceWorkflow struct {
+	Name  string `json:"name"`
+	Scope string `json:"scope"`
+}

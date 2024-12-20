@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -32,6 +33,8 @@ type TorqueWorkflowResourceModel struct {
 	SpaceName     types.String `tfsdk:"space_name"`
 	RepoName      types.String `tfsdk:"repository_name"`
 	LaunchAllowed types.Bool   `tfsdk:"launch_allowed"`
+	SelfService   types.Bool   `tfsdk:"self_service"`
+	Scope         types.String `tfsdk:"scope"`
 }
 
 func (r *TorqueWorkflowResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
@@ -41,7 +44,7 @@ func (r *TorqueWorkflowResource) Metadata(ctx context.Context, req resource.Meta
 func (r *TorqueWorkflowResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "Enables an existing Torque workflow so it will be allowed to be launched and executed.",
+		MarkdownDescription: "Allows to enable and publish existing Torque workflow so it will be allowed to be executed and displayed in the self-service catalog.",
 
 		Attributes: map[string]schema.Attribute{
 			"name": schema.StringAttribute{
@@ -75,10 +78,26 @@ func (r *TorqueWorkflowResource) Schema(ctx context.Context, req resource.Schema
 				Optional:            false,
 				Computed:            true,
 				Required:            false,
+				Default:             booldefault.StaticBool(true),
+			},
+			"self_service": schema.BoolAttribute{
+				MarkdownDescription: "Indicates whether this workflow is displayed in the self-service catalog. For workflows with Space scope, then this field can be omitted and will always be true.",
+				Optional:            true,
+				Required:            false,
+				Computed:            true,
+				// Default:             booldefault.StaticBool(false),
+			},
+			"scope": schema.StringAttribute{
+				MarkdownDescription: "Scope of this workflow workflow. Can be either Space, Environment or Environment Resource",
+				Optional:            false,
+				Required:            false,
+				Computed:            true,
 			},
 		},
 	}
 }
+
+const SpaceScope = "space"
 
 func (r *TorqueWorkflowResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
 	// Prevent panic if the provider has not been configured.
@@ -108,15 +127,46 @@ func (r *TorqueWorkflowResource) Create(ctx context.Context, req resource.Create
 	if resp.Diagnostics.HasError() {
 		return
 	}
-
-	data.LaunchAllowed = types.BoolValue(true)
-	err := r.client.AllowLaunch(data.Name.ValueString(), data.RepoName.ValueString(), data.SpaceName.ValueString(), data.LaunchAllowed.ValueBool())
+	workflows, err := r.client.GetSpaceWorkflows(data.SpaceName.ValueString())
 	if err != nil {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to enable workflow, got error: %s", err))
+		resp.Diagnostics.AddError(
+			"Unable to Read Space Workflows",
+			err.Error(),
+		)
 		return
 	}
+	for _, workflow := range workflows {
+		if workflow.Name == data.Name.ValueString() {
+			data.Scope = types.StringValue(workflow.Scope)
+			if workflow.Scope == SpaceScope {
+				if !data.SelfService.IsUnknown() && !data.SelfService.ValueBool() {
+					resp.Diagnostics.AddError("Invalid Configuration", "Workflows with Space scope cannot have 'self_service' attribute set to false. Remove the attribute or Remove the resource if you wish to unpublish it from the self-service catalog.")
+					return
+				}
+				err := r.client.PublishBlueprintInSpace(data.SpaceName.ValueString(), data.RepoName.ValueString(), data.Name.ValueString())
+				if err != nil {
+					resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to publish workflow to self-service catalog, got error: %s", err))
+					return
+				}
+				data.SelfService = types.BoolValue(true)
+			} else {
+				data.LaunchAllowed = types.BoolValue(true)
+				err := r.client.AllowLaunch(data.Name.ValueString(), data.RepoName.ValueString(), data.SpaceName.ValueString(), data.LaunchAllowed.ValueBool())
+				if err != nil {
+					resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to publish workflow to self-service catalog, got error: %s", err))
+					return
+				}
+				if data.SelfService.ValueBool() {
+					err := r.client.PublishBlueprintInSpace(data.SpaceName.ValueString(), data.RepoName.ValueString(), data.Name.ValueString())
+					if err != nil {
+						resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to publish workflow to self-service catalog, got error: %s", err))
+						return
+					}
+				}
+			}
+		}
+	}
 
-	// Save data into Terraform state.
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
@@ -125,7 +175,35 @@ func (r *TorqueWorkflowResource) Read(ctx context.Context, req resource.ReadRequ
 }
 
 func (r *TorqueWorkflowResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+	var data TorqueWorkflowResourceModel
+	var state TorqueWorkflowResourceModel
 
+	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
+	resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
+
+	if resp.Diagnostics.HasError() {
+		return
+	}
+	if state.Scope == types.StringValue(SpaceScope) {
+		resp.Diagnostics.AddError("Invalid Configuration", "Workflows with Space scope cannot have 'self_service' attribute set to false. Remove the resource to unpublish it.")
+		return
+	}
+	if data.SelfService.ValueBool() {
+		err := r.client.PublishBlueprintInSpace(data.SpaceName.ValueString(), data.RepoName.ValueString(), data.Name.ValueString())
+		if err != nil {
+			resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to publish workflow to self-service catalog, got error: %s", err))
+			return
+		}
+	} else {
+		err := r.client.UnpublishBlueprintInSpace(data.SpaceName.ValueString(), data.RepoName.ValueString(), data.Name.ValueString())
+		if err != nil {
+			resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to unpublish workflow to self-service catalog, got error: %s", err))
+			return
+		}
+	}
+	// Save updated data into Terraform state
+	data.Scope = state.Scope
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
 func (r *TorqueWorkflowResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
@@ -137,13 +215,19 @@ func (r *TorqueWorkflowResource) Delete(ctx context.Context, req resource.Delete
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	data.LaunchAllowed = types.BoolValue(false)
 
+	data.LaunchAllowed = types.BoolValue(false)
 	err := r.client.AllowLaunch(data.Name.ValueString(), data.RepoName.ValueString(), data.SpaceName.ValueString(), data.LaunchAllowed.ValueBool())
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to disable workflow, got error: %s", err))
 		return
 	}
+	err = r.client.UnpublishBlueprintInSpace(data.SpaceName.ValueString(), data.RepoName.ValueString(), data.Name.ValueString())
+	if err != nil {
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to unpublish workflow to self-service catalog, got error: %s", err))
+		return
+	}
+
 }
 
 func (r *TorqueWorkflowResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
