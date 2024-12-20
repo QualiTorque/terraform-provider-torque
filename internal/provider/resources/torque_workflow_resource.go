@@ -81,7 +81,7 @@ func (r *TorqueWorkflowResource) Schema(ctx context.Context, req resource.Schema
 				Default:             booldefault.StaticBool(true),
 			},
 			"self_service": schema.BoolAttribute{
-				MarkdownDescription: "Indicates whether this workflow is displayed in the self-service catalog. For workflows with Space scope, then this field can be ommitted and will always be true.",
+				MarkdownDescription: "Indicates whether this workflow is displayed in the self-service catalog. For workflows with Space scope, then this field can be omitted and will always be true.",
 				Optional:            true,
 				Required:            false,
 				Computed:            true,
