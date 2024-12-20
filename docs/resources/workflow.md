@@ -53,7 +53,7 @@ resource "torque_workflow" "env_workflow" {
 
 ### Optional
 
-- `self_service` (Boolean) Indicates whether this workflow is displayed in the self-service catalog. For workflows with Space scope, then this field can be ommitted and will always be true.
+- `self_service` (Boolean) Indicates whether this workflow is displayed in the self-service catalog. For workflows with Space scope, then this field can be omitted and will always be true.
 
 ### Read-Only
 
