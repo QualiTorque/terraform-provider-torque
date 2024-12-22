@@ -3,12 +3,12 @@
 page_title: "torque_workflow Resource - terraform-provider-torque"
 subcategory: ""
 description: |-
-  Allows to enable and publish existing Torque workflow so it will be allowed to be executed and displayed in the self-service catalog.
+  Allows to enable and publish existing Torque workflow with env or env_resource scope so it will be allowed to be executed and displayed in the self-service catalog.
 ---
 
 # torque_workflow (Resource)
 
-Allows to enable and publish existing Torque workflow so it will be allowed to be executed and displayed in the self-service catalog.
+Allows to enable and publish existing Torque workflow with env or env_resource scope so it will be allowed to be executed and displayed in the self-service catalog.
 
 ## Example Usage
 
@@ -28,16 +28,10 @@ provider "torque" {
 }
 
 
-resource "torque_workflow" "space_workflow" {
-  name            = "Space Workflow"
-  space_name      = "project-dev"
-  repository_name = "repo"
-}
-
 resource "torque_workflow" "env_workflow" {
-  name            = "Env Day2"
-  space_name      = "project-dev"
-  repository_name = "repo"
+  name            = "Day2"
+  space_name      = "Space"
+  repository_name = "Repo"
   self_service    = true
 }
 ```
@@ -58,4 +52,3 @@ resource "torque_workflow" "env_workflow" {
 ### Read-Only
 
 - `launch_allowed` (Boolean) Indicates whether this workflow is enabled and allowed to be launched
-- `scope` (String) Scope of this workflow workflow. Can be either Space, Environment or Environment Resource

@@ -42,7 +42,7 @@ func (r *TorqueSpaceWorkflowResource) Metadata(ctx context.Context, req resource
 func (r *TorqueSpaceWorkflowResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "Allows to enable and publish existing Torque workflow so it will be allowed to be executed and displayed in the self-service catalog.",
+		MarkdownDescription: "Allows to existing Torque workflow with a space scope so it will be allowed to published and displayed in the self-service catalog.",
 
 		Attributes: map[string]schema.Attribute{
 			"name": schema.StringAttribute{
