@@ -229,6 +229,7 @@ func (p *torqueProvider) Resources(ctx context.Context) []func() resource.Resour
 		resources.NewTorqueGitCredentialsResource,
 		resources.NewTorqueEnvironmentResource,
 		resources.NewTorqueWorkflowResource,
+		resources.NewTorqueSpaceWorkflowResource,
 	}
 }
 
