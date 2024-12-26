@@ -74,28 +74,55 @@ func (c *Client) OnboardGitlabEnterpriseRepoToSpace(space_name string, repositor
 	return nil
 }
 
-func (c *Client) OnboardRepoToSpace(space_name string, repo_name string, repo_type string, repo_url string, repo_token string, repo_branch string) error {
-	data := RepoSpaceAssociation{
-		Type:        repo_type,
-		URL:         repo_url,
-		AccessToken: repo_token,
-		Branch:      repo_branch,
-		Name:        repo_name,
+func (c *Client) OnboardRepoToSpace(space_name string, repo_name string, repo_type string, repo_url string, repo_token *string, repo_branch string, credential_name *string) error {
+	var data interface{}
+	var url string
+	if credential_name == nil || *credential_name == "" {
+		data = RepoSpaceAssociation{
+			URL:         repo_url,
+			AccessToken: repo_token,
+			Type:        repo_type,
+			Branch:      repo_branch,
+			Name:        repo_name,
+		}
+		url = fmt.Sprintf("%sapi/spaces/%s/repositories", c.HostURL, space_name)
+
+	} else {
+		data = RepoSpaceAssociationWithCredentials{
+			URL:            repo_url,
+			Type:           repo_type,
+			Branch:         repo_branch,
+			Name:           repo_name,
+			CredentialName: credential_name,
+		}
+		url = fmt.Sprintf("%sapi/spaces/%s/repositories/%s", c.HostURL, space_name, repo_type)
 	}
 
 	payload, err := json.Marshal(data)
 	if err != nil {
-		log.Fatalf("impossible to marshall agent association: %s", err)
+		log.Fatalf("impossible to marshall repo association: %s", err)
 	}
 
-	req, err := http.NewRequest("POST", fmt.Sprintf("%sapi/spaces/%s/repositories", c.HostURL, space_name), bytes.NewReader(payload))
+	// if repo_token == nil || *repo_token == "" {
+	// 	url = fmt.Sprintf("%sapi/spaces/%s/repositories/%s", c.HostURL, space_name, repo_type)
+	// } else {
+	// 	url = fmt.Sprintf("%sapi/spaces/%s/repositories", c.HostURL, space_name)
+	// }
+
+	req, err := http.NewRequest("POST", url, bytes.NewReader(payload))
 	if err != nil {
 		return err
 	}
-
+	// req.Header.Add("Content-Type", "application/json")
+	// req.Header.Add("Accept", "application/json")
+	// } else {
+	// 	req, err := http.NewRequest("POST", fmt.Sprintf("%sapi/spaces/%s/repositories/%s", c.HostURL, space_name, repo_type), bytes.NewReader(payload))
+	// 	if err != nil {
+	// 		return err
+	// 	}
+	// }
 	req.Header.Add("Content-Type", "application/json")
 	req.Header.Add("Accept", "application/json")
-
 	_, err = c.doRequest(req, &c.Token)
 	if err != nil {
 		return err

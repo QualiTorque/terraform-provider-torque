@@ -4,9 +4,13 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/qualitorque/terraform-provider-torque/client"
@@ -26,12 +30,13 @@ type TorqueSpaceRepositoryResource struct {
 }
 
 type TorqueSpaceRepositoryResourceModel struct {
-	SpaceName  types.String `tfsdk:"space_name"`
-	RepoUrl    types.String `tfsdk:"repository_url"`
-	RepoToken  types.String `tfsdk:"access_token"`
-	RepoType   types.String `tfsdk:"repository_type"`
-	RepoBranch types.String `tfsdk:"branch"`
-	RepoName   types.String `tfsdk:"repository_name"`
+	SpaceName      types.String `tfsdk:"space_name"`
+	RepoUrl        types.String `tfsdk:"repository_url"`
+	RepoToken      types.String `tfsdk:"access_token"`
+	RepoType       types.String `tfsdk:"repository_type"`
+	RepoBranch     types.String `tfsdk:"branch"`
+	RepoName       types.String `tfsdk:"repository_name"`
+	CredentialName types.String `tfsdk:"credential_name"`
 }
 
 func (r *TorqueSpaceRepositoryResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
@@ -46,26 +51,53 @@ func (r *TorqueSpaceRepositoryResource) Schema(ctx context.Context, req resource
 			"space_name": schema.StringAttribute{
 				MarkdownDescription: "Existing Torque Space name",
 				Required:            true,
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.RequiresReplace(),
+				},
 			},
 			"repository_url": schema.StringAttribute{
 				Description: "Repository URL. For example: https://github.com/<org>/<repo>",
 				Required:    true,
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.RequiresReplace(),
+				},
 			},
 			"access_token": schema.StringAttribute{
 				Description: "Personal Access Token (PAT) to authenticate with to the repository",
-				Required:    true,
+				// Required:    true,
+				Optional: true,
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.RequiresReplace(),
+				},
 			},
 			"repository_type": schema.StringAttribute{
 				Description: "Repository type. Available types: github, bitbucket, gitlab, azure (for Azure DevOps). For CodeCommit, Please use torque_codecommit_repository_space_association resource. For Gitlab Enterprise please use torque_gitlab_enterprise_repository_space_association resource",
 				Required:    true,
+				Validators: []validator.String{
+					stringvalidator.OneOf([]string{"github", "bitbucket", "gitlab", "azure"}...),
+				},
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.RequiresReplace(),
+				},
 			},
 			"branch": schema.StringAttribute{
 				Description: "Repository branch to use for blueprints and automation assets",
 				Optional:    true,
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.RequiresReplace(),
+				},
 			},
 			"repository_name": schema.StringAttribute{
 				Description: "The name of the repository to onboard in the newly created space",
 				Required:    true,
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.RequiresReplace(),
+				},
+			},
+			"credential_name": schema.StringAttribute{
+				Description: "The name of the credentials to use. If token is also provided, new credentials with this name will be created using the token.",
+				Required:    false,
+				Optional:    true,
 			},
 		},
 	}
@@ -101,7 +133,7 @@ func (r *TorqueSpaceRepositoryResource) Create(ctx context.Context, req resource
 	}
 
 	err := r.client.OnboardRepoToSpace(data.SpaceName.ValueString(), data.RepoName.ValueString(), data.RepoType.ValueString(),
-		data.RepoUrl.ValueString(), data.RepoToken.ValueString(), data.RepoBranch.ValueString())
+		data.RepoUrl.ValueString(), data.RepoToken.ValueStringPointer(), data.RepoBranch.ValueString(), data.CredentialName.ValueStringPointer())
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to onboard repository to space, got error: %s", err))
 		return
