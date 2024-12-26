@@ -147,3 +147,28 @@ func (c *Client) RemoveRepoFromSpace(space_name string, repo_name string) error 
 
 	return nil
 }
+
+func (c *Client) UpdateRepoCredentials(space_name string, repo_name string, credential_name string) error {
+	data := map[string]string{
+		"credential_name": credential_name,
+	}
+	payload, err := json.Marshal(data)
+	if err != nil {
+		log.Fatalf("impossible to marshall repo association: %s", err)
+	}
+
+	req, err := http.NewRequest("PUT", fmt.Sprintf("%sapi/spaces/%s/repositories/%s", c.HostURL, space_name, repo_name), bytes.NewReader(payload))
+	if err != nil {
+		return err
+	}
+
+	req.Header.Add("Content-Type", "application/json")
+	req.Header.Add("Accept", "application/json")
+
+	_, err = c.doRequest(req, &c.Token)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
