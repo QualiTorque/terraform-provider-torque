@@ -63,11 +63,16 @@ func (r *TorqueSpaceRepositoryResource) Schema(ctx context.Context, req resource
 				},
 			},
 			"access_token": schema.StringAttribute{
-				Description: "Personal Access Token (PAT) to authenticate with to the repository",
-				// Required:    true,
-				Optional: true,
+				Description: "Personal Access Token (PAT) to authenticate with to the repository. Credentials will be automatically created with the specified token, or use existing credentials instead.",
+				Optional:    true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.RequiresReplace(),
+				},
+				Validators: []validator.String{
+					// Validate only this attribute or other_attr is configured or neither.
+					stringvalidator.ConflictsWith(path.Expressions{
+						path.MatchRoot("credential_name"),
+					}...),
 				},
 			},
 			"repository_type": schema.StringAttribute{
@@ -95,9 +100,15 @@ func (r *TorqueSpaceRepositoryResource) Schema(ctx context.Context, req resource
 				},
 			},
 			"credential_name": schema.StringAttribute{
-				Description: "The name of the credentials to use. If token is also provided, new credentials with this name will be created using the token.",
+				Description: "The name of existing credentials to use.",
 				Required:    false,
 				Optional:    true,
+				Validators: []validator.String{
+					// Validate only this attribute or other_attr is configured or neither.
+					stringvalidator.ConflictsWith(path.Expressions{
+						path.MatchRoot("access_token"),
+					}...),
+				},
 			},
 		},
 	}
