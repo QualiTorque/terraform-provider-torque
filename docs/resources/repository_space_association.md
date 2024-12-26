@@ -42,7 +42,6 @@ resource "torque_repository_space_association" "repository" {
 
 ### Required
 
-- `access_token` (String) Personal Access Token (PAT) to authenticate with to the repository
 - `repository_name` (String) The name of the repository to onboard in the newly created space
 - `repository_type` (String) Repository type. Available types: github, bitbucket, gitlab, azure (for Azure DevOps). For CodeCommit, Please use torque_codecommit_repository_space_association resource. For Gitlab Enterprise please use torque_gitlab_enterprise_repository_space_association resource
 - `repository_url` (String) Repository URL. For example: https://github.com/<org>/<repo>
@@ -50,4 +49,6 @@ resource "torque_repository_space_association" "repository" {
 
 ### Optional
 
+- `access_token` (String) Personal Access Token (PAT) to authenticate with to the repository. Credentials will be automatically created with the specified token, or use existing credentials instead.
 - `branch` (String) Repository branch to use for blueprints and automation assets
+- `credential_name` (String) The name of existing credentials to use.

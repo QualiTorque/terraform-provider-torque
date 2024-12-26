@@ -72,11 +72,20 @@ type AgentSpaceAssociation struct {
 }
 
 type RepoSpaceAssociation struct {
-	URL         string `json:"repository_url"`
-	AccessToken string `json:"access_token"`
-	Type        string `json:"repository_type"`
-	Branch      string `json:"branch"`
-	Name        string `json:"repository_name"`
+	URL         string  `json:"repository_url"`
+	AccessToken *string `json:"access_token"`
+	Type        string  `json:"repository_type"`
+	Branch      string  `json:"branch"`
+	Name        string  `json:"repository_name"`
+}
+
+type RepoSpaceAssociationWithCredentials struct {
+	URL            string  `json:"repository_url"`
+	Token          *string `json:"token"`
+	Type           string  `json:"repository_type"`
+	Branch         string  `json:"branch"`
+	Name           string  `json:"repository_name"`
+	CredentialName *string `json:"credential_name"`
 }
 
 type GitlabEnterpriseRepoSpaceAssociation struct {

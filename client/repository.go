@@ -74,21 +74,52 @@ func (c *Client) OnboardGitlabEnterpriseRepoToSpace(space_name string, repositor
 	return nil
 }
 
-func (c *Client) OnboardRepoToSpace(space_name string, repo_name string, repo_type string, repo_url string, repo_token string, repo_branch string) error {
-	data := RepoSpaceAssociation{
-		Type:        repo_type,
-		URL:         repo_url,
-		AccessToken: repo_token,
-		Branch:      repo_branch,
-		Name:        repo_name,
+func (c *Client) OnboardRepoToSpace(space_name string, repo_name string, repo_type string, repo_url string, repo_token *string, repo_branch string, credential_name *string) error {
+	var data interface{}
+	var url string
+	if credential_name == nil || *credential_name == "" {
+		data = RepoSpaceAssociation{
+			URL:         repo_url,
+			AccessToken: repo_token,
+			Type:        repo_type,
+			Branch:      repo_branch,
+			Name:        repo_name,
+		}
+		url = fmt.Sprintf("%sapi/spaces/%s/repositories", c.HostURL, space_name)
+
+	} else {
+		data = RepoSpaceAssociationWithCredentials{
+			URL:            repo_url,
+			Type:           repo_type,
+			Branch:         repo_branch,
+			Name:           repo_name,
+			CredentialName: credential_name,
+		}
+		url = fmt.Sprintf("%sapi/spaces/%s/repositories/%s", c.HostURL, space_name, repo_type)
 	}
 
 	payload, err := json.Marshal(data)
 	if err != nil {
-		log.Fatalf("impossible to marshall agent association: %s", err)
+		log.Fatalf("impossible to marshall repo association: %s", err)
 	}
 
-	req, err := http.NewRequest("POST", fmt.Sprintf("%sapi/spaces/%s/repositories", c.HostURL, space_name), bytes.NewReader(payload))
+	req, err := http.NewRequest("POST", url, bytes.NewReader(payload))
+	if err != nil {
+		return err
+	}
+
+	req.Header.Add("Content-Type", "application/json")
+	req.Header.Add("Accept", "application/json")
+	_, err = c.doRequest(req, &c.Token)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (c *Client) RemoveRepoFromSpace(space_name string, repo_name string) error {
+	req, err := http.NewRequest("DELETE", fmt.Sprintf("%sapi/spaces/%s/repositories?repository_name=%s", c.HostURL, space_name, repo_name), nil)
 	if err != nil {
 		return err
 	}
@@ -104,8 +135,16 @@ func (c *Client) OnboardRepoToSpace(space_name string, repo_name string, repo_ty
 	return nil
 }
 
-func (c *Client) RemoveRepoFromSpace(space_name string, repo_name string) error {
-	req, err := http.NewRequest("DELETE", fmt.Sprintf("%sapi/spaces/%s/repositories?repository_name=%s", c.HostURL, space_name, repo_name), nil)
+func (c *Client) UpdateRepoCredentials(space_name string, repo_name string, credential_name string) error {
+	data := map[string]string{
+		"credential_name": credential_name,
+	}
+	payload, err := json.Marshal(data)
+	if err != nil {
+		log.Fatalf("impossible to marshall repo association: %s", err)
+	}
+
+	req, err := http.NewRequest("PUT", fmt.Sprintf("%sapi/spaces/%s/repositories/%s", c.HostURL, space_name, repo_name), bytes.NewReader(payload))
 	if err != nil {
 		return err
 	}
