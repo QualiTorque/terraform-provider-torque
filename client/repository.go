@@ -103,24 +103,11 @@ func (c *Client) OnboardRepoToSpace(space_name string, repo_name string, repo_ty
 		log.Fatalf("impossible to marshall repo association: %s", err)
 	}
 
-	// if repo_token == nil || *repo_token == "" {
-	// 	url = fmt.Sprintf("%sapi/spaces/%s/repositories/%s", c.HostURL, space_name, repo_type)
-	// } else {
-	// 	url = fmt.Sprintf("%sapi/spaces/%s/repositories", c.HostURL, space_name)
-	// }
-
 	req, err := http.NewRequest("POST", url, bytes.NewReader(payload))
 	if err != nil {
 		return err
 	}
-	// req.Header.Add("Content-Type", "application/json")
-	// req.Header.Add("Accept", "application/json")
-	// } else {
-	// 	req, err := http.NewRequest("POST", fmt.Sprintf("%sapi/spaces/%s/repositories/%s", c.HostURL, space_name, repo_type), bytes.NewReader(payload))
-	// 	if err != nil {
-	// 		return err
-	// 	}
-	// }
+
 	req.Header.Add("Content-Type", "application/json")
 	req.Header.Add("Accept", "application/json")
 	_, err = c.doRequest(req, &c.Token)
