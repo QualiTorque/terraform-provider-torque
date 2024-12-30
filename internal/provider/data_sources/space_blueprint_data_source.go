@@ -249,7 +249,7 @@ func (d *spaceBlueprintDataSource) Read(ctx context.Context, req datasource.Read
 	state.MaxDuration = types.StringValue(blueprint_data.Policies.MaxDuration)
 	state.DefaultDuration = types.StringValue(blueprint_data.Policies.DefaultDuration)
 	state.DefaultExtend = types.StringValue(blueprint_data.Policies.DefaultExtend)
-	state.MaxActiveEnvironments = types.Int32Value(blueprint_data.Policies.MaxActiveEnvironments)
+	state.MaxActiveEnvironments = types.Int32PointerValue(blueprint_data.Policies.MaxActiveEnvironments)
 	state.AlwaysOn = types.BoolValue(blueprint_data.Policies.AlwaysOn)
 	state.ModifiedBy = types.StringValue(blueprint_data.ModifiedBy)
 	state.LastModified = types.StringValue(blueprint_data.LastModified)

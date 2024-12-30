@@ -87,7 +87,7 @@ func TestCatalogItemErrorIfNotExists(t *testing.T) {
 					repository_name = "non-existent-repo"
 				}
 				`, spaceName),
-				ExpectError: regexp.MustCompile("Unable to publish blueprint in space"),
+				ExpectError: regexp.MustCompile("Unable to create Catalog Item"),
 			},
 			// Delete testing automatically occurs in TestCase
 		},

@@ -42,3 +42,11 @@ resource "torque_catalog_item" "catalog_item" {
 - `blueprint_name` (String) The name of the blueprint to publish in the catalog
 - `repository_name` (String) The name of the repository where the blueprint resides. "Stored in Torque" will be stored in "qtorque" repository
 - `space_name` (String) Name of the space to configure
+
+### Optional
+
+- `always_on` (Boolean) Specify if environments launched from this blueprint should be always on or not.
+- `default_duration` (String) The default duration of an environment instantiated from this blueprint.
+- `default_extend` (String) The default duration it will be possible to extend an environment instantiated from this blueprint.
+- `max_active_environments` (Number) Sets the maximum number of concurrent active environments insantiated from this blueprint.
+- `max_duration` (String) The maximum duration of an environment instantiated from this blueprint.

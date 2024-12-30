@@ -3,13 +3,18 @@ package resources
 import (
 	"context"
 	"fmt"
+	"regexp"
 	"time"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/qualitorque/terraform-provider-torque/client"
@@ -30,9 +35,14 @@ type TorqueCatalogItemResource struct {
 
 // TorqueCatalogItemResourceModel describes the resource data model.
 type TorqueCatalogItemResourceModel struct {
-	SpaceName      types.String `tfsdk:"space_name"`
-	BlueprintName  types.String `tfsdk:"blueprint_name"`
-	RepositoryName types.String `tfsdk:"repository_name"`
+	SpaceName             types.String `tfsdk:"space_name"`
+	BlueprintName         types.String `tfsdk:"blueprint_name"`
+	RepositoryName        types.String `tfsdk:"repository_name"`
+	MaxDuration           types.String `tfsdk:"max_duration"`
+	DefaultDuration       types.String `tfsdk:"default_duration"`
+	DefaultExtend         types.String `tfsdk:"default_extend"`
+	MaxActiveEnvironments types.Int32  `tfsdk:"max_active_environments"`
+	AlwaysOn              types.Bool   `tfsdk:"always_on"`
 }
 
 func (r *TorqueCatalogItemResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
@@ -68,6 +78,55 @@ func (r *TorqueCatalogItemResource) Schema(ctx context.Context, req resource.Sch
 					stringplanmodifier.RequiresReplace(),
 				},
 			},
+			"max_duration": schema.StringAttribute{
+				MarkdownDescription: "The maximum duration of an environment instantiated from this blueprint.",
+				Required:            false,
+				Optional:            true,
+				Validators: []validator.String{
+					stringvalidator.RegexMatches(
+						regexp.MustCompile(`^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})$`),
+						"must be a valid ISO 8601 timestamp (e.g., 2023-08-19T14:23:30Z or 2023-08-19T14:23:30+02:00)",
+					),
+				},
+			},
+			"default_duration": schema.StringAttribute{
+				MarkdownDescription: "The default duration of an environment instantiated from this blueprint.",
+				Required:            false,
+				Optional:            true,
+				Computed:            true,
+				Default:             stringdefault.StaticString("PT2H"),
+				Validators: []validator.String{
+					stringvalidator.RegexMatches(
+						regexp.MustCompile(`^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})$`),
+						"must be a valid ISO 8601 timestamp (e.g., 2023-08-19T14:23:30Z or 2023-08-19T14:23:30+02:00)",
+					),
+				},
+			},
+			"default_extend": schema.StringAttribute{
+				MarkdownDescription: "The default duration it will be possible to extend an environment instantiated from this blueprint.",
+				Required:            false,
+				Optional:            true,
+				Computed:            true,
+				Default:             stringdefault.StaticString("PT2H"),
+				Validators: []validator.String{
+					stringvalidator.RegexMatches(
+						regexp.MustCompile(`^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})$`),
+						"must be a valid ISO 8601 timestamp (e.g., 2023-08-19T14:23:30Z or 2023-08-19T14:23:30+02:00)",
+					),
+				},
+			},
+			"max_active_environments": schema.Int32Attribute{
+				MarkdownDescription: "Sets the maximum number of concurrent active environments insantiated from this blueprint.",
+				Required:            false,
+				Optional:            true,
+			},
+			"always_on": schema.BoolAttribute{
+				MarkdownDescription: "Specify if environments launched from this blueprint should be always on or not.",
+				Required:            false,
+				Optional:            true,
+				Computed:            true,
+				Default:             booldefault.StaticBool(false),
+			},
 		},
 	}
 }
@@ -100,10 +159,20 @@ func (r *TorqueCatalogItemResource) Create(ctx context.Context, req resource.Cre
 	if resp.Diagnostics.HasError() {
 		return
 	}
-
-	err := r.client.PublishBlueprintInSpace(data.SpaceName.ValueString(), data.RepositoryName.ValueString(), data.BlueprintName.ValueString())
+	var maxActiveEnvironments *int32
+	if !data.MaxActiveEnvironments.IsNull() {
+		value := data.MaxActiveEnvironments.ValueInt32()
+		maxActiveEnvironments = &value
+	}
+	err := r.client.SetBlueprintPolicies(data.SpaceName.ValueString(), data.RepositoryName.ValueString(), data.BlueprintName.ValueString(), data.MaxDuration.ValueString(), data.DefaultDuration.ValueString(), data.DefaultDuration.ValueString(), maxActiveEnvironments, data.AlwaysOn.ValueBool())
 	if err != nil {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to publish blueprint in space, got error: %s", err))
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create Catalog Item, failed to set blueprint policies, got error: %s", err))
+		return
+	}
+
+	err = r.client.PublishBlueprintInSpace(data.SpaceName.ValueString(), data.RepositoryName.ValueString(), data.BlueprintName.ValueString())
+	if err != nil {
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create Catalog Item, failed to publish blueprint in space, got error: %s", err))
 		return
 	}
 
@@ -152,7 +221,16 @@ func (r *TorqueCatalogItemResource) Update(ctx context.Context, req resource.Upd
 	if resp.Diagnostics.HasError() {
 		return
 	}
-
+	var maxActiveEnvironments *int32
+	if !data.MaxActiveEnvironments.IsNull() {
+		value := data.MaxActiveEnvironments.ValueInt32()
+		maxActiveEnvironments = &value
+	}
+	err := r.client.SetBlueprintPolicies(data.SpaceName.ValueString(), data.RepositoryName.ValueString(), data.BlueprintName.ValueString(), data.MaxDuration.ValueString(), data.DefaultDuration.ValueString(), data.DefaultDuration.ValueString(), maxActiveEnvironments, data.AlwaysOn.ValueBool())
+	if err != nil {
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to set blueprint policies, got error: %s", err))
+		return
+	}
 	// Save updated data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }

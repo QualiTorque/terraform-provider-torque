@@ -50,7 +50,7 @@ type Policies struct {
 	MaxDuration           string `json:"max_duration"`
 	DefaultDuration       string `json:"default_duration"`
 	DefaultExtend         string `json:"default_extend"`
-	MaxActiveEnvironments int32  `json:"max_active_environments"`
+	MaxActiveEnvironments *int32 `json:"max_active_environments"`
 	AlwaysOn              bool   `json:"always_on"`
 }
 
