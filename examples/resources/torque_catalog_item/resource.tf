@@ -13,7 +13,13 @@ provider "torque" {
 }
 
 resource "torque_catalog_item" "catalog_item" {
-  space_name      = "space"
-  blueprint_name  = "blueprint_name"
-  repository_name = "repository_name"
+  space_name              = "space"
+  blueprint_name          = "blueprint_name"
+  repository_name         = "repository_name"
+  display_name            = "display_name"
+  max_duration            = "PT2H"
+  default_duration        = "PT2H"
+  default_extend          = "PT2H"
+  max_active_environments = 10
+  always_on               = false
 }

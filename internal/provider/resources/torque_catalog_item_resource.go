@@ -37,6 +37,7 @@ type TorqueCatalogItemResource struct {
 type TorqueCatalogItemResourceModel struct {
 	SpaceName             types.String `tfsdk:"space_name"`
 	BlueprintName         types.String `tfsdk:"blueprint_name"`
+	DisplayName           types.String `tfsdk:"display_name"`
 	RepositoryName        types.String `tfsdk:"repository_name"`
 	MaxDuration           types.String `tfsdk:"max_duration"`
 	DefaultDuration       types.String `tfsdk:"default_duration"`
@@ -69,6 +70,12 @@ func (r *TorqueCatalogItemResource) Schema(ctx context.Context, req resource.Sch
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.RequiresReplace(),
 				},
+			},
+			"display_name": schema.StringAttribute{
+				MarkdownDescription: "The display name of the blueprint as it will be displayed in the self-service catalog.",
+				Required:            false,
+				Computed:            false,
+				Optional:            true,
 			},
 			"repository_name": schema.StringAttribute{
 				MarkdownDescription: "The name of the repository where the blueprint resides. \"Stored in Torque\" will be stored in \"qtorque\" repository",
@@ -169,7 +176,13 @@ func (r *TorqueCatalogItemResource) Create(ctx context.Context, req resource.Cre
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create Catalog Item, failed to set blueprint policies, got error: %s", err))
 		return
 	}
-
+	if !data.DisplayName.IsNull() {
+		err = r.client.UpdateBlueprintDisplayName(data.SpaceName.ValueString(), data.RepositoryName.ValueString(), data.BlueprintName.ValueString(), data.DisplayName.ValueString())
+		if err != nil {
+			resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create Catalog Item, failed to set blueprint display name, got error: %s", err))
+			return
+		}
+	}
 	err = r.client.PublishBlueprintInSpace(data.SpaceName.ValueString(), data.RepositoryName.ValueString(), data.BlueprintName.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create Catalog Item, failed to publish blueprint in space, got error: %s", err))
@@ -226,10 +239,18 @@ func (r *TorqueCatalogItemResource) Update(ctx context.Context, req resource.Upd
 		value := data.MaxActiveEnvironments.ValueInt32()
 		maxActiveEnvironments = &value
 	}
+
 	err := r.client.SetBlueprintPolicies(data.SpaceName.ValueString(), data.RepositoryName.ValueString(), data.BlueprintName.ValueString(), data.MaxDuration.ValueString(), data.DefaultDuration.ValueString(), data.DefaultDuration.ValueString(), maxActiveEnvironments, data.AlwaysOn.ValueBool())
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to set blueprint policies, got error: %s", err))
 		return
+	}
+	if !data.DisplayName.IsNull() {
+		err = r.client.UpdateBlueprintDisplayName(data.SpaceName.ValueString(), data.RepositoryName.ValueString(), data.BlueprintName.ValueString(), data.DisplayName.ValueString())
+		if err != nil {
+			resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update Catalog Item, failed to set blueprint display name, got error: %s", err))
+			return
+		}
 	}
 	// Save updated data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)

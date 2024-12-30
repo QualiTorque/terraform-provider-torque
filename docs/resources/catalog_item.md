@@ -28,9 +28,15 @@ provider "torque" {
 }
 
 resource "torque_catalog_item" "catalog_item" {
-  space_name      = "space"
-  blueprint_name  = "blueprint_name"
-  repository_name = "repository_name"
+  space_name              = "space"
+  blueprint_name          = "blueprint_name"
+  repository_name         = "repository_name"
+  display_name            = "display_name"
+  max_duration            = "PT2H"
+  default_duration        = "PT2H"
+  default_extend          = "PT2H"
+  max_active_environments = 10
+  always_on               = false
 }
 ```
 
@@ -48,5 +54,6 @@ resource "torque_catalog_item" "catalog_item" {
 - `always_on` (Boolean) Specify if environments launched from this blueprint should be always on or not.
 - `default_duration` (String) The default duration of an environment instantiated from this blueprint.
 - `default_extend` (String) The default duration it will be possible to extend an environment instantiated from this blueprint.
+- `display_name` (String) The display name of the blueprint as it will be displayed in the self-service catalog.
 - `max_active_environments` (Number) Sets the maximum number of concurrent active environments insantiated from this blueprint.
 - `max_duration` (String) The maximum duration of an environment instantiated from this blueprint.
