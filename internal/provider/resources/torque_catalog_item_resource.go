@@ -79,10 +79,11 @@ func (r *TorqueCatalogItemResource) Schema(ctx context.Context, req resource.Sch
 				},
 			},
 			"max_duration": schema.StringAttribute{
-				MarkdownDescription: "The name of the repository where the blueprint resides. \"Stored in Torque\" will be stored in \"qtorque\" repository",
+				MarkdownDescription: "The maximum duration of an environment instantiated from this blueprint.",
 				Required:            false,
 				Optional:            true,
 				Computed:            true,
+				Default:             stringdefault.StaticString(""),
 				Validators: []validator.String{
 					stringvalidator.RegexMatches(
 						regexp.MustCompile(`^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})$`),
@@ -91,7 +92,7 @@ func (r *TorqueCatalogItemResource) Schema(ctx context.Context, req resource.Sch
 				},
 			},
 			"default_duration": schema.StringAttribute{
-				MarkdownDescription: "The name of the repository where the blueprint resides. \"Stored in Torque\" will be stored in \"qtorque\" repository",
+				MarkdownDescription: "The default duration of an enviroment instantiated from this blueprint.",
 				Required:            false,
 				Optional:            true,
 				Computed:            true,
@@ -104,7 +105,7 @@ func (r *TorqueCatalogItemResource) Schema(ctx context.Context, req resource.Sch
 				},
 			},
 			"default_extend": schema.StringAttribute{
-				MarkdownDescription: "The name of the repository where the blueprint resides. \"Stored in Torque\" will be stored in \"qtorque\" repository",
+				MarkdownDescription: "The default duration it will be possible to extend an environment instantiated from this blueprint.",
 				Required:            false,
 				Optional:            true,
 				Computed:            true,
@@ -117,13 +118,14 @@ func (r *TorqueCatalogItemResource) Schema(ctx context.Context, req resource.Sch
 				},
 			},
 			"max_active_environments": schema.Int32Attribute{
-				MarkdownDescription: "The name of the repository where the blueprint resides. \"Stored in Torque\" will be stored in \"qtorque\" repository",
+				MarkdownDescription: "Sets the maximum number of concurrent active environments insantiated from this blueprint.",
 				Required:            false,
 				Optional:            true,
 				Computed:            true,
+				Default:             nil,
 			},
 			"always_on": schema.BoolAttribute{
-				MarkdownDescription: "The name of the repository where the blueprint resides. \"Stored in Torque\" will be stored in \"qtorque\" repository",
+				MarkdownDescription: "Specify if environments launched from this blueprint should be always on or not.",
 				Required:            false,
 				Optional:            true,
 				Computed:            true,
