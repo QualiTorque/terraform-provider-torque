@@ -161,8 +161,8 @@ func (r *TorqueCatalogItemResource) Create(ctx context.Context, req resource.Cre
 	}
 	var maxActiveEnvironments *int32
 	if !data.MaxActiveEnvironments.IsNull() {
-		value := data.MaxActiveEnvironments.ValueInt32() 
-		maxActiveEnvironments = &value                   
+		value := data.MaxActiveEnvironments.ValueInt32()
+		maxActiveEnvironments = &value
 	}
 	err := r.client.SetBlueprintPolicies(data.SpaceName.ValueString(), data.RepositoryName.ValueString(), data.BlueprintName.ValueString(), data.MaxDuration.ValueString(), data.DefaultDuration.ValueString(), data.DefaultDuration.ValueString(), maxActiveEnvironments, data.AlwaysOn.ValueBool())
 	if err != nil {
@@ -223,8 +223,8 @@ func (r *TorqueCatalogItemResource) Update(ctx context.Context, req resource.Upd
 	}
 	var maxActiveEnvironments *int32
 	if !data.MaxActiveEnvironments.IsNull() {
-		value := data.MaxActiveEnvironments.ValueInt32() 
-		maxActiveEnvironments = &value                   
+		value := data.MaxActiveEnvironments.ValueInt32()
+		maxActiveEnvironments = &value
 	}
 	err := r.client.SetBlueprintPolicies(data.SpaceName.ValueString(), data.RepositoryName.ValueString(), data.BlueprintName.ValueString(), data.MaxDuration.ValueString(), data.DefaultDuration.ValueString(), data.DefaultDuration.ValueString(), maxActiveEnvironments, data.AlwaysOn.ValueBool())
 	if err != nil {
