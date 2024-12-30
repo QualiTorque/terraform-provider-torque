@@ -92,7 +92,7 @@ func (r *TorqueCatalogItemResource) Schema(ctx context.Context, req resource.Sch
 				},
 			},
 			"default_duration": schema.StringAttribute{
-				MarkdownDescription: "The default duration of an enviroment instantiated from this blueprint.",
+				MarkdownDescription: "The default duration of an environment instantiated from this blueprint.",
 				Required:            false,
 				Optional:            true,
 				Computed:            true,
@@ -163,8 +163,13 @@ func (r *TorqueCatalogItemResource) Create(ctx context.Context, req resource.Cre
 	if resp.Diagnostics.HasError() {
 		return
 	}
+	err := r.client.SetBlueprintPolicies(data.SpaceName.ValueString(), data.RepositoryName.ValueString(), data.BlueprintName.ValueString(), data.MaxDuration.ValueString(), data.DefaultDuration.ValueString(), data.DefaultDuration.ValueString(), data.MaxActiveEnvironments.ValueInt32(), data.AlwaysOn.ValueBool())
+	if err != nil {
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to set blueprint policies, got error: %s", err))
+		return
+	}
 
-	err := r.client.PublishBlueprintInSpace(data.SpaceName.ValueString(), data.RepositoryName.ValueString(), data.BlueprintName.ValueString())
+	err = r.client.PublishBlueprintInSpace(data.SpaceName.ValueString(), data.RepositoryName.ValueString(), data.BlueprintName.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to publish blueprint in space, got error: %s", err))
 		return
