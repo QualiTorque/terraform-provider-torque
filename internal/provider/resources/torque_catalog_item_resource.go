@@ -166,13 +166,13 @@ func (r *TorqueCatalogItemResource) Create(ctx context.Context, req resource.Cre
 	}
 	err := r.client.SetBlueprintPolicies(data.SpaceName.ValueString(), data.RepositoryName.ValueString(), data.BlueprintName.ValueString(), data.MaxDuration.ValueString(), data.DefaultDuration.ValueString(), data.DefaultDuration.ValueString(), maxActiveEnvironments, data.AlwaysOn.ValueBool())
 	if err != nil {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to set blueprint policies, got error: %s", err))
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create Catalog Item, failed to set blueprint policies, got error: %s", err))
 		return
 	}
 
 	err = r.client.PublishBlueprintInSpace(data.SpaceName.ValueString(), data.RepositoryName.ValueString(), data.BlueprintName.ValueString())
 	if err != nil {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to publish blueprint in space, got error: %s", err))
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create Catalog Item, failed to publish blueprint in space, got error: %s", err))
 		return
 	}
 
