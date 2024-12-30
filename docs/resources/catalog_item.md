@@ -46,7 +46,7 @@ resource "torque_catalog_item" "catalog_item" {
 ### Optional
 
 - `always_on` (Boolean) Specify if environments launched from this blueprint should be always on or not.
-- `default_duration` (String) The default duration of an enviroment instantiated from this blueprint.
+- `default_duration` (String) The default duration of an environment instantiated from this blueprint.
 - `default_extend` (String) The default duration it will be possible to extend an environment instantiated from this blueprint.
 - `max_active_environments` (Number) Sets the maximum number of concurrent active environments insantiated from this blueprint.
 - `max_duration` (String) The maximum duration of an environment instantiated from this blueprint.
