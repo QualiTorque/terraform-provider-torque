@@ -82,8 +82,8 @@ func (r *TorqueCatalogItemResource) Schema(ctx context.Context, req resource.Sch
 				MarkdownDescription: "The maximum duration of an environment instantiated from this blueprint.",
 				Required:            false,
 				Optional:            true,
-				Computed:            true,
-				Default:             stringdefault.StaticString(""),
+				// Computed:            true,
+				// Default:             stringdefault.StaticString(""),
 				Validators: []validator.String{
 					stringvalidator.RegexMatches(
 						regexp.MustCompile(`^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})$`),
@@ -121,8 +121,11 @@ func (r *TorqueCatalogItemResource) Schema(ctx context.Context, req resource.Sch
 				MarkdownDescription: "Sets the maximum number of concurrent active environments insantiated from this blueprint.",
 				Required:            false,
 				Optional:            true,
-				Computed:            true,
-				Default:             nil,
+				// Computed:            true,
+				// PlanModifiers: []planmodifier.Int32{
+				// 	int32planmodifier.UseStateForUnknown(),
+				// },
+				// Default: defaults.Int32.DefaultInt32(-1),
 			},
 			"always_on": schema.BoolAttribute{
 				MarkdownDescription: "Specify if environments launched from this blueprint should be always on or not.",
@@ -163,7 +166,12 @@ func (r *TorqueCatalogItemResource) Create(ctx context.Context, req resource.Cre
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	err := r.client.SetBlueprintPolicies(data.SpaceName.ValueString(), data.RepositoryName.ValueString(), data.BlueprintName.ValueString(), data.MaxDuration.ValueString(), data.DefaultDuration.ValueString(), data.DefaultDuration.ValueString(), data.MaxActiveEnvironments.ValueInt32(), data.AlwaysOn.ValueBool())
+	var maxActiveEnvironments *int32
+	if !data.MaxActiveEnvironments.IsNull() {
+		value := data.MaxActiveEnvironments.ValueInt32() // Get the actual value
+		maxActiveEnvironments = &value                   // Pass it as a pointer
+	}
+	err := r.client.SetBlueprintPolicies(data.SpaceName.ValueString(), data.RepositoryName.ValueString(), data.BlueprintName.ValueString(), data.MaxDuration.ValueString(), data.DefaultDuration.ValueString(), data.DefaultDuration.ValueString(), maxActiveEnvironments, data.AlwaysOn.ValueBool())
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to set blueprint policies, got error: %s", err))
 		return
@@ -220,7 +228,12 @@ func (r *TorqueCatalogItemResource) Update(ctx context.Context, req resource.Upd
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	err := r.client.SetBlueprintPolicies(data.SpaceName.ValueString(), data.RepositoryName.ValueString(), data.BlueprintName.ValueString(), data.MaxDuration.ValueString(), data.DefaultDuration.ValueString(), data.DefaultDuration.ValueString(), data.MaxActiveEnvironments.ValueInt32(), data.AlwaysOn.ValueBool())
+	var maxActiveEnvironments *int32
+	if !data.MaxActiveEnvironments.IsNull() {
+		value := data.MaxActiveEnvironments.ValueInt32() // Get the actual value
+		maxActiveEnvironments = &value                   // Pass it as a pointer
+	}
+	err := r.client.SetBlueprintPolicies(data.SpaceName.ValueString(), data.RepositoryName.ValueString(), data.BlueprintName.ValueString(), data.MaxDuration.ValueString(), data.DefaultDuration.ValueString(), data.DefaultDuration.ValueString(), maxActiveEnvironments, data.AlwaysOn.ValueBool())
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to set blueprint policies, got error: %s", err))
 		return
