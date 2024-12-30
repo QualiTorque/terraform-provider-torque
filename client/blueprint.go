@@ -67,3 +67,30 @@ func (c *Client) SetBlueprintPolicies(space_name string, repository_name string,
 
 	return nil
 }
+
+func (c *Client) UpdateBlueprintDisplayName(space_name string, repository_name string, name string, display_name string) error {
+	data := BlueprintDisplayNameRequest{
+		BlueprintName:  name,
+		RepositoryName: repository_name,
+		DisplayName:    display_name,
+	}
+	payload, err := json.Marshal(data)
+	if err != nil {
+		log.Fatalf("impossible to blueprint display name request: %s", err)
+	}
+	req, err := http.NewRequest("PUT", fmt.Sprintf("%sapi/spaces/%s/blueprints/display_name", c.HostURL, space_name), bytes.NewReader(payload))
+
+	if err != nil {
+		return err
+	}
+
+	req.Header.Add("Content-Type", "application/json")
+	req.Header.Add("Accept", "application/json")
+
+	_, err = c.doRequest(req, &c.Token)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
