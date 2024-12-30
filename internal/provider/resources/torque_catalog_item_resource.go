@@ -10,7 +10,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -39,7 +41,7 @@ type TorqueCatalogItemResourceModel struct {
 	MaxDuration           types.String `tfsdk:"max_duration"`
 	DefaultDuration       types.String `tfsdk:"default_duration"`
 	DefaultExtend         types.String `tfsdk:"default_extend"`
-	MaxActiveEnvironments types.String `tfsdk:"max_active_environments"`
+	MaxActiveEnvironments types.Int32  `tfsdk:"max_active_environments"`
 	AlwaysOn              types.Bool   `tfsdk:"always_on"`
 }
 
@@ -93,6 +95,7 @@ func (r *TorqueCatalogItemResource) Schema(ctx context.Context, req resource.Sch
 				Required:            false,
 				Optional:            true,
 				Computed:            true,
+				Default:             stringdefault.StaticString("PT2H"),
 				Validators: []validator.String{
 					stringvalidator.RegexMatches(
 						regexp.MustCompile(`^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})$`),
@@ -105,6 +108,7 @@ func (r *TorqueCatalogItemResource) Schema(ctx context.Context, req resource.Sch
 				Required:            false,
 				Optional:            true,
 				Computed:            true,
+				Default:             stringdefault.StaticString("PT2H"),
 				Validators: []validator.String{
 					stringvalidator.RegexMatches(
 						regexp.MustCompile(`^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})$`),
@@ -123,6 +127,7 @@ func (r *TorqueCatalogItemResource) Schema(ctx context.Context, req resource.Sch
 				Required:            false,
 				Optional:            true,
 				Computed:            true,
+				Default:             booldefault.StaticBool(false),
 			},
 		},
 	}
@@ -208,7 +213,11 @@ func (r *TorqueCatalogItemResource) Update(ctx context.Context, req resource.Upd
 	if resp.Diagnostics.HasError() {
 		return
 	}
-
+	err := r.client.SetBlueprintPolicies(data.SpaceName.ValueString(), data.RepositoryName.ValueString(), data.BlueprintName.ValueString(), data.MaxDuration.ValueString(), data.DefaultDuration.ValueString(), data.DefaultDuration.ValueString(), data.MaxActiveEnvironments.ValueInt32(), data.AlwaysOn.ValueBool())
+	if err != nil {
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to set blueprint policies, got error: %s", err))
+		return
+	}
 	// Save updated data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
