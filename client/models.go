@@ -421,3 +421,9 @@ type SpaceWorkflow struct {
 	Name  string `json:"name"`
 	Scope string `json:"scope"`
 }
+
+type BlueprintDisplayNameRequest struct {
+	BlueprintName  string `json:"blueprint_name"`
+	RepositoryName string `json:"repository_name"`
+	DisplayName    string `json:"display_name"`
+}
