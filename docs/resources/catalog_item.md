@@ -37,6 +37,7 @@ resource "torque_catalog_item" "catalog_item" {
   default_extend          = "PT2H"
   max_active_environments = 10
   always_on               = false
+  allow_scheduling        = true
 }
 ```
 
@@ -51,6 +52,7 @@ resource "torque_catalog_item" "catalog_item" {
 
 ### Optional
 
+- `allow_scheduling` (Boolean) Specify if environments from this blueprint can be scheduled to launch at a future time.
 - `always_on` (Boolean) Specify if environments launched from this blueprint should be always on or not.
 - `default_duration` (String) The default duration of an environment instantiated from this blueprint.
 - `default_extend` (String) The default duration it will be possible to extend an environment instantiated from this blueprint.

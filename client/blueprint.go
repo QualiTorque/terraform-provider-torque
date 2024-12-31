@@ -39,13 +39,14 @@ func (c *Client) GetBlueprint(space_name string, name string) (*Blueprint, error
 	return nil, fmt.Errorf("blueprint %s not found", name)
 }
 
-func (c *Client) SetBlueprintPolicies(space_name string, repository_name string, name string, max_duration string, default_duration string, default_extend string, max_active_environments *int32, always_on bool) error {
+func (c *Client) SetBlueprintPolicies(space_name string, repository_name string, name string, max_duration string, default_duration string, default_extend string, max_active_environments *int32, always_on bool, allow_scheduling bool) error {
 	data := Policies{
 		MaxDuration:           max_duration,
 		DefaultDuration:       default_duration,
 		DefaultExtend:         default_extend,
 		MaxActiveEnvironments: max_active_environments,
 		AlwaysOn:              always_on,
+		AllowScheduling:       allow_scheduling,
 	}
 	payload, err := json.Marshal(data)
 	if err != nil {

@@ -44,6 +44,7 @@ type TorqueCatalogItemResourceModel struct {
 	DefaultExtend         types.String `tfsdk:"default_extend"`
 	MaxActiveEnvironments types.Int32  `tfsdk:"max_active_environments"`
 	AlwaysOn              types.Bool   `tfsdk:"always_on"`
+	AllowScheduling       types.Bool   `tfsdk:"allow_scheduling"`
 }
 
 func (r *TorqueCatalogItemResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
@@ -91,7 +92,7 @@ func (r *TorqueCatalogItemResource) Schema(ctx context.Context, req resource.Sch
 				Optional:            true,
 				Validators: []validator.String{
 					stringvalidator.RegexMatches(
-						regexp.MustCompile(`^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})$`),
+						regexp.MustCompile(`^P(?:(\d+)D)?T(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?$`),
 						"must be a valid ISO 8601 timestamp (e.g., 2023-08-19T14:23:30Z or 2023-08-19T14:23:30+02:00)",
 					),
 				},
@@ -104,7 +105,7 @@ func (r *TorqueCatalogItemResource) Schema(ctx context.Context, req resource.Sch
 				Default:             stringdefault.StaticString("PT2H"),
 				Validators: []validator.String{
 					stringvalidator.RegexMatches(
-						regexp.MustCompile(`^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})$`),
+						regexp.MustCompile(`^P(?:(\d+)D)?T(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?$`),
 						"must be a valid ISO 8601 timestamp (e.g., 2023-08-19T14:23:30Z or 2023-08-19T14:23:30+02:00)",
 					),
 				},
@@ -117,7 +118,7 @@ func (r *TorqueCatalogItemResource) Schema(ctx context.Context, req resource.Sch
 				Default:             stringdefault.StaticString("PT2H"),
 				Validators: []validator.String{
 					stringvalidator.RegexMatches(
-						regexp.MustCompile(`^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})$`),
+						regexp.MustCompile(`^P(?:(\d+)D)?T(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?$`),
 						"must be a valid ISO 8601 timestamp (e.g., 2023-08-19T14:23:30Z or 2023-08-19T14:23:30+02:00)",
 					),
 				},
@@ -129,6 +130,13 @@ func (r *TorqueCatalogItemResource) Schema(ctx context.Context, req resource.Sch
 			},
 			"always_on": schema.BoolAttribute{
 				MarkdownDescription: "Specify if environments launched from this blueprint should be always on or not.",
+				Required:            false,
+				Optional:            true,
+				Computed:            true,
+				Default:             booldefault.StaticBool(false),
+			},
+			"allow_scheduling": schema.BoolAttribute{
+				MarkdownDescription: "Specify if environments from this blueprint can be scheduled to launch at a future time.",
 				Required:            false,
 				Optional:            true,
 				Computed:            true,
@@ -171,7 +179,7 @@ func (r *TorqueCatalogItemResource) Create(ctx context.Context, req resource.Cre
 		value := data.MaxActiveEnvironments.ValueInt32()
 		maxActiveEnvironments = &value
 	}
-	err := r.client.SetBlueprintPolicies(data.SpaceName.ValueString(), data.RepositoryName.ValueString(), data.BlueprintName.ValueString(), data.MaxDuration.ValueString(), data.DefaultDuration.ValueString(), data.DefaultDuration.ValueString(), maxActiveEnvironments, data.AlwaysOn.ValueBool())
+	err := r.client.SetBlueprintPolicies(data.SpaceName.ValueString(), data.RepositoryName.ValueString(), data.BlueprintName.ValueString(), data.MaxDuration.ValueString(), data.DefaultDuration.ValueString(), data.DefaultExtend.ValueString(), maxActiveEnvironments, data.AlwaysOn.ValueBool(), data.AllowScheduling.ValueBool())
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create Catalog Item, failed to set blueprint policies, got error: %s", err))
 		return
@@ -240,7 +248,7 @@ func (r *TorqueCatalogItemResource) Update(ctx context.Context, req resource.Upd
 		maxActiveEnvironments = &value
 	}
 
-	err := r.client.SetBlueprintPolicies(data.SpaceName.ValueString(), data.RepositoryName.ValueString(), data.BlueprintName.ValueString(), data.MaxDuration.ValueString(), data.DefaultDuration.ValueString(), data.DefaultDuration.ValueString(), maxActiveEnvironments, data.AlwaysOn.ValueBool())
+	err := r.client.SetBlueprintPolicies(data.SpaceName.ValueString(), data.RepositoryName.ValueString(), data.BlueprintName.ValueString(), data.MaxDuration.ValueString(), data.DefaultDuration.ValueString(), data.DefaultExtend.ValueString(), maxActiveEnvironments, data.AlwaysOn.ValueBool(), data.AllowScheduling.ValueBool())
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to set blueprint policies, got error: %s", err))
 		return
