@@ -52,6 +52,7 @@ type Policies struct {
 	DefaultExtend         string `json:"default_extend"`
 	MaxActiveEnvironments *int32 `json:"max_active_environments"`
 	AlwaysOn              bool   `json:"always_on"`
+	AllowScheduling       bool   `json:"allow_scheduling"`
 }
 
 type UserSpaceAssociation struct {

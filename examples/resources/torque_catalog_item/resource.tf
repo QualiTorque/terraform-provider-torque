@@ -22,4 +22,5 @@ resource "torque_catalog_item" "catalog_item" {
   default_extend          = "PT2H"
   max_active_environments = 10
   always_on               = false
+  allow_scheduling        = true
 }
