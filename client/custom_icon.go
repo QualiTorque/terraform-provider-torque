@@ -20,7 +20,6 @@ func (c *Client) UploadCustomIcon(space_name string, file_path string) error {
 	}
 	defer file.Close()
 
-	// Create a buffer to hold the multipart data
 	body := &bytes.Buffer{}
 	writer := multipart.NewWriter(body)
 	part, err := writer.CreatePart(
@@ -29,7 +28,6 @@ func (c *Client) UploadCustomIcon(space_name string, file_path string) error {
 			"Content-Type":        []string{"image/svg+xml"},
 		},
 	)
-	// part, err := writer.CreateFormFile("file", file_path)
 
 	if err != nil {
 		return fmt.Errorf("failed to create form file: %w", err)
@@ -38,12 +36,10 @@ func (c *Client) UploadCustomIcon(space_name string, file_path string) error {
 		return fmt.Errorf("failed to copy file data: %w", err)
 	}
 
-	// Close the writer to finalize the multipart data
 	if err := writer.Close(); err != nil {
 		return fmt.Errorf("failed to close writer: %w", err)
 	}
-	// fmt.Println("Multipart Body:", body.String())
-	// fmt.Println(body)
+
 	req, err := http.NewRequest("POST", fmt.Sprintf("%sapi/spaces/%s/blueprint_icons", c.HostURL, space_name), body)
 	if err != nil {
 		return err
@@ -51,9 +47,7 @@ func (c *Client) UploadCustomIcon(space_name string, file_path string) error {
 
 	req.Header.Add("Accept", "application/json")
 	req.Header.Set("Content-Type", writer.FormDataContentType())
-	// req.Header.Set("Content-Type", writer.FormDataContentType())
-	// req.Header.Set("Content-Type", "image/svg+xml")
-	fmt.Println(req)
+
 	_, err = c.doRequest(req, &c.Token)
 	if err != nil {
 		return err
