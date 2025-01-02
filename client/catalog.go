@@ -108,3 +108,65 @@ func (c *Client) AllowLaunch(blueprint_name string, repository_name string, spac
 
 	return nil
 }
+
+func (c *Client) SetCatalogItemCustomIcon(space_name string, blueprint_name string, repository_name string, key string) error {
+	type setCatalogItemCustomIconRequest struct {
+		BlueprintName  string `json:"blueprint_name"`
+		RepositoryName string `json:"repository_name"`
+		CustomIconKey  string `json:"custom_icon_key"`
+	}
+	request := setCatalogItemCustomIconRequest{
+		BlueprintName:  blueprint_name,
+		RepositoryName: repository_name,
+		CustomIconKey:  key,
+	}
+	payload, err := json.Marshal(request)
+	if err != nil {
+		log.Fatalf("impossible to marshall custom icon request: %s", err)
+	}
+	req, err := http.NewRequest("PUT", fmt.Sprintf("%sapi/spaces/%s/catalog/icons", c.HostURL, space_name), bytes.NewReader(payload))
+	if err != nil {
+		return err
+	}
+
+	req.Header.Add("Content-Type", "application/json")
+	req.Header.Add("Accept", "application/json")
+
+	_, err = c.doRequest(req, &c.Token)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (c *Client) SetCatalogItemIcon(space_name string, blueprint_name string, repository_name string, icon string) error {
+	type setCatalogItemCustomIconRequest struct {
+		BlueprintName  string `json:"blueprint_name"`
+		RepositoryName string `json:"repository_name"`
+		Icon           string `json:"icon"`
+	}
+	request := setCatalogItemCustomIconRequest{
+		BlueprintName:  blueprint_name,
+		RepositoryName: repository_name,
+		Icon:           icon,
+	}
+	payload, err := json.Marshal(request)
+	if err != nil {
+		log.Fatalf("impossible to marshall custom icon request: %s", err)
+	}
+	req, err := http.NewRequest("PUT", fmt.Sprintf("%sapi/spaces/%s/catalog/icons", c.HostURL, space_name), bytes.NewReader(payload))
+	if err != nil {
+		return err
+	}
+
+	req.Header.Add("Content-Type", "application/json")
+	req.Header.Add("Accept", "application/json")
+
+	_, err = c.doRequest(req, &c.Token)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
