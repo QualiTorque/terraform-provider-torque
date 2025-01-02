@@ -45,6 +45,7 @@ type TorqueCatalogItemResourceModel struct {
 	MaxActiveEnvironments types.Int32  `tfsdk:"max_active_environments"`
 	AlwaysOn              types.Bool   `tfsdk:"always_on"`
 	AllowScheduling       types.Bool   `tfsdk:"allow_scheduling"`
+	CustomIcon            types.String `tfsdk:"custom_icon"`
 }
 
 func (r *TorqueCatalogItemResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
@@ -142,6 +143,12 @@ func (r *TorqueCatalogItemResource) Schema(ctx context.Context, req resource.Sch
 				Computed:            true,
 				Default:             booldefault.StaticBool(false),
 			},
+			"custom_icon": schema.StringAttribute{
+				MarkdownDescription: "Custom icon key to associate with this catalog item. The key can be referenced from a torque_space_custom_icon key attribute.",
+				Required:            false,
+				Optional:            true,
+				Computed:            false,
+			},
 		},
 	}
 }
@@ -178,6 +185,13 @@ func (r *TorqueCatalogItemResource) Create(ctx context.Context, req resource.Cre
 	if !data.MaxActiveEnvironments.IsNull() {
 		value := data.MaxActiveEnvironments.ValueInt32()
 		maxActiveEnvironments = &value
+	}
+	if !data.CustomIcon.IsNull() {
+		err := r.client.SetCatalogItemCustomIcon(data.SpaceName.ValueString(), data.BlueprintName.ValueString(), data.RepositoryName.ValueString(), data.CustomIcon.ValueString())
+		if err != nil {
+			resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create Catalog Item, failed to set catalog item custom icon, got error: %s", err))
+			return
+		}
 	}
 	err := r.client.SetBlueprintPolicies(data.SpaceName.ValueString(), data.RepositoryName.ValueString(), data.BlueprintName.ValueString(), data.MaxDuration.ValueString(), data.DefaultDuration.ValueString(), data.DefaultExtend.ValueString(), maxActiveEnvironments, data.AlwaysOn.ValueBool(), data.AllowScheduling.ValueBool())
 	if err != nil {
@@ -266,7 +280,7 @@ func (r *TorqueCatalogItemResource) Update(ctx context.Context, req resource.Upd
 
 func (r *TorqueCatalogItemResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
 	var data TorqueCatalogItemResourceModel
-
+	const default_icon = "nodes"
 	// Read Terraform prior state data into the model.
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
 
@@ -280,7 +294,11 @@ func (r *TorqueCatalogItemResource) Delete(ctx context.Context, req resource.Del
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to unpublish blueprint from space, got error: %s", err))
 		return
 	}
-
+	err = r.client.SetCatalogItemIcon(data.SpaceName.ValueString(), data.BlueprintName.ValueString(), data.RepositoryName.ValueString(), default_icon)
+	if err != nil {
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to remove Catalog Item custom icon, failed to set catalog item custom icon, got error: %s", err))
+		return
+	}
 }
 
 func (r *TorqueCatalogItemResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {

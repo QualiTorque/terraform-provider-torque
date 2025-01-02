@@ -23,4 +23,5 @@ resource "torque_catalog_item" "catalog_item" {
   max_active_environments = 10
   always_on               = false
   allow_scheduling        = true
+  custom_icon             = "blueprint-icons/key"
 }

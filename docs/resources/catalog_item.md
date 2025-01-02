@@ -38,6 +38,7 @@ resource "torque_catalog_item" "catalog_item" {
   max_active_environments = 10
   always_on               = false
   allow_scheduling        = true
+  custom_icon             = "blueprint-icons/key"
 }
 ```
 
@@ -54,6 +55,7 @@ resource "torque_catalog_item" "catalog_item" {
 
 - `allow_scheduling` (Boolean) Specify if environments from this blueprint can be scheduled to launch at a future time.
 - `always_on` (Boolean) Specify if environments launched from this blueprint should be always on or not.
+- `custom_icon` (String) Custom icon key to associate with this catalog item. The key can be referenced from a torque_space_custom_icon key attribute.
 - `default_duration` (String) The default duration of an environment instantiated from this blueprint.
 - `default_extend` (String) The default duration it will be possible to extend an environment instantiated from this blueprint.
 - `display_name` (String) The display name of the blueprint as it will be displayed in the self-service catalog.
