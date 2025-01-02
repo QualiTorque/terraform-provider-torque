@@ -428,3 +428,8 @@ type BlueprintDisplayNameRequest struct {
 	RepositoryName string `json:"repository_name"`
 	DisplayName    string `json:"display_name"`
 }
+
+type TorqueSpaceCustomIcon struct {
+	FileName string `json:"file_name"`
+	Key      string `json:"key"`
+}
