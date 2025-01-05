@@ -137,7 +137,28 @@ func (r *TorqueSpaceWorkflowResource) Read(ctx context.Context, req resource.Rea
 }
 
 func (r *TorqueSpaceWorkflowResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+	var data TorqueSpaceWorkflowResourceModel
+	var state TorqueSpaceWorkflowResourceModel
+	const default_icon = "nodes"
 
+	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
+	resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
+
+	if data.CustomIcon.IsNull() {
+		err := r.client.SetCatalogItemIcon(data.SpaceName.ValueString(), data.Name.ValueString(), data.RepoName.ValueString(), default_icon)
+		if err != nil {
+			resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update workflow custom icon, failed to set catalog item custom icon, got error: %s", err))
+			return
+		}
+	} else {
+		if data.CustomIcon.ValueString() != state.CustomIcon.ValueString() {
+			err := r.client.SetCatalogItemCustomIcon(data.SpaceName.ValueString(), data.Name.ValueString(), data.RepoName.ValueString(), data.CustomIcon.ValueString())
+			if err != nil {
+				resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update workflow custom icon, failed to set catalog item custom icon, got error: %s", err))
+				return
+			}
+		}
+	}
 }
 
 func (r *TorqueSpaceWorkflowResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
