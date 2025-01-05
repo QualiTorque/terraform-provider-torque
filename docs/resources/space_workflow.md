@@ -31,6 +31,7 @@ resource "torque_space_workflow" "workflow" {
   name            = "Space Day2 Operation"
   space_name      = "Space"
   repository_name = "repo"
+  custom_icon     = "blueprint_icons/key"
 }
 ```
 
@@ -42,6 +43,10 @@ resource "torque_space_workflow" "workflow" {
 - `name` (String) Name of the workflow to enable.
 - `repository_name` (String) Repository where the workflow source code is
 - `space_name` (String) Space the workflow belongs to
+
+### Optional
+
+- `custom_icon` (String) Custom icon key to associate with this catalog item. The key can be referenced from a torque_space_custom_icon key attribute.
 
 ### Read-Only
 
