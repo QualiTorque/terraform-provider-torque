@@ -159,6 +159,7 @@ func (r *TorqueSpaceWorkflowResource) Update(ctx context.Context, req resource.U
 			}
 		}
 	}
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
 func (r *TorqueSpaceWorkflowResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
