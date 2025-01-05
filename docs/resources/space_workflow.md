@@ -43,6 +43,10 @@ resource "torque_space_workflow" "workflow" {
 - `repository_name` (String) Repository where the workflow source code is
 - `space_name` (String) Space the workflow belongs to
 
+### Optional
+
+- `custom_icon` (String) Custom icon key to associate with this catalog item. The key can be referenced from a torque_space_custom_icon key attribute.
+
 ### Read-Only
 
 - `launch_allowed` (Boolean) Indicates whether this workflow is enabled and allowed to be launched
