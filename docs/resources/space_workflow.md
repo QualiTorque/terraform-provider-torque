@@ -31,6 +31,7 @@ resource "torque_space_workflow" "workflow" {
   name            = "Space Day2 Operation"
   space_name      = "Space"
   repository_name = "repo"
+  custom_icon     = "blueprint_icons/key"
 }
 ```
 
