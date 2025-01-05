@@ -249,6 +249,7 @@ func (r *TorqueCatalogItemResource) Read(ctx context.Context, req resource.ReadR
 
 func (r *TorqueCatalogItemResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 	var data TorqueCatalogItemResourceModel
+	const default_icon = "nodes"
 
 	// Read Terraform plan data into the model
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
@@ -274,6 +275,14 @@ func (r *TorqueCatalogItemResource) Update(ctx context.Context, req resource.Upd
 			return
 		}
 	}
+	if data.CustomIcon.IsNull() {
+		err = r.client.SetCatalogItemIcon(data.SpaceName.ValueString(), data.BlueprintName.ValueString(), data.RepositoryName.ValueString(), default_icon)
+		if err != nil {
+			resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to remove Catalog Item custom icon, failed to set catalog item custom icon, got error: %s", err))
+			return
+		}
+	}
+
 	// Save updated data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
