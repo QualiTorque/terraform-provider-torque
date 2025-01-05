@@ -18,5 +18,6 @@ resource "torque_workflow" "env_workflow" {
   space_name      = "Space"
   repository_name = "Repo"
   self_service    = true
+  custom_icon     = "blueprint_icons/key"
 }
 

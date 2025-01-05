@@ -33,6 +33,7 @@ resource "torque_workflow" "env_workflow" {
   space_name      = "Space"
   repository_name = "Repo"
   self_service    = true
+  custom_icon     = "blueprint_icons/key"
 }
 ```
 
@@ -47,6 +48,7 @@ resource "torque_workflow" "env_workflow" {
 
 ### Optional
 
+- `custom_icon` (String) Custom icon key to associate with this catalog item. The key can be referenced from a torque_space_custom_icon key attribute.
 - `self_service` (Boolean) Indicates whether this workflow is displayed in the self-service catalog. For workflows with Space scope, then this field can be omitted and will always be true.
 
 ### Read-Only

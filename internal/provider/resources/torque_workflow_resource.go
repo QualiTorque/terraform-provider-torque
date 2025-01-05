@@ -34,6 +34,7 @@ type TorqueWorkflowResourceModel struct {
 	RepoName      types.String `tfsdk:"repository_name"`
 	LaunchAllowed types.Bool   `tfsdk:"launch_allowed"`
 	SelfService   types.Bool   `tfsdk:"self_service"`
+	CustomIcon    types.String `tfsdk:"custom_icon"`
 }
 
 func (r *TorqueWorkflowResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
@@ -86,6 +87,12 @@ func (r *TorqueWorkflowResource) Schema(ctx context.Context, req resource.Schema
 				Computed:            true,
 				Default:             booldefault.StaticBool(false),
 			},
+			"custom_icon": schema.StringAttribute{
+				MarkdownDescription: "Custom icon key to associate with this catalog item. The key can be referenced from a torque_space_custom_icon key attribute.",
+				Required:            false,
+				Optional:            true,
+				Computed:            false,
+			},
 		},
 	}
 }
@@ -131,7 +138,13 @@ func (r *TorqueWorkflowResource) Create(ctx context.Context, req resource.Create
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to publish workflow to self-service catalog, got error: %s", err))
 		return
 	}
-
+	if !data.CustomIcon.IsNull() {
+		err := r.client.SetCatalogItemCustomIcon(data.SpaceName.ValueString(), data.Name.ValueString(), data.RepoName.ValueString(), data.CustomIcon.ValueString())
+		if err != nil {
+			resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create Catalog Item, failed to set catalog item custom icon, got error: %s", err))
+			return
+		}
+	}
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
@@ -142,6 +155,7 @@ func (r *TorqueWorkflowResource) Read(ctx context.Context, req resource.ReadRequ
 func (r *TorqueWorkflowResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 	var data TorqueWorkflowResourceModel
 	var state TorqueWorkflowResourceModel
+	const default_icon = "nodes"
 
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
 	resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
@@ -162,7 +176,21 @@ func (r *TorqueWorkflowResource) Update(ctx context.Context, req resource.Update
 			return
 		}
 	}
-
+	if data.CustomIcon.IsNull() {
+		err := r.client.SetCatalogItemIcon(data.SpaceName.ValueString(), data.Name.ValueString(), data.RepoName.ValueString(), default_icon)
+		if err != nil {
+			resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to remove Catalog Item custom icon, failed to set catalog item custom icon, got error: %s", err))
+			return
+		}
+	} else {
+		if data.CustomIcon.ValueString() != state.CustomIcon.ValueString() {
+			err := r.client.SetCatalogItemCustomIcon(data.SpaceName.ValueString(), data.Name.ValueString(), data.RepoName.ValueString(), data.CustomIcon.ValueString())
+			if err != nil {
+				resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update workflow custom icon, failed to set catalog item custom icon, got error: %s", err))
+				return
+			}
+		}
+	}
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
