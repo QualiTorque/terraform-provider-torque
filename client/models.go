@@ -433,3 +433,28 @@ type TorqueSpaceCustomIcon struct {
 	FileName string `json:"file_name"`
 	Key      string `json:"key"`
 }
+
+type TorqueInputSource struct {
+	Name          string             `json:"name"`
+	Description   string             `json:"description"`
+	Details       InputSourceDetails `json:"details"`
+	AllowedSpaces AllowedSpaces      `json:"allowed_spaces"`
+}
+
+type InputSourceDetails struct {
+	CredentialName string           `json:"credential_name"`
+	BucketName     OverridableValue `json:"bucket_name"`
+	PathPrefix     OverridableValue `json:"path_prefix"`
+	FilterPattern  OverridableValue `json:"filter_pattern"`
+	Type           string           `json:"type"`
+}
+
+type AllowedSpaces struct {
+	AllSpaces      bool     `json:"all_spaces"`
+	SpecificSpaces []string `json:"specific_spaces"`
+}
+
+type OverridableValue struct {
+	Overridable bool   `json:"overridable"`
+	Value       string `json:"value"`
+}

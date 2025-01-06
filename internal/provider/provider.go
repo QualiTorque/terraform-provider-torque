@@ -231,6 +231,7 @@ func (p *torqueProvider) Resources(ctx context.Context) []func() resource.Resour
 		resources.NewTorqueWorkflowResource,
 		resources.NewTorqueSpaceWorkflowResource,
 		resources.NewTorqueSpaceCustomIconResource,
+		resources.NewTorqueS3ObjectInputSourceResource,
 	}
 }
 
