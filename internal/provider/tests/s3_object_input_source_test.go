@@ -87,8 +87,7 @@ func TestS3ObjectInputSource(t *testing.T) {
 
 }
 
-func TestInvalidInputSourceConfiguration(t *testing.T) {
-	// spaceName := os.Getenv("TORQUE_SPACE")
+func TestCantSpecifyAllSpacesWithSpecificSpaces(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { testAccPreCheck(t) },
 		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
