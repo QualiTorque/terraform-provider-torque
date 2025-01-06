@@ -8,7 +8,7 @@ import (
 	"net/http"
 )
 
-func (c *Client) CreateS3InputSource(Name string, Description string, AllowedSpaces AllowedSpaces, Details InputSourceDetails) error {
+func (c *Client) CreateInputSource(Name string, Description string, AllowedSpaces AllowedSpaces, Details InputSourceDetails) error {
 	data := TorqueInputSource{
 		Name:          Name,
 		Description:   Description,
@@ -18,7 +18,7 @@ func (c *Client) CreateS3InputSource(Name string, Description string, AllowedSpa
 
 	payload, err := json.Marshal(data)
 	if err != nil {
-		log.Fatalf("impossible to marshall aws cost target request: %s", err)
+		log.Fatalf("impossible to marshall Input Source request: %s", err)
 	}
 
 	req, err := http.NewRequest("POST", fmt.Sprintf("%sapi/input_sources", c.HostURL), bytes.NewReader(payload))
@@ -54,30 +54,53 @@ func (c *Client) DeleteInputSource(name string) error {
 	return nil
 }
 
-// func (c *Client) UpdateAWSCostTarget(target_name string, new_target_name string, target_type string, role_arn string, external_id string) error {
-// 	data := AwsCostTarget{
-// 		NewName:    new_target_name,
-// 		Type:       target_type,
-// 		ARN:        role_arn,
-// 		ExternalId: external_id,
-// 	}
-// 	payload, err := json.Marshal(data)
-// 	if err != nil {
-// 		log.Fatalf("impossible to marshall target name update request: %s", err)
-// 	}
+func (c *Client) UpdateInputSource(CurrentName string, Name string, Description string, AllowedSpaces AllowedSpaces, Details InputSourceDetails) error {
+	data := TorqueInputSource{
+		Name:          Name,
+		Description:   Description,
+		AllowedSpaces: AllowedSpaces,
+		Details:       Details,
+	}
 
-// 	req, err := http.NewRequest("PUT", fmt.Sprintf("%sapi/settings/costtargets/%s", c.HostURL, target_name), bytes.NewReader(payload))
-// 	if err != nil {
-// 		return err
-// 	}
+	payload, err := json.Marshal(data)
+	if err != nil {
+		log.Fatalf("impossible to marshall Input Source request: %s", err)
+	}
 
-// 	req.Header.Add("Content-Type", "application/json")
-// 	req.Header.Add("Accept", "application/json")
+	req, err := http.NewRequest("PUT", fmt.Sprintf("%sapi/input_sources/%s", c.HostURL, CurrentName), bytes.NewReader(payload))
+	if err != nil {
+		return err
+	}
 
-// 	_, err = c.doRequest(req, &c.Token)
-// 	if err != nil {
-// 		return err
-// 	}
+	req.Header.Add("Content-Type", "application/json")
+	req.Header.Add("Accept", "application/json")
 
-// 	return nil
-// }
+	_, err = c.doRequest(req, &c.Token)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (c *Client) GetInputSource(Name string) (*TorqueInputSource, error) {
+	req, err := http.NewRequest("GET", fmt.Sprintf("%sapi/input_sources/%s", c.HostURL, Name), nil)
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Add("Content-Type", "application/json")
+	req.Header.Add("Accept", "application/json")
+
+	body, err := c.doRequest(req, &c.Token)
+	if err != nil {
+		return nil, err
+	}
+
+	input_source := TorqueInputSource{}
+
+	err = json.Unmarshal(body, &input_source)
+	if err != nil {
+		return nil, err
+	}
+	return &input_source, nil
+}
