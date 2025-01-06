@@ -7,7 +7,6 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/boolvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
-	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -47,7 +46,6 @@ type TorqueS3ObjectInputSourceResourceModel struct {
 	PathPrefixOverridable    types.Bool   `tfsdk:"path_prefix_overridable"`
 }
 
-
 func (r *TorqueS3ObjectInputSourceResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
 	resp.TypeName = "torque_s3_object_input_source"
 }
@@ -55,7 +53,7 @@ func (r *TorqueS3ObjectInputSourceResource) Metadata(ctx context.Context, req re
 func (r *TorqueS3ObjectInputSourceResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "Allows to enable and publish existing Torque workflow with env or env_resource scope so it will be allowed to be executed and displayed in the self-service catalog.",
+		MarkdownDescription: "Creates a new AWS Input Source of type S3 Object.",
 
 		Attributes: map[string]schema.Attribute{
 			"name": schema.StringAttribute{
@@ -71,10 +69,13 @@ func (r *TorqueS3ObjectInputSourceResource) Schema(ctx context.Context, req reso
 				Required:            false,
 			},
 			"all_spaces": schema.BoolAttribute{
-				Description: "Specify if is overridable at the blueprint level",
+				Description: "Specify if the input source can be used in all spaces. Defaults to true, use specific spaces attribute for allowing only specific spaces.",
 				Optional:    true,
 				Computed:    true,
-				Default:     booldefault.StaticBool(true),
+				PlanModifiers: []planmodifier.Bool{
+					&allSpacesModifier{},
+				},
+				// Default:     booldefault.StaticBool(true),
 				Validators: []validator.Bool{
 					// Validate only this attribute or other_attr is configured or neither.
 					boolvalidator.ConflictsWith(path.Expressions{
@@ -83,7 +84,7 @@ func (r *TorqueS3ObjectInputSourceResource) Schema(ctx context.Context, req reso
 				},
 			},
 			"specific_spaces": schema.ListAttribute{
-				Description: "Bucket's Name",
+				Description: "List of spaces that can use this input source",
 				Required:    false,
 				Optional:    true,
 				ElementType: types.StringType,
@@ -106,26 +107,30 @@ func (r *TorqueS3ObjectInputSourceResource) Schema(ctx context.Context, req reso
 			},
 			"filter_pattern_overridable": schema.BoolAttribute{
 				Description: "Specify if is overridable at the blueprint level",
+				Required:    false,
 				Optional:    true,
 				Computed:    true,
 				Default:     booldefault.StaticBool(false),
 			},
 			"filter_pattern": schema.StringAttribute{
-				Description: "Bucket's Name",
-				Required:    true,
+				Description: "Regex pattern to filter the results by.",
+				Required:    false,
+				Optional:    true,
 			},
 			"path_prefix_overridable": schema.BoolAttribute{
 				Description: "Specify if is overridable at the blueprint level",
+				Required:    false,
 				Optional:    true,
 				Computed:    true,
 				Default:     booldefault.StaticBool(false),
 			},
 			"path_prefix": schema.StringAttribute{
-				Description: "Bucket's Name",
-				Required:    true,
+				Description: "Path prefix of the object.",
+				Required:    false,
+				Optional:    true,
 			},
 			"credential_name": schema.StringAttribute{
-				MarkdownDescription: "Credentials to use to connect to the bucket ",
+				MarkdownDescription: "Credentials to use to connect to the bucket. Must be of type AWS.",
 				Optional:            false,
 				Computed:            false,
 				Required:            true,
@@ -215,11 +220,11 @@ func (r *TorqueS3ObjectInputSourceResource) Read(ctx context.Context, req resour
 	data.BucketNameOverridable = types.BoolValue(input_source.Details.BucketName.Overridable)
 	data.CredentialName = types.StringValue(input_source.Details.CredentialName)
 	data.AllSpaces = types.BoolValue(input_source.AllowedSpaces.AllSpaces)
-	var specificSpaces []attr.Value
-	for _, space := range input_source.AllowedSpaces.SpecificSpaces {
-		specificSpaces = append(specificSpaces, types.StringValue(space))
+	if len(input_source.AllowedSpaces.SpecificSpaces) > 0 {
+		data.SpecificSpaces, _ = types.ListValueFrom(ctx, types.StringType, input_source.AllowedSpaces.SpecificSpaces)
+	} else {
+		data.SpecificSpaces = types.ListNull(types.StringType)
 	}
-	data.SpecificSpaces, _ = types.ListValue(types.StringType, specificSpaces)
 	data.FilterPattern = types.StringValue(input_source.Details.FilterPattern.Value)
 	data.FilterPatternOverridable = types.BoolValue(input_source.Details.FilterPattern.Overridable)
 	data.PathPrefix = types.StringValue(input_source.Details.PathPrefix.Value)
@@ -291,4 +296,38 @@ func (r *TorqueS3ObjectInputSourceResource) Delete(ctx context.Context, req reso
 
 func (r *TorqueS3ObjectInputSourceResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resource.ImportStatePassthroughID(ctx, path.Root("name"), req, resp)
+}
+
+type allSpacesModifier struct{}
+
+func (m allSpacesModifier) Description(ctx context.Context) string {
+	return "Set 'all_spaces' to false if 'specific_spaces' is provided and non-empty."
+}
+
+func (m allSpacesModifier) MarkdownDescription(ctx context.Context) string {
+	return "Set `all_spaces` to `false` if `specific_spaces` is provided and non-empty."
+}
+
+func (m allSpacesModifier) PlanModifyBool(ctx context.Context, req planmodifier.BoolRequest, resp *planmodifier.BoolResponse) {
+	// If the user explicitly set 'all_spaces', respect that value.
+	if !req.ConfigValue.IsNull() {
+		resp.PlanValue = req.ConfigValue
+		return
+	}
+
+	// Retrieve 'specific_spaces' from the planned state.
+	var specificSpaces []string
+	diags := req.Plan.GetAttribute(ctx, path.Root("specific_spaces"), &specificSpaces)
+	if diags.HasError() {
+		resp.Diagnostics.Append(diags...)
+		return
+	}
+
+	// If 'specific_spaces' is non-empty, set 'all_spaces' to false.
+	if len(specificSpaces) > 0 {
+		resp.PlanValue = types.BoolValue(false)
+	} else {
+		// Otherwise, default to true.
+		resp.PlanValue = types.BoolValue(true)
+	}
 }
