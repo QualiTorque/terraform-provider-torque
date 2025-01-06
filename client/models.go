@@ -442,11 +442,13 @@ type TorqueInputSource struct {
 }
 
 type InputSourceDetails struct {
-	CredentialName string           `json:"credential_name"`
-	BucketName     OverridableValue `json:"bucket_name"`
-	PathPrefix     OverridableValue `json:"path_prefix"`
-	FilterPattern  OverridableValue `json:"filter_pattern"`
-	Type           string           `json:"type"`
+	CredentialName string            `json:"credential_name"`
+	BucketName     OverridableValue  `json:"bucket_name"`
+	PathPrefix     *OverridableValue `json:"path_prefix"`
+	FilterPattern  OverridableValue  `json:"filter_pattern"`
+	ObjectKey      *OverridableValue `json:"object_key"`
+	ContentFormat  *ContentFormat    `json:"content_format"`
+	Type           string            `json:"type"`
 }
 
 type AllowedSpaces struct {
@@ -457,4 +459,10 @@ type AllowedSpaces struct {
 type OverridableValue struct {
 	Overridable bool   `json:"overridable"`
 	Value       string `json:"value"`
+}
+
+type ContentFormat struct {
+	DisplayJsonPath OverridableValue `json:"display_json_path"`
+	JsonPath        OverridableValue `json:"json_path"`
+	Type            string           `json:"type"`
 }
