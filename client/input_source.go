@@ -37,22 +37,22 @@ func (c *Client) CreateS3InputSource(Name string, Description string, AllowedSpa
 	return nil
 }
 
-// func (c *Client) DeleteCostTarget(target_name string) error {
-// 	req, err := http.NewRequest("DELETE", fmt.Sprintf("%sapi/settings/costtargets/%s", c.HostURL, target_name), nil)
-// 	if err != nil {
-// 		return err
-// 	}
+func (c *Client) DeleteInputSource(name string) error {
+	req, err := http.NewRequest("DELETE", fmt.Sprintf("%sapi/input_sources/%s", c.HostURL, name), nil)
+	if err != nil {
+		return err
+	}
 
-// 	req.Header.Add("Content-Type", "application/json")
-// 	req.Header.Add("Accept", "application/json")
+	req.Header.Add("Content-Type", "application/json")
+	req.Header.Add("Accept", "application/json")
 
-// 	_, err = c.doRequest(req, &c.Token)
-// 	if err != nil {
-// 		return err
-// 	}
+	_, err = c.doRequest(req, &c.Token)
+	if err != nil {
+		return err
+	}
 
-// 	return nil
-// }
+	return nil
+}
 
 // func (c *Client) UpdateAWSCostTarget(target_name string, new_target_name string, target_type string, role_arn string, external_id string) error {
 // 	data := AwsCostTarget{

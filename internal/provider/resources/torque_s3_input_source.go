@@ -3,13 +3,17 @@ package resources
 import (
 	"context"
 	"fmt"
+	"strings"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/boolvalidator"
+	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/qualitorque/terraform-provider-torque/client"
 )
@@ -89,12 +93,24 @@ func (r *TorqueS3ObjectInputSourceResource) Schema(ctx context.Context, req reso
 				Optional:    true,
 				Computed:    true,
 				Default:     booldefault.StaticBool(true),
+				Validators: []validator.Bool{
+					// Validate only this attribute or other_attr is configured or neither.
+					boolvalidator.ConflictsWith(path.Expressions{
+						path.MatchRoot("specific_spaces"),
+					}...),
+				},
 			},
 			"specific_spaces": schema.ListAttribute{
 				Description: "Bucket's Name",
 				Required:    false,
 				Optional:    true,
 				ElementType: types.StringType,
+				Validators: []validator.List{
+					// Validate only this attribute or other_attr is configured or neither.
+					listvalidator.ConflictsWith(path.Expressions{
+						path.MatchRoot("all_spaces"),
+					}...),
+				},
 			},
 			"bucket_name_overridable": schema.BoolAttribute{
 				Description: "Specify if is overridable at the blueprint level",
@@ -257,21 +273,15 @@ func (r *TorqueS3ObjectInputSourceResource) Create(ctx context.Context, req reso
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	if !data.AllSpaces.IsNull() && !data.SpecificSpaces.IsNull() {
-		allowed_spaces.AllSpaces = data.AllSpaces.ValueBool()
-		for _, val := range data.SpecificSpaces.Elements() {
-			specificSpaces = append(specificSpaces, val.String())
-		}
-		allowed_spaces.SpecificSpaces = specificSpaces
-	}
+	allowed_spaces.AllSpaces = data.AllSpaces.ValueBool()
 	if !data.SpecificSpaces.IsNull() {
-		allowed_spaces.AllSpaces = data.AllSpaces.ValueBool()
+		allowed_spaces.AllSpaces = false
 		for _, val := range data.SpecificSpaces.Elements() {
-			specificSpaces = append(specificSpaces, val.String())
+			specificSpaces = append(specificSpaces, strings.Replace(val.String(), "\"", "", -1))
 		}
 		allowed_spaces.SpecificSpaces = specificSpaces
 	} else {
-		allowed_spaces.AllSpaces = data.AllSpaces.ValueBool()
+		allowed_spaces.AllSpaces = data.AllSpaces.ValueBool() // true
 	}
 	details.BucketName.Overridable = data.BucketNameOverridable.ValueBool()
 	details.BucketName.Value = data.BucketName.ValueString()
@@ -286,25 +296,6 @@ func (r *TorqueS3ObjectInputSourceResource) Create(ctx context.Context, req reso
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create Input Source, got error: %s", err))
 		return
 	}
-	// if data.SelfService.ValueBool() {
-	// 	err := r.client.PublishBlueprintInSpace(data.SpaceName.ValueString(), data.RepoName.ValueString(), data.Name.ValueString())
-	// 	if err != nil {
-	// 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to publish workflow to self-service catalog, got error: %s", err))
-	// 		return
-	// 	}
-	// }
-	// err := r.client.AllowLaunch(data.Name.ValueString(), data.RepoName.ValueString(), data.SpaceName.ValueString(), data.LaunchAllowed.ValueBool())
-	// if err != nil {
-	// 	resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to publish workflow to self-service catalog, got error: %s", err))
-	// 	return
-	// }
-	// if !data.CustomIcon.IsNull() {
-	// 	err := r.client.SetCatalogItemCustomIcon(data.SpaceName.ValueString(), data.Name.ValueString(), data.RepoName.ValueString(), data.CustomIcon.ValueString())
-	// 	if err != nil {
-	// 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create Catalog Item, failed to set catalog item custom icon, got error: %s", err))
-	// 		return
-	// 	}
-	// }
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
@@ -363,17 +354,11 @@ func (r *TorqueS3ObjectInputSourceResource) Delete(ctx context.Context, req reso
 		return
 	}
 
-	// data.LaunchAllowed = types.BoolValue(false)
-	// err := r.client.AllowLaunch(data.Name.ValueString(), data.RepoName.ValueString(), data.SpaceName.ValueString(), data.LaunchAllowed.ValueBool())
-	// if err != nil {
-	// 	resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to disable workflow, got error: %s", err))
-	// 	return
-	// }
-	// err = r.client.UnpublishBlueprintInSpace(data.SpaceName.ValueString(), data.RepoName.ValueString(), data.Name.ValueString())
-	// if err != nil {
-	// 	resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to unpublish workflow to self-service catalog, got error: %s", err))
-	// 	return
-	// }
+	err := r.client.DeleteInputSource(data.Name.ValueString())
+	if err != nil {
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to delete Input Source, got error: %s", err))
+		return
+	}
 
 }
 
