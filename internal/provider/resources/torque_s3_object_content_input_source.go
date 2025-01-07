@@ -19,38 +19,42 @@ import (
 )
 
 // Ensure provider defined types fully satisfy framework interfaces.
-var _ resource.Resource = &TorqueS3ObjectInputSourceResource{}
-var _ resource.ResourceWithImportState = &TorqueS3ObjectInputSourceResource{}
+var _ resource.Resource = &TorqueS3ObjectContentInputSourceResource{}
+var _ resource.ResourceWithImportState = &TorqueS3ObjectContentInputSourceResource{}
 
-func NewTorqueS3ObjectInputSourceResource() resource.Resource {
-	return &TorqueS3ObjectInputSourceResource{}
+func NewTorqueS3ObjectContentInputSourceResource() resource.Resource {
+	return &TorqueS3ObjectContentInputSourceResource{}
 }
 
-// TorqueS3ObjectInputSourceResource defines the resource implementation.
-type TorqueS3ObjectInputSourceResource struct {
+// TorqueS3ObjectContentInputSourceResource defines the resource implementation.
+type TorqueS3ObjectContentInputSourceResource struct {
 	client *client.Client
 }
 
 // TorqueS3ObjectInputSourceResourceModel describes the resource data model.
-type TorqueS3ObjectInputSourceResourceModel struct {
-	Name                     types.String `tfsdk:"name"`
-	Description              types.String `tfsdk:"description"`
-	AllSpaces                types.Bool   `tfsdk:"all_spaces"`
-	SpecificSpaces           types.List   `tfsdk:"specific_spaces"`
-	BucketName               types.String `tfsdk:"bucket_name"`
-	BucketNameOverridable    types.Bool   `tfsdk:"bucket_name_overridable"`
-	CredentialName           types.String `tfsdk:"credential_name"`
-	FilterPattern            types.String `tfsdk:"filter_pattern"`
-	FilterPatternOverridable types.Bool   `tfsdk:"filter_pattern_overridable"`
-	PathPrefix               types.String `tfsdk:"path_prefix"`
-	PathPrefixOverridable    types.Bool   `tfsdk:"path_prefix_overridable"`
+type TorqueS3ObjectContentInputSourceResourceModel struct {
+	Name                       types.String `tfsdk:"name"`
+	Description                types.String `tfsdk:"description"`
+	AllSpaces                  types.Bool   `tfsdk:"all_spaces"`
+	SpecificSpaces             types.List   `tfsdk:"specific_spaces"`
+	BucketName                 types.String `tfsdk:"bucket_name"`
+	BucketNameOverridable      types.Bool   `tfsdk:"bucket_name_overridable"`
+	CredentialName             types.String `tfsdk:"credential_name"`
+	JsonPath                   types.String `tfsdk:"json_path"`
+	JsonPathOverridable        types.Bool   `tfsdk:"json_path_overridable"`
+	DisplayJsonPath            types.String `tfsdk:"display_json_path"`
+	DisplayJsonPathOverridable types.Bool   `tfsdk:"display_json_path_overridable"`
+	FilterPattern              types.String `tfsdk:"filter_pattern"`
+	FilterPatternOverridable   types.Bool   `tfsdk:"filter_pattern_overridable"`
+	ObjectKey                  types.String `tfsdk:"object_key"`
+	ObjectKeyOverridable       types.Bool   `tfsdk:"object_key_overridable"`
 }
 
-func (r *TorqueS3ObjectInputSourceResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
-	resp.TypeName = "torque_s3_object_input_source"
+func (r *TorqueS3ObjectContentInputSourceResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
+	resp.TypeName = "torque_s3_object_content_input_source"
 }
 
-func (r *TorqueS3ObjectInputSourceResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
+func (r *TorqueS3ObjectContentInputSourceResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
 		MarkdownDescription: "Creates a new AWS Input Source of type S3 Object.",
@@ -117,17 +121,41 @@ func (r *TorqueS3ObjectInputSourceResource) Schema(ctx context.Context, req reso
 				Required:    false,
 				Optional:    true,
 			},
-			"path_prefix_overridable": schema.BoolAttribute{
+			"object_key_overridable": schema.BoolAttribute{
 				Description: "Specify if is overridable at the blueprint level",
 				Required:    false,
 				Optional:    true,
 				Computed:    true,
 				Default:     booldefault.StaticBool(false),
 			},
-			"path_prefix": schema.StringAttribute{
-				Description: "Path prefix of the object.",
+			"object_key": schema.StringAttribute{
+				Description: "Key of the S3 object to use as the input source.",
+				Required:    true,
+				Optional:    false,
+			},
+			"json_path_overridable": schema.BoolAttribute{
+				Description: "Specify if is overridable at the blueprint level",
 				Required:    false,
 				Optional:    true,
+				Computed:    true,
+				Default:     booldefault.StaticBool(false),
+			},
+			"json_path": schema.StringAttribute{
+				Description: "Enter the JSONPath for extracting the desired values",
+				Required:    true,
+				Optional:    false,
+			},
+			"display_json_path": schema.StringAttribute{
+				Description: "Enter the JSONPath for extracting the corresponding display values",
+				Required:    false,
+				Optional:    true,
+			},
+			"display_json_path_overridable": schema.BoolAttribute{
+				Description: "Specify if is overridable at the blueprint level.",
+				Required:    false,
+				Optional:    true,
+				Computed:    true,
+				Default:     booldefault.StaticBool(false),
 			},
 			"credential_name": schema.StringAttribute{
 				MarkdownDescription: "Credentials to use to connect to the bucket. Must be of type AWS.",
@@ -141,7 +169,7 @@ func (r *TorqueS3ObjectInputSourceResource) Schema(ctx context.Context, req reso
 		},
 	}
 }
-func (r *TorqueS3ObjectInputSourceResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
+func (r *TorqueS3ObjectContentInputSourceResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
 	// Prevent panic if the provider has not been configured.
 	if req.ProviderData == nil {
 		return
@@ -161,14 +189,17 @@ func (r *TorqueS3ObjectInputSourceResource) Configure(ctx context.Context, req r
 	r.client = client
 }
 
-func (r *TorqueS3ObjectInputSourceResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
-	var data TorqueS3ObjectInputSourceResourceModel
+func (r *TorqueS3ObjectContentInputSourceResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
+	var data TorqueS3ObjectContentInputSourceResourceModel
 	var details client.InputSourceDetails
+	details.ContentFormat = &client.ContentFormat{} // pointer initialization
+	details.ObjectKey = &client.OverridableValue{}  // pointer initialization
 	var allowed_spaces client.AllowedSpaces
-	const input_source_type = "s3-object"
+	const input_source_type = "s3-object-content"
+	const content_type = "JSON"
 	var specificSpaces []string
-	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
 
+	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
@@ -186,10 +217,18 @@ func (r *TorqueS3ObjectInputSourceResource) Create(ctx context.Context, req reso
 	details.BucketName.Value = data.BucketName.ValueString()
 	details.FilterPattern.Overridable = data.FilterPatternOverridable.ValueBool()
 	details.FilterPattern.Value = data.FilterPattern.ValueString()
-	details.PathPrefix.Overridable = data.PathPrefixOverridable.ValueBool()
-	details.PathPrefix.Value = data.PathPrefix.ValueString()
+	details.ObjectKey.Overridable = data.ObjectKeyOverridable.ValueBool()
+	details.ObjectKey.Value = data.ObjectKey.ValueString()
+
+	details.ContentFormat.DisplayJsonPath.Value = data.DisplayJsonPath.ValueString()
+	details.ContentFormat.DisplayJsonPath.Overridable = data.DisplayJsonPathOverridable.ValueBool()
+	details.ContentFormat.JsonPath.Overridable = data.JsonPathOverridable.ValueBool()
+	details.ContentFormat.JsonPath.Value = data.JsonPath.ValueString()
+	details.ContentFormat.Type = content_type
+
 	details.Type = input_source_type
 	details.CredentialName = data.CredentialName.ValueString()
+
 	err := r.client.CreateInputSource(data.Name.ValueString(), data.Description.ValueString(), allowed_spaces, details)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create Input Source, got error: %s", err))
@@ -198,8 +237,8 @@ func (r *TorqueS3ObjectInputSourceResource) Create(ctx context.Context, req reso
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
-func (r *TorqueS3ObjectInputSourceResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
-	var data TorqueS3ObjectInputSourceResourceModel
+func (r *TorqueS3ObjectContentInputSourceResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
+	var data TorqueS3ObjectContentInputSourceResourceModel
 
 	diags := req.State.Get(ctx, &data)
 	resp.Diagnostics.Append(diags...)
@@ -227,8 +266,8 @@ func (r *TorqueS3ObjectInputSourceResource) Read(ctx context.Context, req resour
 	}
 	data.FilterPattern = types.StringValue(input_source.Details.FilterPattern.Value)
 	data.FilterPatternOverridable = types.BoolValue(input_source.Details.FilterPattern.Overridable)
-	data.PathPrefix = types.StringValue(input_source.Details.PathPrefix.Value)
-	data.PathPrefixOverridable = types.BoolValue(input_source.Details.PathPrefix.Overridable)
+	data.ObjectKey = types.StringValue(input_source.Details.ObjectKey.Value)
+	data.ObjectKeyOverridable = types.BoolValue(input_source.Details.ObjectKey.Overridable)
 
 	diags = resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
@@ -237,13 +276,18 @@ func (r *TorqueS3ObjectInputSourceResource) Read(ctx context.Context, req resour
 	}
 }
 
-func (r *TorqueS3ObjectInputSourceResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var data TorqueS3ObjectInputSourceResourceModel
-	var state TorqueS3ObjectInputSourceResourceModel
+func (r *TorqueS3ObjectContentInputSourceResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+	var data TorqueS3ObjectContentInputSourceResourceModel
+	var state TorqueS3ObjectContentInputSourceResourceModel
+
 	var details client.InputSourceDetails
+	details.ContentFormat = &client.ContentFormat{} // pointer initialization
+	details.ObjectKey = &client.OverridableValue{}  // pointer initialization
 	var allowed_spaces client.AllowedSpaces
-	const input_source_type = "s3-object"
+	const input_source_type = "s3-object-content"
+	const content_type = "JSON"
 	var specificSpaces []string
+
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
 	resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
 
@@ -264,10 +308,18 @@ func (r *TorqueS3ObjectInputSourceResource) Update(ctx context.Context, req reso
 	details.BucketName.Value = data.BucketName.ValueString()
 	details.FilterPattern.Overridable = data.FilterPatternOverridable.ValueBool()
 	details.FilterPattern.Value = data.FilterPattern.ValueString()
-	details.PathPrefix.Overridable = data.PathPrefixOverridable.ValueBool()
-	details.PathPrefix.Value = data.PathPrefix.ValueString()
+	details.ObjectKey.Overridable = data.ObjectKeyOverridable.ValueBool()
+	details.ObjectKey.Value = data.ObjectKey.ValueString()
+
+	details.ContentFormat.DisplayJsonPath.Value = data.DisplayJsonPath.ValueString()
+	details.ContentFormat.DisplayJsonPath.Overridable = data.DisplayJsonPathOverridable.ValueBool()
+	details.ContentFormat.JsonPath.Overridable = data.JsonPathOverridable.ValueBool()
+	details.ContentFormat.JsonPath.Value = data.JsonPath.ValueString()
+	details.ContentFormat.Type = content_type
+
 	details.Type = input_source_type
 	details.CredentialName = data.CredentialName.ValueString()
+
 	err := r.client.UpdateInputSource(state.Name.ValueString(), data.Name.ValueString(), data.Description.ValueString(), allowed_spaces, details)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create Input Source, got error: %s", err))
@@ -276,8 +328,8 @@ func (r *TorqueS3ObjectInputSourceResource) Update(ctx context.Context, req reso
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
-func (r *TorqueS3ObjectInputSourceResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
-	var data TorqueS3ObjectInputSourceResourceModel
+func (r *TorqueS3ObjectContentInputSourceResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+	var data TorqueS3ObjectContentInputSourceResourceModel
 
 	// Read Terraform prior state data into the model.
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
@@ -294,40 +346,6 @@ func (r *TorqueS3ObjectInputSourceResource) Delete(ctx context.Context, req reso
 
 }
 
-func (r *TorqueS3ObjectInputSourceResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+func (r *TorqueS3ObjectContentInputSourceResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resource.ImportStatePassthroughID(ctx, path.Root("name"), req, resp)
-}
-
-type allSpacesModifier struct{}
-
-func (m allSpacesModifier) Description(ctx context.Context) string {
-	return "Set 'all_spaces' to false if 'specific_spaces' is provided and non-empty."
-}
-
-func (m allSpacesModifier) MarkdownDescription(ctx context.Context) string {
-	return "Set `all_spaces` to `false` if `specific_spaces` is provided and non-empty."
-}
-
-func (m allSpacesModifier) PlanModifyBool(ctx context.Context, req planmodifier.BoolRequest, resp *planmodifier.BoolResponse) {
-	// If the user explicitly set 'all_spaces', respect that value.
-	if !req.ConfigValue.IsNull() {
-		resp.PlanValue = req.ConfigValue
-		return
-	}
-
-	// Retrieve 'specific_spaces' from the planned state.
-	var specificSpaces []string
-	diags := req.Plan.GetAttribute(ctx, path.Root("specific_spaces"), &specificSpaces)
-	if diags.HasError() {
-		resp.Diagnostics.Append(diags...)
-		return
-	}
-
-	// If 'specific_spaces' is non-empty, set 'all_spaces' to false.
-	if len(specificSpaces) > 0 {
-		resp.PlanValue = types.BoolValue(false)
-	} else {
-		// Otherwise, default to true.
-		resp.PlanValue = types.BoolValue(true)
-	}
 }
