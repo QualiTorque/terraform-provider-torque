@@ -124,8 +124,10 @@ func TestCantSpecifyAllSpacesWithSpecificSpacesInObjectContent(t *testing.T) {
 					credential_name            = "creds"
 					filter_pattern_overridable = false
 					filter_pattern             = "pattern"
+					object_key                 = "key"
+					json_path                  = "path"
 					specific_spaces            = ["TorqueTerraformProvider"]
-					all_spaces = true
+					all_spaces                 = true
 				}
 				`,
 				ExpectError: regexp.MustCompile("Invalid Attribute Combination"),
