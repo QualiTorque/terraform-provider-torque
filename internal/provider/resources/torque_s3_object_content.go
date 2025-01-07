@@ -239,7 +239,7 @@ func (r *TorqueS3ObjectContentInputSourceResource) Create(ctx context.Context, r
 }
 
 func (r *TorqueS3ObjectContentInputSourceResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
-	var data TorqueS3ObjectInputSourceResourceModel
+	var data TorqueS3ObjectContentInputSourceResourceModel
 
 	diags := req.State.Get(ctx, &data)
 	resp.Diagnostics.Append(diags...)
@@ -267,8 +267,8 @@ func (r *TorqueS3ObjectContentInputSourceResource) Read(ctx context.Context, req
 	}
 	data.FilterPattern = types.StringValue(input_source.Details.FilterPattern.Value)
 	data.FilterPatternOverridable = types.BoolValue(input_source.Details.FilterPattern.Overridable)
-	data.PathPrefix = types.StringValue(input_source.Details.PathPrefix.Value)
-	data.PathPrefixOverridable = types.BoolValue(input_source.Details.PathPrefix.Overridable)
+	data.ObjectKey = types.StringValue(input_source.Details.ObjectKey.Value)
+	data.ObjectKeyOverridable = types.BoolValue(input_source.Details.ObjectKey.Overridable)
 
 	diags = resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
@@ -278,12 +278,17 @@ func (r *TorqueS3ObjectContentInputSourceResource) Read(ctx context.Context, req
 }
 
 func (r *TorqueS3ObjectContentInputSourceResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var data TorqueS3ObjectInputSourceResourceModel
-	var state TorqueS3ObjectInputSourceResourceModel
+	var data TorqueS3ObjectContentInputSourceResourceModel
+	var state TorqueS3ObjectContentInputSourceResourceModel
+
 	var details client.InputSourceDetails
+	details.ContentFormat = &client.ContentFormat{} // pointer initialization
+	details.ObjectKey = &client.OverridableValue{}  // pointer initialization
 	var allowed_spaces client.AllowedSpaces
-	const input_source_type = "s3-object"
+	const input_source_type = "s3-object-content"
+	const content_type = "JSON"
 	var specificSpaces []string
+
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
 	resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
 
@@ -304,10 +309,18 @@ func (r *TorqueS3ObjectContentInputSourceResource) Update(ctx context.Context, r
 	details.BucketName.Value = data.BucketName.ValueString()
 	details.FilterPattern.Overridable = data.FilterPatternOverridable.ValueBool()
 	details.FilterPattern.Value = data.FilterPattern.ValueString()
-	details.PathPrefix.Overridable = data.PathPrefixOverridable.ValueBool()
-	details.PathPrefix.Value = data.PathPrefix.ValueString()
+	details.ObjectKey.Overridable = data.ObjectKeyOverridable.ValueBool()
+	details.ObjectKey.Value = data.ObjectKey.ValueString()
+
+	details.ContentFormat.DisplayJsonPath.Value = data.DisplayJsonPath.ValueString()
+	details.ContentFormat.DisplayJsonPath.Overridable = data.DisplayJsonPathOverridable.ValueBool()
+	details.ContentFormat.JsonPath.Overridable = data.JsonPathOverridable.ValueBool()
+	details.ContentFormat.JsonPath.Value = data.JsonPath.ValueString()
+	details.ContentFormat.Type = content_type
+
 	details.Type = input_source_type
 	details.CredentialName = data.CredentialName.ValueString()
+
 	err := r.client.UpdateInputSource(state.Name.ValueString(), data.Name.ValueString(), data.Description.ValueString(), allowed_spaces, details)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create Input Source, got error: %s", err))
@@ -317,7 +330,7 @@ func (r *TorqueS3ObjectContentInputSourceResource) Update(ctx context.Context, r
 }
 
 func (r *TorqueS3ObjectContentInputSourceResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
-	var data TorqueS3ObjectInputSourceResourceModel
+	var data TorqueS3ObjectContentInputSourceResourceModel
 
 	// Read Terraform prior state data into the model.
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
