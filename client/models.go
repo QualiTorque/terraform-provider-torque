@@ -468,11 +468,11 @@ type ContentFormat struct {
 }
 
 type ResourceInventory struct {
-	Credentials   string                         `json:"credentials"`
-	Configuration ResourceInventoryConfiguration `json:"configuration"`
+	Credentials string                   `json:"credentials"`
+	Details     ResourceInventoryDetails `json:"details"`
 }
 
-type ResourceInventoryConfiguration struct {
+type ResourceInventoryDetails struct {
 	Type    string  `json:"type"`
 	ViewArn *string `json:"view_arn"`
 }

@@ -8,10 +8,10 @@ import (
 	"net/http"
 )
 
-func (c *Client) CreateResourceInventory(credentials string, configuration ResourcesInventoryConfiguration) error {
+func (c *Client) CreateResourceInventory(credentials string, details ResourceInventoryDetails) error {
 	data := ResourceInventory{
-		Credentials:   credentials,
-		Configuration: configuration,
+		Credentials: credentials,
+		Details:     details,
 	}
 
 	payload, err := json.Marshal(data)
@@ -19,7 +19,7 @@ func (c *Client) CreateResourceInventory(credentials string, configuration Resou
 		log.Fatalf("impossible to marshall Resource Inventory: %s", err)
 	}
 
-	req, err := http.NewRequest("POST", fmt.Sprintf("%sapi/cloudresource", c.HostURL), bytes.NewReader(payload))
+	req, err := http.NewRequest("POST", fmt.Sprintf("%sapi/cloudresource/configuration", c.HostURL), bytes.NewReader(payload))
 	if err != nil {
 		return err
 	}
