@@ -129,7 +129,7 @@ func (r *TorqueS3ObjectContentInputSourceResource) Schema(ctx context.Context, r
 				Default:     booldefault.StaticBool(false),
 			},
 			"object_key": schema.StringAttribute{
-				Description: "Path prefix of the object.",
+				Description: "Key of the S3 object to use as the input source.",
 				Required:    true,
 				Optional:    false,
 			},
@@ -141,18 +141,17 @@ func (r *TorqueS3ObjectContentInputSourceResource) Schema(ctx context.Context, r
 				Default:     booldefault.StaticBool(false),
 			},
 			"json_path": schema.StringAttribute{
-				Description: "Path prefix of the object.",
+				Description: "Enter the JSONPath for extracting the desired values",
 				Required:    true,
 				Optional:    false,
 			},
 			"display_json_path": schema.StringAttribute{
-				Description: "Specify if is overridable at the blueprint level",
+				Description: "Enter the JSONPath for extracting the corresponding display values",
 				Required:    false,
 				Optional:    true,
-				// Computed:    true,
 			},
 			"display_json_path_overridable": schema.BoolAttribute{
-				Description: "Path prefix of the object.",
+				Description: "Specify if is overridable at the blueprint level.",
 				Required:    false,
 				Optional:    true,
 				Computed:    true,
@@ -350,37 +349,3 @@ func (r *TorqueS3ObjectContentInputSourceResource) Delete(ctx context.Context, r
 func (r *TorqueS3ObjectContentInputSourceResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resource.ImportStatePassthroughID(ctx, path.Root("name"), req, resp)
 }
-
-// type allSpacesModifier struct{}
-
-// func (m allSpacesModifier) Description(ctx context.Context) string {
-// 	return "Set 'all_spaces' to false if 'specific_spaces' is provided and non-empty."
-// }
-
-// func (m allSpacesModifier) MarkdownDescription(ctx context.Context) string {
-// 	return "Set `all_spaces` to `false` if `specific_spaces` is provided and non-empty."
-// }
-
-// func (m allSpacesModifier) PlanModifyBool(ctx context.Context, req planmodifier.BoolRequest, resp *planmodifier.BoolResponse) {
-// 	// If the user explicitly set 'all_spaces', respect that value.
-// 	if !req.ConfigValue.IsNull() {
-// 		resp.PlanValue = req.ConfigValue
-// 		return
-// 	}
-
-// 	// Retrieve 'specific_spaces' from the planned state.
-// 	var specificSpaces []string
-// 	diags := req.Plan.GetAttribute(ctx, path.Root("specific_spaces"), &specificSpaces)
-// 	if diags.HasError() {
-// 		resp.Diagnostics.Append(diags...)
-// 		return
-// 	}
-
-// 	// If 'specific_spaces' is non-empty, set 'all_spaces' to false.
-// 	if len(specificSpaces) > 0 {
-// 		resp.PlanValue = types.BoolValue(false)
-// 	} else {
-// 		// Otherwise, default to true.
-// 		resp.PlanValue = types.BoolValue(true)
-// 	}
-// }
