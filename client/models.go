@@ -466,3 +466,13 @@ type ContentFormat struct {
 	JsonPath        OverridableValue `json:"json_path"`
 	Type            string           `json:"type"`
 }
+
+type ResourceInventory struct {
+	Credentials   string                         `json:"credentials"`
+	Configuration ResourceInventoryConfiguration `json:"configuration"`
+}
+
+type ResourceInventoryConfiguration struct {
+	Type    string  `json:"type"`
+	ViewArn *string `json:"view_arn"`
+}
