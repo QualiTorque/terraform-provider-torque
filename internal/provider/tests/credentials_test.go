@@ -17,14 +17,14 @@ func TestAccountCredentials(t *testing.T) {
 		token                 = "token"
 		git_type              = "github"
 		space                 = "TorqueTerraformProvider"
-		new_name              = "new_credentials_new"
+		new_name              = "new_credentials"
 		new_description       = "new_description"
 		new_token             = "new_token"
 		new_git_type          = "bitbucket"
 		new_space             = "TorqueTerraformProvider-2"
 		allowed_spaces_length = "1"
 	)
-	var unique_name = name + index
+	var unique_name = name +  index
 	var new_unique_name = new_name + index
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { testAccPreCheck(t) },
@@ -33,7 +33,7 @@ func TestAccountCredentials(t *testing.T) {
 			{
 				Config: providerConfig + fmt.Sprintf(`
 				resource "torque_git_credentials" "credentials" {
-					name                = "%s+"
+					name                = "%s"
 					description         = "%s"
 					token               = "%s"
 					type                = "%s"
