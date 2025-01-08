@@ -8,13 +8,12 @@ import (
 	"net/http"
 )
 
-func (c *Client) CreateSpaceGitCredentials(space_name string, name string, description string, repo_type string, token string) error {
-	const cloudtype = "sourceControl"
+func (c *Client) CreateSpaceCredentials(space_name string, name string, description string, cloudtype string, repo_type string, token string) error {
 	credential_data := CredentialData{
 		Token: token,
 		Type:  repo_type,
 	}
-	credentials := GitCredentials{
+	credentials := SpaceCredentials{
 		SpaceName:       space_name,
 		Name:            name,
 		Description:     description,
@@ -42,13 +41,12 @@ func (c *Client) CreateSpaceGitCredentials(space_name string, name string, descr
 	return nil
 }
 
-func (c *Client) CreateGitCredentials(name string, description string, repo_type string, token string, allowed_space_names []string) error {
-	const cloudtype = "sourceControl"
+func (c *Client) CreateAccountCredentials(name string, description string, cloudtype string, repo_type string, token string, allowed_space_names []string) error {
 	credential_data := CredentialData{
 		Token: token,
 		Type:  repo_type,
 	}
-	credentials := AccountGitCredentials{
+	credentials := AccountCredentials{
 		Name:              name,
 		Description:       description,
 		CloudType:         cloudtype,
@@ -77,7 +75,7 @@ func (c *Client) CreateGitCredentials(name string, description string, repo_type
 	return nil
 }
 
-func (c *Client) DeleteSpaceGitCredentials(space_name string, credential_name string) error {
+func (c *Client) DeleteSpaceCredentials(space_name string, credential_name string) error {
 	type DeleteSpaceCredentialRequest struct {
 		SpaceName      string `json:"space_name"`
 		CredentialName string `json:"credential_name"`
@@ -106,7 +104,7 @@ func (c *Client) DeleteSpaceGitCredentials(space_name string, credential_name st
 	return nil
 }
 
-func (c *Client) DeleteGitCredentials(credential_name string) error {
+func (c *Client) DeleteAccountCredentials(credential_name string) error {
 	req, err := http.NewRequest("DELETE", fmt.Sprintf("%sapi/settings/credentialstore/%s", c.HostURL, credential_name), nil)
 	if err != nil {
 		return err
@@ -123,10 +121,10 @@ func (c *Client) DeleteGitCredentials(credential_name string) error {
 	return nil
 }
 
-func (c *Client) GetSpaceGitCredentials(space_name string, credential_name string) (GitCredentials, error) {
+func (c *Client) GetSpaceCredentials(space_name string, credential_name string) (SpaceCredentials, error) {
 	req, err := http.NewRequest("GET", fmt.Sprintf("%sapi/spaces/%s/settings/credentialstore/%s", c.HostURL, space_name, credential_name), nil)
 
-	credentials := GitCredentials{}
+	credentials := SpaceCredentials{}
 
 	if err != nil {
 		return credentials, err
@@ -148,10 +146,10 @@ func (c *Client) GetSpaceGitCredentials(space_name string, credential_name strin
 	return credentials, nil
 }
 
-func (c *Client) GetGitCredentials(credential_name string) (AccountGitCredentials, error) {
+func (c *Client) GetCredentials(credential_name string) (AccountCredentials, error) {
 	req, err := http.NewRequest("GET", fmt.Sprintf("%sapi/settings/credentialstore/%s", c.HostURL, credential_name), nil)
 
-	credentials := AccountGitCredentials{}
+	credentials := AccountCredentials{}
 
 	if err != nil {
 		return credentials, err
@@ -173,13 +171,12 @@ func (c *Client) GetGitCredentials(credential_name string) (AccountGitCredential
 	return credentials, nil
 }
 
-func (c *Client) UpdateSpaceGitCredentials(space_name string, name string, description string, repo_type string, token string) error {
-	const cloudtype = "sourceControl"
+func (c *Client) UpdateSpaceCredentials(space_name string, name string, description string, cloudtype string, repo_type string, token string) error {
 	credential_data := CredentialData{
 		Token: token,
 		Type:  repo_type,
 	}
-	credentials := GitCredentials{
+	credentials := SpaceCredentials{
 		SpaceName:       space_name,
 		Name:            name,
 		Description:     description,
@@ -207,13 +204,12 @@ func (c *Client) UpdateSpaceGitCredentials(space_name string, name string, descr
 	return nil
 }
 
-func (c *Client) UpdateGitCredentials(name string, description string, repo_type string, token string, allowed_space_names []string) error {
-	const cloudtype = "sourceControl"
+func (c *Client) UpdateAccountCredentials(name string, description string, cloudtype string, repo_type string, token string, allowed_space_names []string) error {
 	credential_data := CredentialData{
 		Token: token,
 		Type:  repo_type,
 	}
-	credentials := AccountGitCredentials{
+	credentials := AccountCredentials{
 		Name:              name,
 		Description:       description,
 		CloudType:         cloudtype,

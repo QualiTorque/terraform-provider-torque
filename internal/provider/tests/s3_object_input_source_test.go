@@ -5,9 +5,7 @@ package tests
 
 import (
 	"fmt"
-	"os"
 	"regexp"
-	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -19,9 +17,6 @@ func TestS3ObjectInputSource(t *testing.T) {
 		description     = "s3 input test"
 		credential_name = "TerraformCreds"
 	)
-	var version = os.Getenv("VERSION")
-	var minorVresion = strings.Split((version), ".")
-	var index = minorVresion[1]
 	var unique_name = input_name + "_" + index
 	var unique_bucket = input_name + "_bucket_" + index
 
