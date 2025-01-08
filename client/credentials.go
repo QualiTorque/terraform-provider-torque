@@ -9,7 +9,6 @@ import (
 )
 
 func (c *Client) CreateSpaceCredentials(space_name string, name string, description string, cloudtype string, repo_type string, token string) error {
-	// const cloudtype = "sourceControl"
 	credential_data := CredentialData{
 		Token: token,
 		Type:  repo_type,
@@ -43,7 +42,6 @@ func (c *Client) CreateSpaceCredentials(space_name string, name string, descript
 }
 
 func (c *Client) CreateAccountCredentials(name string, description string, cloudtype string, repo_type string, token string, allowed_space_names []string) error {
-	// const cloudtype = "sourceControl"
 	credential_data := CredentialData{
 		Token: token,
 		Type:  repo_type,
@@ -174,7 +172,6 @@ func (c *Client) GetCredentials(credential_name string) (AccountCredentials, err
 }
 
 func (c *Client) UpdateSpaceCredentials(space_name string, name string, description string, cloudtype string, repo_type string, token string) error {
-	// const cloudtype = "sourceControl"
 	credential_data := CredentialData{
 		Token: token,
 		Type:  repo_type,
@@ -208,7 +205,6 @@ func (c *Client) UpdateSpaceCredentials(space_name string, name string, descript
 }
 
 func (c *Client) UpdateAccountCredentials(name string, description string, cloudtype string, repo_type string, token string, allowed_space_names []string) error {
-	// const cloudtype = "sourceControl"
 	credential_data := CredentialData{
 		Token: token,
 		Type:  repo_type,
