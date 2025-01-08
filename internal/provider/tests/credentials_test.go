@@ -24,6 +24,8 @@ func TestAccountCredentials(t *testing.T) {
 		new_space             = "TorqueTerraformProvider-2"
 		allowed_spaces_length = "1"
 	)
+	var unique_name = name + index
+	var new_unique_name = new_name + index
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { testAccPreCheck(t) },
 		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
@@ -31,15 +33,15 @@ func TestAccountCredentials(t *testing.T) {
 			{
 				Config: providerConfig + fmt.Sprintf(`
 				resource "torque_git_credentials" "credentials" {
-					name                = "%s"
+					name                = "%s+"
 					description         = "%s"
 					token               = "%s"
 					type                = "%s"
 					allowed_space_names = ["%s"]
 				}
-				`, name, description, token, git_type, space),
+				`, unique_name, description, token, git_type, space),
 				Check: resource.ComposeAggregateTestCheckFunc(
-					resource.TestCheckResourceAttr("torque_git_credentials.credentials", "name", name),
+					resource.TestCheckResourceAttr("torque_git_credentials.credentials", "name", unique_name),
 					resource.TestCheckResourceAttr("torque_git_credentials.credentials", "description", description),
 					resource.TestCheckResourceAttr("torque_git_credentials.credentials", "token", token),
 					resource.TestCheckResourceAttr("torque_git_credentials.credentials", "type", git_type),
@@ -56,7 +58,7 @@ func TestAccountCredentials(t *testing.T) {
 					type                = "%s"
 					allowed_space_names = ["%s"]
 				}
-				`, new_name, new_description, new_token, new_git_type, new_space),
+				`, new_unique_name, new_description, new_token, new_git_type, new_space),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr("torque_git_credentials.credentials", "name", new_name),
 					resource.TestCheckResourceAttr("torque_git_credentials.credentials", "description", new_description),
@@ -75,9 +77,9 @@ func TestAccountCredentials(t *testing.T) {
 					type                = "%s"
 					// allowed_space_names = ["%s"]
 				}
-				`, new_name, new_description, new_token, new_git_type, new_space),
+				`, new_unique_name, new_description, new_token, new_git_type, new_space),
 				Check: resource.ComposeAggregateTestCheckFunc(
-					resource.TestCheckResourceAttr("torque_git_credentials.credentials", "name", new_name),
+					resource.TestCheckResourceAttr("torque_git_credentials.credentials", "name", new_unique_name),
 					resource.TestCheckResourceAttr("torque_git_credentials.credentials", "description", new_description),
 					resource.TestCheckResourceAttr("torque_git_credentials.credentials", "token", new_token),
 					resource.TestCheckResourceAttr("torque_git_credentials.credentials", "type", new_git_type),
@@ -103,6 +105,8 @@ func TestSpaceCredentials(t *testing.T) {
 		new_space             = "TorqueTerraformProvider-2"
 		allowed_spaces_length = "1"
 	)
+	var unique_name = name + index
+	var new_unique_name = new_name + index
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { testAccPreCheck(t) },
 		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
@@ -116,7 +120,7 @@ func TestSpaceCredentials(t *testing.T) {
 					type                = "%s"
 					space_name          = "%s"
 				}
-				`, name, description, token, git_type, space),
+				`, unique_name, description, token, git_type, space),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr("torque_space_git_credentials.credentials", "name", name),
 					resource.TestCheckResourceAttr("torque_space_git_credentials.credentials", "description", description),
@@ -134,7 +138,7 @@ func TestSpaceCredentials(t *testing.T) {
 					type                = "%s"
 					space_name          = "%s"
 				}
-				`, new_name, new_description, new_token, new_git_type, new_space),
+				`, new_unique_name, new_description, new_token, new_git_type, new_space),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr("torque_space_git_credentials.credentials", "name", new_name),
 					resource.TestCheckResourceAttr("torque_space_git_credentials.credentials", "description", new_description),
