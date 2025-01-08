@@ -128,6 +128,12 @@ func (r *TorqueAwsResourceInventoryResource) Delete(ctx context.Context, req res
 
 	// Read Terraform prior state data into the model.
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
+	err := r.client.DeleteResourceInventory(data.Credentials.ValueString())
+
+	if err != nil {
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create resource inventory, got error: %s", err))
+		return
+	}
 
 	if resp.Diagnostics.HasError() {
 		return
