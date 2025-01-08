@@ -24,7 +24,7 @@ func TestAccountCredentials(t *testing.T) {
 		new_space             = "TorqueTerraformProvider-2"
 		allowed_spaces_length = "1"
 	)
-	var unique_name = name +  index
+	var unique_name = name + index
 	var new_unique_name = new_name + index
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { testAccPreCheck(t) },
