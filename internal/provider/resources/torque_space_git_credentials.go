@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -35,6 +36,7 @@ type TorqueSpaceGitCredentialsResourceModel struct {
 	Description types.String `tfsdk:"description"`
 	Token       types.String `tfsdk:"token"`
 	Type        types.String `tfsdk:"type"`
+	CloudType   types.String `tfsdk:"cloudtype"`
 }
 
 func (r *TorqueSpaceGitCredentialsResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
@@ -73,6 +75,12 @@ func (r *TorqueSpaceGitCredentialsResource) Schema(ctx context.Context, req reso
 				Computed:            false,
 				Sensitive:           true,
 			},
+			"cloudtype": schema.StringAttribute{
+				MarkdownDescription: "Credentials type identifier",
+				Required:            false,
+				Computed:            true,
+				Default:             stringdefault.StaticString("sourceControl"),
+			},
 			"type": schema.StringAttribute{
 				MarkdownDescription: "Type of git repository these credentials are for. Supported types are github, bitbucket, azureDevops and gitlabEnterprise.",
 				Required:            true,
@@ -110,13 +118,12 @@ func (r *TorqueSpaceGitCredentialsResource) Configure(ctx context.Context, req r
 
 func (r *TorqueSpaceGitCredentialsResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	var data TorqueSpaceGitCredentialsResourceModel
-
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
 
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	err := r.client.CreateSpaceGitCredentials(data.SpaceName.ValueString(), data.Name.ValueString(), data.Description.ValueString(), data.Type.ValueString(), data.Token.ValueString())
+	err := r.client.CreateSpaceCredentials(data.SpaceName.ValueString(), data.Name.ValueString(), data.Description.ValueString(), data.CloudType.ValueString(), data.Type.ValueString(), data.Token.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create space git credentials, got error: %s", err))
 		return
@@ -143,7 +150,7 @@ func (r *TorqueSpaceGitCredentialsResource) Update(ctx context.Context, req reso
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	err := r.client.UpdateSpaceGitCredentials(data.SpaceName.ValueString(), data.Name.ValueString(), data.Description.ValueString(), data.Type.ValueString(), data.Token.ValueString())
+	err := r.client.UpdateSpaceCredentials(data.SpaceName.ValueString(), data.Name.ValueString(), data.Description.ValueString(), data.CloudType.ValueString(), data.Type.ValueString(), data.Token.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update space git credentials, got error: %s", err))
 		return
@@ -158,7 +165,7 @@ func (r *TorqueSpaceGitCredentialsResource) Delete(ctx context.Context, req reso
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	err := r.client.DeleteSpaceGitCredentials(data.SpaceName.ValueString(), data.Name.ValueString())
+	err := r.client.DeleteSpaceCredentials(data.SpaceName.ValueString(), data.Name.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to delete space git credentials, got error: %s", err))
 		return

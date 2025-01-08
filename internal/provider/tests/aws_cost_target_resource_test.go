@@ -5,9 +5,7 @@ package tests
 
 import (
 	"fmt"
-	"os"
 	"regexp"
-	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/acctest"
@@ -15,9 +13,7 @@ import (
 )
 
 func TestAWSCostTargetResource(t *testing.T) {
-	var version = os.Getenv("VERSION")
-	var minorVresion = strings.Split((version), ".")
-	var index = minorVresion[1]
+
 	new_aws_cost_target_name := fmt.Sprintf("new_aws_cost_target_%s", index)
 	aws_cost_target_name := fmt.Sprintf("aws_cost_target_%s", index)
 	random_account_num := fmt.Sprint(acctest.RandIntRange(100000000000, 999999999999))
