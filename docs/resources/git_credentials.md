@@ -49,3 +49,7 @@ resource "torque_git_credentials" "credentials" {
 ### Optional
 
 - `allowed_space_names` (List of String) List of allowed spaces that can use the credentials. At least one space must be in the list if a list is provided. If the argument is not probvided, the credentials may be used in all spaces
+
+### Read-Only
+
+- `cloudtype` (String) Credentials type identifier.

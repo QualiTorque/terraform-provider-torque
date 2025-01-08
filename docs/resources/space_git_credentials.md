@@ -46,3 +46,7 @@ resource "torque_space_git_credentials" "creds" {
 - `space_name` (String) Name of the space to create the credentials in.
 - `token` (String, Sensitive) Access token the credentials will use.
 - `type` (String) Type of git repository these credentials are for. Supported types are github, bitbucket, azureDevops and gitlabEnterprise.
+
+### Read-Only
+
+- `cloudtype` (String) Credentials type identifier
