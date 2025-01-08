@@ -121,7 +121,6 @@ func (r *TorqueGitCredentialsResource) Configure(ctx context.Context, req resour
 
 func (r *TorqueGitCredentialsResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	var data TorqueGitCredentialsResourceModel
-	// const cloudtype = "sourceControl"
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
 
 	if resp.Diagnostics.HasError() {
