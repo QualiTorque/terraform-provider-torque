@@ -63,13 +63,10 @@ func (c *Client) CreateAccountCredentials(name string, description string, cloud
 		log.Fatalf("impossible to marshall credentials: %s", err)
 	}
 
-	// fmt.Println(credential_data)
 	req, err := http.NewRequest("POST", fmt.Sprintf("%sapi/settings/credentialstore", c.HostURL), bytes.NewReader(payload))
 	if err != nil {
 		return err
 	}
-	fmt.Printf("Payload being sent:\n%s\n", string(payload))
-	fmt.Println(string(payload))
 	req.Header.Add("Content-Type", "application/json")
 	req.Header.Add("Accept", "application/json")
 

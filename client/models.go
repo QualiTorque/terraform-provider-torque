@@ -384,9 +384,9 @@ type AccountCredentials struct {
 }
 
 type CredentialData struct {
-	Token  *string `json:"token"`
-	Key    *string `json:"key"`
-	Secret *string `json:"secret"`
+	Token  *string `json:"token,omitempty"`
+	Key    *string `json:"key,omitempty"`
+	Secret *string `json:"secret,omitempty"`
 	Type   string  `json:"type"`
 }
 
