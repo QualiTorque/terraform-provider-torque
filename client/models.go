@@ -379,13 +379,15 @@ type AccountCredentials struct {
 	CredentialData    CredentialData `json:"credential_data"`
 	CloudType         string         `json:"cloud_type"`
 	CloudIdentifier   string         `json:"cloud_identifier"`
-	AllowedSpaceNames []string       `json:"allowed_space_names"`
+	AllowedSpaceNames []string       `json:"allowed_space_names,omitempty"`
 	AllSpacesAllowed  bool           `json:"all_spaces_allowed"`
 }
 
 type CredentialData struct {
-	Token string `json:"token"`
-	Type  string `json:"type"`
+	Token  *string `json:"token"`
+	Key    *string `json:"key"`
+	Secret *string `json:"secret"`
+	Type   string  `json:"type"`
 }
 
 type BlueprintSource struct {

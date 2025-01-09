@@ -123,7 +123,7 @@ func (r *TorqueSpaceGitCredentialsResource) Create(ctx context.Context, req reso
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	err := r.client.CreateSpaceCredentials(data.SpaceName.ValueString(), data.Name.ValueString(), data.Description.ValueString(), data.CloudType.ValueString(), data.Type.ValueString(), data.Token.ValueString())
+	err := r.client.CreateSpaceCredentials(data.SpaceName.ValueString(), data.Name.ValueString(), data.Description.ValueString(), data.CloudType.ValueString(), data.Type.ValueString(), data.Token.ValueStringPointer())
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create space git credentials, got error: %s", err))
 		return
@@ -150,7 +150,7 @@ func (r *TorqueSpaceGitCredentialsResource) Update(ctx context.Context, req reso
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	err := r.client.UpdateSpaceCredentials(data.SpaceName.ValueString(), data.Name.ValueString(), data.Description.ValueString(), data.CloudType.ValueString(), data.Type.ValueString(), data.Token.ValueString())
+	err := r.client.UpdateSpaceCredentials(data.SpaceName.ValueString(), data.Name.ValueString(), data.Description.ValueString(), data.CloudType.ValueString(), data.Type.ValueString(), data.Token.ValueStringPointer())
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update space git credentials, got error: %s", err))
 		return

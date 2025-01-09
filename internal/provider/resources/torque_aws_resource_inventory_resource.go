@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/qualitorque/terraform-provider-torque/client"
@@ -27,8 +28,14 @@ type TorqueAwsResourceInventoryResource struct {
 
 // TorqueAwsResourceInventoryResourceModel describes the resource data model.
 type TorqueAwsResourceInventoryResourceModel struct {
-	Credentials types.String `tfsdk:"credentials"`
-	ViewArn     types.String `tfsdk:"view_arn"`
+	Name          types.String `tfsdk:"name"`
+	Description   types.String `tfsdk:"description"`
+	AccountNumber types.String `tfsdk:"account_number"`
+	AccessKey     types.String `tfsdk:"access_key"`
+	SecretKey     types.String `tfsdk:"secret_key"`
+	// Credentials types.String `tfsdk:"credentials"`
+	ViewArn   types.String `tfsdk:"view_arn"`
+	CloudType types.String `tfsdk:"cloud_type"`
 }
 
 func (r *TorqueAwsResourceInventoryResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
@@ -41,13 +48,37 @@ func (r *TorqueAwsResourceInventoryResource) Schema(ctx context.Context, req res
 		MarkdownDescription: "Creation of a new parameter is a Torque space",
 
 		Attributes: map[string]schema.Attribute{
-			"credentials": schema.StringAttribute{
-				MarkdownDescription: "Existing credentials to use for authenticating to the cloud account. Will also be used as the cloud account name in Torque.",
+			"name": schema.StringAttribute{
+				MarkdownDescription: "Name of the AWS Cloud Account. Will also be used to store the provided credentials in Torque's credential store for later use.",
 				Required:            true,
+			},
+			"description": schema.StringAttribute{
+				MarkdownDescription: "ARN of the reader IAM role.",
+				Required:            true,
+			},
+			"account_number": schema.StringAttribute{
+				MarkdownDescription: "ARN of the reader IAM role.",
+				Required:            true,
+			},
+			"access_key": schema.StringAttribute{
+				MarkdownDescription: "AWS Access Key.",
+				Required:            true,
+				Sensitive:           true,
+			},
+			"secret_key": schema.StringAttribute{
+				MarkdownDescription: "AWS Secret Access Key.",
+				Required:            true,
+				Sensitive:           true,
 			},
 			"view_arn": schema.StringAttribute{
 				MarkdownDescription: "ARN of the reader IAM role.",
 				Required:            true,
+			},
+			"cloud_type": schema.StringAttribute{
+				MarkdownDescription: "Type of the resource inventory.",
+				Required:            false,
+				Computed:            true,
+				Default:             stringdefault.StaticString("aws"),
 			},
 		},
 	}
@@ -76,14 +107,20 @@ func (r *TorqueAwsResourceInventoryResource) Configure(ctx context.Context, req 
 func (r *TorqueAwsResourceInventoryResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	var data TorqueAwsResourceInventoryResourceModel
 	var details client.ResourceInventoryDetails
-	const cloud_type = "aws"
+	const credential_type = "aws__basic"
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	details.Type = cloud_type
+	err := r.client.CreateAccountCredentials(data.Name.ValueString(), data.Description.ValueString(), data.CloudType.ValueString(), data.AccountNumber.ValueString(), credential_type, nil, data.AccessKey.ValueStringPointer(), data.SecretKey.ValueStringPointer(), nil)
+
+	if err != nil {
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create resource inventory credentials, got error: %s", err))
+		return
+	}
+	details.Type = data.CloudType.ValueString()
 	details.ViewArn = data.ViewArn.ValueStringPointer()
-	err := r.client.CreateResourceInventory(data.Credentials.ValueString(), details)
+	err = r.client.CreateResourceInventory(data.Name.ValueString(), details)
 
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create resource inventory, got error: %s", err))
@@ -128,7 +165,7 @@ func (r *TorqueAwsResourceInventoryResource) Delete(ctx context.Context, req res
 
 	// Read Terraform prior state data into the model.
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
-	err := r.client.DeleteResourceInventory(data.Credentials.ValueString())
+	err := r.client.DeleteResourceInventory(data.Name.ValueString())
 
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create resource inventory, got error: %s", err))
