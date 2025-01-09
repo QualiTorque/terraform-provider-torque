@@ -448,6 +448,7 @@ type InputSourceDetails struct {
 	BucketName         *OverridableValue `json:"bucket_name,omitempty"`
 	StorageAccountName *OverridableValue `json:"storage_account_name,omitempty"`
 	ContainerName      *OverridableValue `json:"container_name,omitempty"`
+	BlobName           *OverridableValue `json:"blob_name,omitempty"`
 	PathPrefix         *OverridableValue `json:"path_prefix"`
 	FilterPattern      OverridableValue  `json:"filter_pattern"`
 	ObjectKey          *OverridableValue `json:"object_key"`
