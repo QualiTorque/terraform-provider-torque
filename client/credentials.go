@@ -8,17 +8,17 @@ import (
 	"net/http"
 )
 
-func (c *Client) CreateSpaceCredentials(space_name string, name string, description string, cloudtype string, repo_type string, token string) error {
+func (c *Client) CreateSpaceCredentials(space_name string, name string, description string, cloudtype string, cloud_identifier string, token *string) error {
 	credential_data := CredentialData{
 		Token: token,
-		Type:  repo_type,
+		Type:  cloud_identifier,
 	}
 	credentials := SpaceCredentials{
 		SpaceName:       space_name,
 		Name:            name,
 		Description:     description,
 		CloudType:       cloudtype,
-		CloudIdentifier: repo_type,
+		CloudIdentifier: cloud_identifier,
 		CredentialData:  credential_data,
 	}
 	payload, err := json.Marshal(credentials)
@@ -41,16 +41,19 @@ func (c *Client) CreateSpaceCredentials(space_name string, name string, descript
 	return nil
 }
 
-func (c *Client) CreateAccountCredentials(name string, description string, cloudtype string, repo_type string, token string, allowed_space_names []string) error {
+func (c *Client) CreateAccountCredentials(name string, description string, cloud_type string, cloud_identifier string, credential_type string, token *string, key *string, secret *string, allowed_space_names []string) error {
 	credential_data := CredentialData{
-		Token: token,
-		Type:  repo_type,
+		Token:  token,
+		Type:   credential_type,
+		Key:    key,
+		Secret: secret,
 	}
+
 	credentials := AccountCredentials{
 		Name:              name,
 		Description:       description,
-		CloudType:         cloudtype,
-		CloudIdentifier:   repo_type,
+		CloudType:         cloud_type,
+		CloudIdentifier:   cloud_identifier,
 		CredentialData:    credential_data,
 		AllowedSpaceNames: allowed_space_names,
 		AllSpacesAllowed:  len(allowed_space_names) == 0 || allowed_space_names == nil,
@@ -59,11 +62,11 @@ func (c *Client) CreateAccountCredentials(name string, description string, cloud
 	if err != nil {
 		log.Fatalf("impossible to marshall credentials: %s", err)
 	}
+
 	req, err := http.NewRequest("POST", fmt.Sprintf("%sapi/settings/credentialstore", c.HostURL), bytes.NewReader(payload))
 	if err != nil {
 		return err
 	}
-
 	req.Header.Add("Content-Type", "application/json")
 	req.Header.Add("Accept", "application/json")
 
@@ -171,17 +174,17 @@ func (c *Client) GetCredentials(credential_name string) (AccountCredentials, err
 	return credentials, nil
 }
 
-func (c *Client) UpdateSpaceCredentials(space_name string, name string, description string, cloudtype string, repo_type string, token string) error {
+func (c *Client) UpdateSpaceCredentials(space_name string, name string, description string, cloudtype string, cloud_identifier string, token *string) error {
 	credential_data := CredentialData{
 		Token: token,
-		Type:  repo_type,
+		Type:  cloud_identifier,
 	}
 	credentials := SpaceCredentials{
 		SpaceName:       space_name,
 		Name:            name,
 		Description:     description,
 		CloudType:       cloudtype,
-		CloudIdentifier: repo_type,
+		CloudIdentifier: cloud_identifier,
 		CredentialData:  credential_data,
 	}
 	payload, err := json.Marshal(credentials)
@@ -204,16 +207,19 @@ func (c *Client) UpdateSpaceCredentials(space_name string, name string, descript
 	return nil
 }
 
-func (c *Client) UpdateAccountCredentials(name string, description string, cloudtype string, repo_type string, token string, allowed_space_names []string) error {
+func (c *Client) UpdateAccountCredentials(name string, description string, cloud_identifier string, cloudtype string, credential_type string, token *string, key *string, secret *string, allowed_space_names []string) error {
 	credential_data := CredentialData{
-		Token: token,
-		Type:  repo_type,
+		Token:  token,
+		Type:   credential_type,
+		Key:    key,
+		Secret: secret,
 	}
+
 	credentials := AccountCredentials{
 		Name:              name,
 		Description:       description,
 		CloudType:         cloudtype,
-		CloudIdentifier:   repo_type,
+		CloudIdentifier:   cloud_identifier,
 		CredentialData:    credential_data,
 		AllowedSpaceNames: allowed_space_names,
 	}
