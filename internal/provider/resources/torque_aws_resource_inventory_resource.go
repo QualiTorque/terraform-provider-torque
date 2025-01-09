@@ -38,9 +38,8 @@ type TorqueAwsResourceInventoryResourceModel struct {
 	AccountNumber types.String `tfsdk:"account_number"`
 	AccessKey     types.String `tfsdk:"access_key"`
 	SecretKey     types.String `tfsdk:"secret_key"`
-	// Credentials types.String `tfsdk:"credentials"`
-	ViewArn   types.String `tfsdk:"view_arn"`
-	CloudType types.String `tfsdk:"cloud_type"`
+	ViewArn       types.String `tfsdk:"view_arn"`
+	CloudType     types.String `tfsdk:"cloud_type"`
 }
 
 func (r *TorqueAwsResourceInventoryResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
