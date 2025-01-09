@@ -49,7 +49,7 @@ func (r *TorqueAwsResourceInventoryResource) Metadata(ctx context.Context, req r
 func (r *TorqueAwsResourceInventoryResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "Creation of a new parameter is a Torque space",
+		MarkdownDescription: "Creation of a new cloud resource inventory is Torque account to allow curation of the resource in the cloud account.",
 
 		Attributes: map[string]schema.Attribute{
 			"name": schema.StringAttribute{
@@ -60,20 +60,20 @@ func (r *TorqueAwsResourceInventoryResource) Schema(ctx context.Context, req res
 				},
 			},
 			"description": schema.StringAttribute{
-				MarkdownDescription: "ARN of the reader IAM role.",
+				MarkdownDescription: "Description of the credentials that will be created.",
 				Required:            true,
 			},
 			"account_number": schema.StringAttribute{
-				MarkdownDescription: "ARN of the reader IAM role.",
+				MarkdownDescription: "AWS Account Number.",
 				Required:            true,
 			},
 			"access_key": schema.StringAttribute{
-				MarkdownDescription: "AWS Access Key.",
+				MarkdownDescription: "AWS Access Key of a local IAM user to use its credentials for authentication.",
 				Required:            true,
 				Sensitive:           true,
 			},
 			"secret_key": schema.StringAttribute{
-				MarkdownDescription: "AWS Secret Access Key.",
+				MarkdownDescription: "AWS Secret Access Key of a local IAM user to use its credentials for authentication.",
 				Required:            true,
 				Sensitive:           true,
 			},
