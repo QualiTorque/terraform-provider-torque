@@ -210,11 +210,14 @@ func (c *Client) UpdateSpaceCredentials(space_name string, name string, descript
 	return nil
 }
 
-func (c *Client) UpdateAccountCredentials(name string, description string, cloud_identifier string, cloudtype string, repo_type string, token *string, allowed_space_names []string) error {
+func (c *Client) UpdateAccountCredentials(name string, description string, cloud_identifier string, cloudtype string, credential_type string, token *string, key *string, secret *string, allowed_space_names []string) error {
 	credential_data := CredentialData{
-		Token: token,
-		Type:  repo_type,
+		Token:  token,
+		Type:   credential_type,
+		Key:    key,
+		Secret: secret,
 	}
+
 	credentials := AccountCredentials{
 		Name:              name,
 		Description:       description,

@@ -173,7 +173,7 @@ func (r *TorqueGitCredentialsResource) Update(ctx context.Context, req resource.
 		}
 	}
 
-	err := r.client.UpdateAccountCredentials(data.Name.ValueString(), data.Description.ValueString(), data.CloudType.ValueString(), data.Type.ValueString(), data.Type.ValueString(), data.Token.ValueStringPointer(), allowed_space_names)
+	err := r.client.UpdateAccountCredentials(data.Name.ValueString(), data.Description.ValueString(), data.CloudType.ValueString(), data.Type.ValueString(), data.Type.ValueString(), data.Token.ValueStringPointer(), nil, nil, allowed_space_names)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update git credentials, got error: %s", err))
 		return
