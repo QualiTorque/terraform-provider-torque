@@ -11,7 +11,7 @@ import (
 )
 
 
-func TestAzureBlobObjectContentInputSourceResource(t *testing.T) {
+func TestAzureBlobObjectInputSourceResource(t *testing.T) {
 	const (
 		input_name               = "az_blob"
 		description              = "az input test"
