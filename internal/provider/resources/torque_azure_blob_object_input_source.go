@@ -19,41 +19,43 @@ import (
 )
 
 // Ensure provider defined types fully satisfy framework interfaces.
-var _ resource.Resource = &TorqueS3ObjectInputSourceResource{}
-var _ resource.ResourceWithImportState = &TorqueS3ObjectInputSourceResource{}
+var _ resource.Resource = &TorqueAzureBlobObjectInputSourceResource{}
+var _ resource.ResourceWithImportState = &TorqueAzureBlobObjectInputSourceResource{}
 
-func NewTorqueS3ObjectInputSourceResource() resource.Resource {
-	return &TorqueS3ObjectInputSourceResource{}
+func NewTorqueAzureBlobObjectInputSourceResource() resource.Resource {
+	return &TorqueAzureBlobObjectInputSourceResource{}
 }
 
-// TorqueS3ObjectInputSourceResource defines the resource implementation.
-type TorqueS3ObjectInputSourceResource struct {
+// TorqueAzureBlobObjectInputSourceResource defines the resource implementation.
+type TorqueAzureBlobObjectInputSourceResource struct {
 	client *client.Client
 }
 
-// TorqueS3ObjectInputSourceResourceModel describes the resource data model.
-type TorqueS3ObjectInputSourceResourceModel struct {
-	Name                     types.String `tfsdk:"name"`
-	Description              types.String `tfsdk:"description"`
-	AllSpaces                types.Bool   `tfsdk:"all_spaces"`
-	SpecificSpaces           types.List   `tfsdk:"specific_spaces"`
-	BucketName               types.String `tfsdk:"bucket_name"`
-	BucketNameOverridable    types.Bool   `tfsdk:"bucket_name_overridable"`
-	CredentialName           types.String `tfsdk:"credential_name"`
-	FilterPattern            types.String `tfsdk:"filter_pattern"`
-	FilterPatternOverridable types.Bool   `tfsdk:"filter_pattern_overridable"`
-	PathPrefix               types.String `tfsdk:"path_prefix"`
-	PathPrefixOverridable    types.Bool   `tfsdk:"path_prefix_overridable"`
+// TorqueAzureBlobObjectInputSourceResourceModel describes the resource data model.
+type TorqueAzureBlobObjectInputSourceResourceModel struct {
+	Name                          types.String `tfsdk:"name"`
+	Description                   types.String `tfsdk:"description"`
+	AllSpaces                     types.Bool   `tfsdk:"all_spaces"`
+	SpecificSpaces                types.List   `tfsdk:"specific_spaces"`
+	StorageAccountName            types.String `tfsdk:"storage_account_name"`
+	StorageAccountNameOverridable types.Bool   `tfsdk:"storage_account_overridable"`
+	ContainerName                 types.String `tfsdk:"container_name"`
+	ContainerNameOverridable      types.Bool   `tfsdk:"container_name_overridable"`
+	CredentialName                types.String `tfsdk:"credential_name"`
+	FilterPattern                 types.String `tfsdk:"filter_pattern"`
+	FilterPatternOverridable      types.Bool   `tfsdk:"filter_pattern_overridable"`
+	PathPrefix                    types.String `tfsdk:"path_prefix"`
+	PathPrefixOverridable         types.Bool   `tfsdk:"path_prefix_overridable"`
 }
 
-func (r *TorqueS3ObjectInputSourceResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
-	resp.TypeName = "torque_s3_object_input_source"
+func (r *TorqueAzureBlobObjectInputSourceResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
+	resp.TypeName = "torque_azure_blob_object_input_source"
 }
 
-func (r *TorqueS3ObjectInputSourceResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
+func (r *TorqueAzureBlobObjectInputSourceResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "Creates a new AWS Input Source of type S3 Object.",
+		MarkdownDescription: "Creates a new AWS Input Source of type Azure Blob Object.",
 
 		Attributes: map[string]schema.Attribute{
 			"name": schema.StringAttribute{
@@ -95,13 +97,23 @@ func (r *TorqueS3ObjectInputSourceResource) Schema(ctx context.Context, req reso
 					}...),
 				},
 			},
-			"bucket_name_overridable": schema.BoolAttribute{
+			"storage_account_overridable": schema.BoolAttribute{
 				Description: "Specify if is overridable at the blueprint level",
 				Optional:    true,
 				Computed:    true,
 				Default:     booldefault.StaticBool(false),
 			},
-			"bucket_name": schema.StringAttribute{
+			"storage_account_name": schema.StringAttribute{
+				Description: "Bucket's Name",
+				Required:    true,
+			},
+			"container_name_overridable": schema.BoolAttribute{
+				Description: "Specify if is overridable at the blueprint level",
+				Optional:    true,
+				Computed:    true,
+				Default:     booldefault.StaticBool(false),
+			},
+			"container_name": schema.StringAttribute{
 				Description: "Bucket's Name",
 				Required:    true,
 			},
@@ -141,7 +153,7 @@ func (r *TorqueS3ObjectInputSourceResource) Schema(ctx context.Context, req reso
 		},
 	}
 }
-func (r *TorqueS3ObjectInputSourceResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
+func (r *TorqueAzureBlobObjectInputSourceResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
 	// Prevent panic if the provider has not been configured.
 	if req.ProviderData == nil {
 		return
@@ -161,13 +173,16 @@ func (r *TorqueS3ObjectInputSourceResource) Configure(ctx context.Context, req r
 	r.client = client
 }
 
-func (r *TorqueS3ObjectInputSourceResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
-	var data TorqueS3ObjectInputSourceResourceModel
+func (r *TorqueAzureBlobObjectInputSourceResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
+	var data TorqueAzureBlobObjectInputSourceResourceModel
 	var details client.InputSourceDetails
-	details.PathPrefix = &client.OverridableValue{} // pointer initialization
-	details.BucketName = &client.OverridableValue{} // pointer initialization
+
+	details.PathPrefix = &client.OverridableValue{}         // pointer initialization
+	details.StorageAccountName = &client.OverridableValue{} // pointer initialization
+	details.ContainerName = &client.OverridableValue{}      // pointer initialization
+
 	var allowed_spaces client.AllowedSpaces
-	const input_source_type = "s3-object"
+	const input_source_type = "azure-blob"
 	var specificSpaces []string
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
 
@@ -184,8 +199,10 @@ func (r *TorqueS3ObjectInputSourceResource) Create(ctx context.Context, req reso
 	} else {
 		allowed_spaces.AllSpaces = data.AllSpaces.ValueBool() // true
 	}
-	details.BucketName.Overridable = data.BucketNameOverridable.ValueBool()
-	details.BucketName.Value = data.BucketName.ValueString()
+	details.StorageAccountName.Overridable = data.StorageAccountNameOverridable.ValueBool()
+	details.StorageAccountName.Value = data.StorageAccountName.ValueString()
+	details.ContainerName.Overridable = data.ContainerNameOverridable.ValueBool()
+	details.ContainerName.Value = data.ContainerName.ValueString()
 	details.FilterPattern.Overridable = data.FilterPatternOverridable.ValueBool()
 	details.FilterPattern.Value = data.FilterPattern.ValueString()
 	details.PathPrefix.Overridable = data.PathPrefixOverridable.ValueBool()
@@ -200,8 +217,8 @@ func (r *TorqueS3ObjectInputSourceResource) Create(ctx context.Context, req reso
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
-func (r *TorqueS3ObjectInputSourceResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
-	var data TorqueS3ObjectInputSourceResourceModel
+func (r *TorqueAzureBlobObjectInputSourceResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
+	var data TorqueAzureBlobObjectInputSourceResourceModel
 
 	diags := req.State.Get(ctx, &data)
 	resp.Diagnostics.Append(diags...)
@@ -218,8 +235,10 @@ func (r *TorqueS3ObjectInputSourceResource) Read(ctx context.Context, req resour
 	}
 	data.Name = types.StringValue(input_source.Name)
 	data.Description = types.StringValue(input_source.Description)
-	data.BucketName = types.StringValue(input_source.Details.BucketName.Value)
-	data.BucketNameOverridable = types.BoolValue(input_source.Details.BucketName.Overridable)
+	data.StorageAccountName = types.StringValue(input_source.Details.StorageAccountName.Value)
+	data.StorageAccountNameOverridable = types.BoolValue(input_source.Details.StorageAccountName.Overridable)
+	data.ContainerName = types.StringValue(input_source.Details.ContainerName.Value)
+	data.ContainerNameOverridable = types.BoolValue(input_source.Details.ContainerName.Overridable)
 	data.CredentialName = types.StringValue(input_source.Details.CredentialName)
 	data.AllSpaces = types.BoolValue(input_source.AllowedSpaces.AllSpaces)
 	if len(input_source.AllowedSpaces.SpecificSpaces) > 0 {
@@ -239,12 +258,17 @@ func (r *TorqueS3ObjectInputSourceResource) Read(ctx context.Context, req resour
 	}
 }
 
-func (r *TorqueS3ObjectInputSourceResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var data TorqueS3ObjectInputSourceResourceModel
-	var state TorqueS3ObjectInputSourceResourceModel
+func (r *TorqueAzureBlobObjectInputSourceResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+	var data TorqueAzureBlobObjectInputSourceResourceModel
+	var state TorqueAzureBlobObjectInputSourceResourceModel
 	var details client.InputSourceDetails
+
+	details.PathPrefix = &client.OverridableValue{}         // pointer initialization
+	details.StorageAccountName = &client.OverridableValue{} // pointer initialization
+	details.ContainerName = &client.OverridableValue{}      // pointer initialization
+
 	var allowed_spaces client.AllowedSpaces
-	const input_source_type = "s3-object"
+	const input_source_type = "azure-blob"
 	var specificSpaces []string
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
 	resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
@@ -262,8 +286,10 @@ func (r *TorqueS3ObjectInputSourceResource) Update(ctx context.Context, req reso
 	} else {
 		allowed_spaces.AllSpaces = data.AllSpaces.ValueBool() // true
 	}
-	details.BucketName.Overridable = data.BucketNameOverridable.ValueBool()
-	details.BucketName.Value = data.BucketName.ValueString()
+	details.StorageAccountName.Overridable = data.StorageAccountNameOverridable.ValueBool()
+	details.StorageAccountName.Value = data.StorageAccountName.ValueString()
+	details.ContainerName.Overridable = data.ContainerNameOverridable.ValueBool()
+	details.ContainerName.Value = data.ContainerName.ValueString()
 	details.FilterPattern.Overridable = data.FilterPatternOverridable.ValueBool()
 	details.FilterPattern.Value = data.FilterPattern.ValueString()
 	details.PathPrefix.Overridable = data.PathPrefixOverridable.ValueBool()
@@ -278,8 +304,8 @@ func (r *TorqueS3ObjectInputSourceResource) Update(ctx context.Context, req reso
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
-func (r *TorqueS3ObjectInputSourceResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
-	var data TorqueS3ObjectInputSourceResourceModel
+func (r *TorqueAzureBlobObjectInputSourceResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+	var data TorqueAzureBlobObjectInputSourceResourceModel
 
 	// Read Terraform prior state data into the model.
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
@@ -296,40 +322,6 @@ func (r *TorqueS3ObjectInputSourceResource) Delete(ctx context.Context, req reso
 
 }
 
-func (r *TorqueS3ObjectInputSourceResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+func (r *TorqueAzureBlobObjectInputSourceResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resource.ImportStatePassthroughID(ctx, path.Root("name"), req, resp)
-}
-
-type allSpacesModifier struct{}
-
-func (m allSpacesModifier) Description(ctx context.Context) string {
-	return "Set 'all_spaces' to false if 'specific_spaces' is provided and non-empty."
-}
-
-func (m allSpacesModifier) MarkdownDescription(ctx context.Context) string {
-	return "Set `all_spaces` to `false` if `specific_spaces` is provided and non-empty."
-}
-
-func (m allSpacesModifier) PlanModifyBool(ctx context.Context, req planmodifier.BoolRequest, resp *planmodifier.BoolResponse) {
-	// If the user explicitly set 'all_spaces', respect that value.
-	if !req.ConfigValue.IsNull() {
-		resp.PlanValue = req.ConfigValue
-		return
-	}
-
-	// Retrieve 'specific_spaces' from the planned state.
-	var specificSpaces []string
-	diags := req.Plan.GetAttribute(ctx, path.Root("specific_spaces"), &specificSpaces)
-	if diags.HasError() {
-		resp.Diagnostics.Append(diags...)
-		return
-	}
-
-	// If 'specific_spaces' is non-empty, set 'all_spaces' to false.
-	if len(specificSpaces) > 0 {
-		resp.PlanValue = types.BoolValue(false)
-	} else {
-		// Otherwise, default to true.
-		resp.PlanValue = types.BoolValue(true)
-	}
 }
