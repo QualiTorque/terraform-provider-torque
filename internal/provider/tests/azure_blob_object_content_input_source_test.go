@@ -70,6 +70,11 @@ func TestAzureBlobObjectContentInputSourceResource(t *testing.T) {
 					resource.TestCheckResourceAttr("torque_azure_blob_object_content_input_source.az_blob", "container_name_overridable", "false"),
 					resource.TestCheckResourceAttr("torque_azure_blob_object_content_input_source.az_blob", "blob_name", blob_name),
 					resource.TestCheckResourceAttr("torque_azure_blob_object_content_input_source.az_blob", "blob_name_overridable", "false"),
+					resource.TestCheckResourceAttr("torque_azure_blob_object_content_input_source.az_blob", "filter_pattern_overridable", "true"),
+					resource.TestCheckResourceAttr("torque_azure_blob_object_content_input_source.az_blob", "json_path", json_path),
+					resource.TestCheckResourceAttr("torque_azure_blob_object_content_input_source.az_blob", "json_path_overridable", "false"),
+					resource.TestCheckResourceAttr("torque_azure_blob_object_content_input_source.az_blob", "display_json_path", display_json_path),
+					resource.TestCheckResourceAttr("torque_azure_blob_object_content_input_source.az_blob", "display_json_path_overridable", "false"),
 				),
 			},
 			{
@@ -103,9 +108,12 @@ func TestAzureBlobObjectContentInputSourceResource(t *testing.T) {
 					resource.TestCheckResourceAttr("torque_azure_blob_object_content_input_source.az_blob", "container_name_overridable", "true"),
 					resource.TestCheckResourceAttr("torque_azure_blob_object_content_input_source.az_blob", "blob_name", new_blob_name),
 					resource.TestCheckResourceAttr("torque_azure_blob_object_content_input_source.az_blob", "blob_name_overridable", "true"),
+					resource.TestCheckResourceAttr("torque_azure_blob_object_content_input_source.az_blob", "json_path", new_json_path),
+					resource.TestCheckResourceAttr("torque_azure_blob_object_content_input_source.az_blob", "json_path_overridable", "false"),
+					resource.TestCheckResourceAttr("torque_azure_blob_object_content_input_source.az_blob", "display_json_path", new_display_json_path),
+					resource.TestCheckResourceAttr("torque_azure_blob_object_content_input_source.az_blob", "display_json_path_overridable", "false"),
 				),
 			},
 		},
 	})
-
 }

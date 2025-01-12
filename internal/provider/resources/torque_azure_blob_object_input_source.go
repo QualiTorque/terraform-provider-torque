@@ -325,37 +325,3 @@ func (r *TorqueAzureBlobObjectInputSourceResource) Delete(ctx context.Context, r
 func (r *TorqueAzureBlobObjectInputSourceResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resource.ImportStatePassthroughID(ctx, path.Root("name"), req, resp)
 }
-
-// type allSpacesModifier struct{}
-
-// func (m allSpacesModifier) Description(ctx context.Context) string {
-// 	return "Set 'all_spaces' to false if 'specific_spaces' is provided and non-empty."
-// }
-
-// func (m allSpacesModifier) MarkdownDescription(ctx context.Context) string {
-// 	return "Set `all_spaces` to `false` if `specific_spaces` is provided and non-empty."
-// }
-
-// func (m allSpacesModifier) PlanModifyBool(ctx context.Context, req planmodifier.BoolRequest, resp *planmodifier.BoolResponse) {
-// 	// If the user explicitly set 'all_spaces', respect that value.
-// 	if !req.ConfigValue.IsNull() {
-// 		resp.PlanValue = req.ConfigValue
-// 		return
-// 	}
-
-// 	// Retrieve 'specific_spaces' from the planned state.
-// 	var specificSpaces []string
-// 	diags := req.Plan.GetAttribute(ctx, path.Root("specific_spaces"), &specificSpaces)
-// 	if diags.HasError() {
-// 		resp.Diagnostics.Append(diags...)
-// 		return
-// 	}
-
-// 	// If 'specific_spaces' is non-empty, set 'all_spaces' to false.
-// 	if len(specificSpaces) > 0 {
-// 		resp.PlanValue = types.BoolValue(false)
-// 	} else {
-// 		// Otherwise, default to true.
-// 		resp.PlanValue = types.BoolValue(true)
-// 	}
-// }

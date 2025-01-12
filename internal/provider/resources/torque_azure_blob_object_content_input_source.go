@@ -203,7 +203,7 @@ func (r *TorqueAzureBlobObjectContentInputSourceResource) Create(ctx context.Con
 	var data TorqueAzureBlobObjectContentInputSourceResourceModel
 	var details client.InputSourceDetails
 	const content_type = "JSON"
-	details.ContentFormat = &client.ContentFormat{} // pointer initialization       // pointer initialization
+	details.ContentFormat = &client.ContentFormat{}         // pointer initialization       // pointer initialization
 	details.StorageAccountName = &client.OverridableValue{} // pointer initialization
 	details.ContainerName = &client.OverridableValue{}      // pointer initialization
 	details.BlobName = &client.OverridableValue{}
@@ -280,8 +280,6 @@ func (r *TorqueAzureBlobObjectContentInputSourceResource) Read(ctx context.Conte
 	}
 	data.FilterPattern = types.StringValue(input_source.Details.FilterPattern.Value)
 	data.FilterPatternOverridable = types.BoolValue(input_source.Details.FilterPattern.Overridable)
-	// data.PathPrefix = types.StringValue(input_source.Details.PathPrefix.Value)
-	// data.PathPrefixOverridable = types.BoolValue(input_source.Details.PathPrefix.Overridable)
 
 	diags = resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
@@ -324,8 +322,6 @@ func (r *TorqueAzureBlobObjectContentInputSourceResource) Update(ctx context.Con
 	details.ContainerName.Value = data.ContainerName.ValueString()
 	details.FilterPattern.Overridable = data.FilterPatternOverridable.ValueBool()
 	details.FilterPattern.Value = data.FilterPattern.ValueString()
-	// details.PathPrefix.Overridable = data.PathPrefixOverridable.ValueBool()
-	// details.PathPrefix.Value = data.PathPrefix.ValueString()
 	details.Type = input_source_type
 	details.CredentialName = data.CredentialName.ValueString()
 	err := r.client.UpdateInputSource(state.Name.ValueString(), data.Name.ValueString(), data.Description.ValueString(), allowed_spaces, details)

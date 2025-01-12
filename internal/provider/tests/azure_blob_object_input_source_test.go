@@ -10,7 +10,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 )
 
-
 func TestAzureBlobObjectInputSourceResource(t *testing.T) {
 	const (
 		input_name               = "az_blob"
@@ -100,4 +99,3 @@ func TestAzureBlobObjectInputSourceResource(t *testing.T) {
 	})
 
 }
-
