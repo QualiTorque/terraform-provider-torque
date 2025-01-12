@@ -194,6 +194,7 @@ func (r *TorqueS3ObjectContentInputSourceResource) Create(ctx context.Context, r
 	var details client.InputSourceDetails
 	details.ContentFormat = &client.ContentFormat{} // pointer initialization
 	details.ObjectKey = &client.OverridableValue{}  // pointer initialization
+	details.BucketName = &client.OverridableValue{}  // pointer initialization
 	var allowed_spaces client.AllowedSpaces
 	const input_source_type = "s3-object-content"
 	const content_type = "JSON"
