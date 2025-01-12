@@ -165,6 +165,7 @@ func (r *TorqueS3ObjectInputSourceResource) Create(ctx context.Context, req reso
 	var data TorqueS3ObjectInputSourceResourceModel
 	var details client.InputSourceDetails
 	details.PathPrefix = &client.OverridableValue{} // pointer initialization
+	details.BucketName = &client.OverridableValue{} // pointer initialization
 	var allowed_spaces client.AllowedSpaces
 	const input_source_type = "s3-object"
 	var specificSpaces []string
