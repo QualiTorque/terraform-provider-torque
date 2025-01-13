@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"regexp"
 	"time"
-
+	"github.com/qualitorque/terraform-provider-torque/internal/provider/common"
 	"github.com/hashicorp/terraform-plugin-framework-validators/boolvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -35,18 +35,19 @@ type TorqueCatalogItemResource struct {
 
 // TorqueCatalogItemResourceModel describes the resource data model.
 type TorqueCatalogItemResourceModel struct {
-	SpaceName             types.String `tfsdk:"space_name"`
-	BlueprintName         types.String `tfsdk:"blueprint_name"`
-	DisplayName           types.String `tfsdk:"display_name"`
-	RepositoryName        types.String `tfsdk:"repository_name"`
-	MaxDuration           types.String `tfsdk:"max_duration"`
-	DefaultDuration       types.String `tfsdk:"default_duration"`
-	DefaultExtend         types.String `tfsdk:"default_extend"`
-	MaxActiveEnvironments types.Int32  `tfsdk:"max_active_environments"`
-	AlwaysOn              types.Bool   `tfsdk:"always_on"`
-	AllowScheduling       types.Bool   `tfsdk:"allow_scheduling"`
-	CustomIcon            types.String `tfsdk:"custom_icon"`
-	Labels                types.List   `tfsdk:"labels"`
+	SpaceName             types.String               `tfsdk:"space_name"`
+	BlueprintName         types.String               `tfsdk:"blueprint_name"`
+	DisplayName           types.String               `tfsdk:"display_name"`
+	RepositoryName        types.String               `tfsdk:"repository_name"`
+	MaxDuration           types.String               `tfsdk:"max_duration"`
+	DefaultDuration       types.String               `tfsdk:"default_duration"`
+	DefaultExtend         types.String               `tfsdk:"default_extend"`
+	MaxActiveEnvironments types.Int32                `tfsdk:"max_active_environments"`
+	AlwaysOn              types.Bool                 `tfsdk:"always_on"`
+	AllowScheduling       types.Bool                 `tfsdk:"allow_scheduling"`
+	CustomIcon            types.String               `tfsdk:"custom_icon"`
+	Labels                types.List                 `tfsdk:"labels"`
+	Tags                  []common.KeyValuePairModel `tfsdk:"tags"`
 }
 
 func (r *TorqueCatalogItemResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
@@ -175,6 +176,22 @@ func (r *TorqueCatalogItemResource) Schema(ctx context.Context, req resource.Sch
 				Optional:            true,
 				Computed:            false,
 				ElementType:         types.StringType,
+			},
+			"tags": schema.ListNestedAttribute{
+				Description: "Environment Tags",
+				Computed:    true,
+				NestedObject: schema.NestedAttributeObject{
+					Attributes: map[string]schema.Attribute{
+						"name": schema.StringAttribute{
+							Description: "Tag's name",
+							Computed:    true,
+						},
+						"value": schema.StringAttribute{
+							Description: "The value of the tag",
+							Computed:    true,
+						},
+					},
+				},
 			},
 		},
 	}

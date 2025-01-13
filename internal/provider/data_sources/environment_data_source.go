@@ -3,6 +3,7 @@ package data_sources
 import (
 	"context"
 	"fmt"
+	"github.com/qualitorque/terraform-provider-torque/internal/provider/common"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -45,16 +46,16 @@ type environmentDataSourceModel struct {
 	EndTime                 types.String        `tfsdk:"end_time"`
 	Grains                  []grainModel        `tfsdk:"grains"`
 	Errors                  []errorModel        `tfsdk:"errors"`
-	Inputs                  []keyValuePairModel `tfsdk:"inputs"`
-	Outputs                 []keyValuePairModel `tfsdk:"outputs"`
-	Tags                    []keyValuePairModel `tfsdk:"tags"`
+	Inputs                  []common.KeyValuePairModel `tfsdk:"inputs"`
+	Outputs                 []common.KeyValuePairModel `tfsdk:"outputs"`
+	Tags                    []common.KeyValuePairModel `tfsdk:"tags"`
 	RawJson                 types.String        `tfsdk:"raw_json"`
 }
 
-type keyValuePairModel struct {
-	Name  types.String `tfsdk:"name"`
-	Value types.String `tfsdk:"value"`
-}
+// type common.KeyValuePairModel struct {
+// 	Name  types.String `tfsdk:"name"`
+// 	Value types.String `tfsdk:"value"`
+// }
 
 type grainModel struct {
 	Name    types.String       `tfsdk:"name"`
@@ -346,9 +347,9 @@ func (d *environmentDataSource) Read(ctx context.Context, req datasource.ReadReq
 	state.RawJson = types.StringValue(raw_json)
 
 	state.CollaboratorsEmails = []collaboratorModel{}
-	state.Inputs = []keyValuePairModel{}
-	state.Tags = []keyValuePairModel{}
-	state.Outputs = []keyValuePairModel{}
+	state.Inputs = []common.KeyValuePairModel{}
+	state.Tags = []common.KeyValuePairModel{}
+	state.Outputs = []common.KeyValuePairModel{}
 	state.Errors = []errorModel{}
 
 	for _, grainItem := range environment_data.Details.State.Grains {
@@ -382,7 +383,7 @@ func (d *environmentDataSource) Read(ctx context.Context, req datasource.ReadReq
 	}
 
 	for _, inputItem := range environment_data.Details.Definition.Inputs {
-		inputData := keyValuePairModel{
+		inputData := common.KeyValuePairModel{
 			Name:  types.StringValue(inputItem.Name),
 			Value: types.StringValue(inputItem.Value),
 		}
@@ -390,14 +391,14 @@ func (d *environmentDataSource) Read(ctx context.Context, req datasource.ReadReq
 	}
 
 	for _, tagItem := range environment_data.Details.Definition.Tags {
-		tagData := keyValuePairModel{
+		tagData := common.KeyValuePairModel{
 			Name:  types.StringValue(tagItem.Name),
 			Value: types.StringValue(tagItem.Value),
 		}
 		state.Tags = append(state.Tags, tagData)
 	}
 	for _, outputItem := range environment_data.Details.State.Outputs {
-		outputData := keyValuePairModel{
+		outputData := common.KeyValuePairModel{
 			Name:  types.StringValue(outputItem.Name),
 			Value: types.StringValue(outputItem.Value),
 		}

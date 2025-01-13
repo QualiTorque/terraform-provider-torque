@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/qualitorque/terraform-provider-torque/internal/provider/common"
+
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -28,16 +30,16 @@ type environmentIntrospectionDataSource struct {
 }
 
 type introspectionDataModel struct {
-	GrainPath        types.String        `tfsdk:"grain_path"`
-	GrainType        types.String        `tfsdk:"grain_type"`
-	ResourceName     types.String        `tfsdk:"resource_name"`
-	ResourceType     types.String        `tfsdk:"resource_type"`
-	ResourceCategory types.String        `tfsdk:"resource_category"`
-	Status           types.String        `tfsdk:"status"`
-	Alias            types.String        `tfsdk:"alias"`
-	HasRunningAction types.Bool          `tfsdk:"has_running_action"`
-	Attributes       []keyValuePairModel `tfsdk:"attributes"`
-	CustomIcon       types.String        `tfsdk:"custom_icon"`
+	GrainPath        types.String               `tfsdk:"grain_path"`
+	GrainType        types.String               `tfsdk:"grain_type"`
+	ResourceName     types.String               `tfsdk:"resource_name"`
+	ResourceType     types.String               `tfsdk:"resource_type"`
+	ResourceCategory types.String               `tfsdk:"resource_category"`
+	Status           types.String               `tfsdk:"status"`
+	Alias            types.String               `tfsdk:"alias"`
+	HasRunningAction types.Bool                 `tfsdk:"has_running_action"`
+	Attributes       []common.KeyValuePairModel `tfsdk:"attributes"`
+	CustomIcon       types.String               `tfsdk:"custom_icon"`
 }
 
 // environmentIntrospectionDataSourceModel maps the data source schema data.
@@ -184,7 +186,7 @@ func (d *environmentIntrospectionDataSource) Read(ctx context.Context, req datas
 			CustomIcon:       types.StringValue(introspectionItem.CustomIcon),
 		}
 		for _, attributeItem := range introspectionItem.Attributes {
-			attributeData := keyValuePairModel{
+			attributeData := common.KeyValuePairModel{
 				Name:  types.StringValue(attributeItem.Name),
 				Value: types.StringValue(attributeItem.Value),
 			}

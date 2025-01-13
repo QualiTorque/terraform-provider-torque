@@ -223,7 +223,6 @@ func (c *Client) CreateBlueprintTagValue(space_name string, tag_name string, tag
 	if err != nil {
 		log.Fatalf("impossible to marshall blueprint tag key value association: %s", err)
 	}
-	// /api/spaces/devnet/repositories/qtorque/blueprints/Elasticsearch/settings/tags
 	req, err := http.NewRequest("POST", fmt.Sprintf("%sapi/spaces/%s/repositories/%s/blueprints/%s/settings/tags", c.HostURL, space_name, repo_name, blueprint_name), bytes.NewReader(payload))
 	if err != nil {
 		return err
