@@ -38,12 +38,17 @@ func TestCatalogItemResource(t *testing.T) {
 					space_name      = "%s"
 					blueprint_name  = "%s"
 					repository_name = "%s"
+					always_on       = "true"
 				}
 				`, spaceName, unique_blueprint_name, repository_name),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr("torque_catalog_item.catalog_item", "space_name", spaceName),
 					resource.TestCheckResourceAttr("torque_catalog_item.catalog_item", "blueprint_name", unique_blueprint_name),
 					resource.TestCheckResourceAttr("torque_catalog_item.catalog_item", "repository_name", repository_name),
+					resource.TestCheckResourceAttr("torque_catalog_item.catalog_item", "always_on", "true"),
+					resource.TestCheckNoResourceAttr("torque_catalog_item.catalog_item", "default_duration"),
+					resource.TestCheckNoResourceAttr("torque_catalog_item.catalog_item", "default_extend"),
+					resource.TestCheckNoResourceAttr("torque_catalog_item.catalog_item", "max_duration"),
 					testBlueprintPublished(unique_blueprint_name),
 				),
 			},
@@ -53,13 +58,39 @@ func TestCatalogItemResource(t *testing.T) {
 				resource "torque_catalog_item" "catalog_item" {
 					space_name      = "%s"
 					blueprint_name  = "%s"
-					repository_name = "%s"
+					repository_name = "%s"					
 				}
 				`, spaceName, new_unique_blueprint_name, repository_name),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr("torque_catalog_item.catalog_item", "space_name", spaceName),
 					resource.TestCheckResourceAttr("torque_catalog_item.catalog_item", "blueprint_name", new_unique_blueprint_name),
 					resource.TestCheckResourceAttr("torque_catalog_item.catalog_item", "repository_name", repository_name),
+					resource.TestCheckResourceAttr("torque_catalog_item.catalog_item", "always_on", "false"),
+					resource.TestCheckResourceAttr("torque_catalog_item.catalog_item", "default_duration", "PT2H"),
+					resource.TestCheckResourceAttr("torque_catalog_item.catalog_item", "default_extend", "PT2H"),
+					resource.TestCheckResourceAttr("torque_catalog_item.catalog_item", "max_duration", "PT2H"),
+					testBlueprintPublished(new_unique_blueprint_name),
+				),
+			},
+			{
+				Config: providerConfig + fmt.Sprintf(`
+				resource "torque_catalog_item" "catalog_item" {
+					space_name      = "%s"
+					blueprint_name  = "%s"
+					repository_name = "%s"
+					default_duration = "PT3H"
+					default_extend = "PT9H"
+					max_duration = "PT30H"					
+				}
+				`, spaceName, new_unique_blueprint_name, repository_name),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttr("torque_catalog_item.catalog_item", "space_name", spaceName),
+					resource.TestCheckResourceAttr("torque_catalog_item.catalog_item", "blueprint_name", new_unique_blueprint_name),
+					resource.TestCheckResourceAttr("torque_catalog_item.catalog_item", "repository_name", repository_name),
+					resource.TestCheckResourceAttr("torque_catalog_item.catalog_item", "always_on", "false"),
+					resource.TestCheckResourceAttr("torque_catalog_item.catalog_item", "default_duration", "PT3H"),
+					resource.TestCheckResourceAttr("torque_catalog_item.catalog_item", "default_extend", "PT9H"),
+					resource.TestCheckResourceAttr("torque_catalog_item.catalog_item", "max_duration", "PT30H"),
 					testBlueprintPublished(new_unique_blueprint_name),
 				),
 			},
@@ -84,6 +115,31 @@ func TestCatalogItemErrorIfNotExists(t *testing.T) {
 				}
 				`, spaceName),
 				ExpectError: regexp.MustCompile("Unable to create Catalog Item"),
+			},
+			// Delete testing automatically occurs in TestCase
+		},
+	})
+}
+
+func TestCatalogItemDurationConflicts(t *testing.T) {
+	spaceName := os.Getenv("TORQUE_SPACE")
+	resource.Test(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			{
+				Config: providerConfig + fmt.Sprintf(`
+				resource "torque_catalog_item" "catalog_item" {
+					space_name      = "%s"
+					blueprint_name  = "doesnt matter"
+					repository_name = "doesnt matter"
+					always_on = "true"
+					default_duration = "PT3H"
+					default_extend = "PT9H"
+					max_duration = "PT30H"					
+				}
+				`, spaceName),
+				ExpectError: regexp.MustCompile("Invalid Attribute Combination"),
 			},
 			// Delete testing automatically occurs in TestCase
 		},
