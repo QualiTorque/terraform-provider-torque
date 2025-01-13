@@ -18,7 +18,6 @@ func TestSpacesDataSource(t *testing.T) {
 		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			{
-				// Can't create account level tag with possible values
 				Config: providerConfig + `
 				data "torque_spaces" "torque_spaces" {
 				}
