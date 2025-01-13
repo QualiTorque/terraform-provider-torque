@@ -39,6 +39,7 @@ resource "torque_catalog_item" "catalog_item" {
   always_on               = false
   allow_scheduling        = true
   custom_icon             = "blueprint_icons/key"
+  labels                  = ["label1", "label2"]
 }
 ```
 
@@ -59,5 +60,6 @@ resource "torque_catalog_item" "catalog_item" {
 - `default_duration` (String) The default duration of an environment instantiated from this blueprint.
 - `default_extend` (String) The default duration it will be possible to extend an environment instantiated from this blueprint.
 - `display_name` (String) The display name of the blueprint as it will be displayed in the self-service catalog.
+- `labels` (List of String) List of labels to associate with this catalog item.
 - `max_active_environments` (Number) Sets the maximum number of concurrent active environments insantiated from this blueprint.
 - `max_duration` (String) The maximum duration of an environment instantiated from this blueprint.
