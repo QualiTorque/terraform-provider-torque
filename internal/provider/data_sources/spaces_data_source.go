@@ -104,12 +104,6 @@ func (d *SpacesDataSource) Configure(_ context.Context, req datasource.Configure
 func (d *SpacesDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var state SpacesDataSourceModel
 
-	// diags := req.Config.GetAttribute(ctx, path.Root("Spaces_email"), &email)
-	// resp.Diagnostics.Append(diags1...)
-	// if resp.Diagnostics.HasError() {
-	// 	return
-	// }
-
 	spaces, err := d.client.GetSpaces()
 	if err != nil {
 		resp.Diagnostics.AddError(
