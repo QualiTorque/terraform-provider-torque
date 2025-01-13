@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"regexp"
 	"time"
-	"github.com/qualitorque/terraform-provider-torque/internal/provider/common"
+
 	"github.com/hashicorp/terraform-plugin-framework-validators/boolvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -18,6 +18,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/qualitorque/terraform-provider-torque/client"
+	"github.com/qualitorque/terraform-provider-torque/internal/provider/common"
 )
 
 // Ensure provider defined types fully satisfy framework interfaces.
@@ -179,16 +180,18 @@ func (r *TorqueCatalogItemResource) Schema(ctx context.Context, req resource.Sch
 			},
 			"tags": schema.ListNestedAttribute{
 				Description: "Environment Tags",
-				Computed:    true,
+				Required:    false,
+				Optional:    true,
+				Computed:    false,
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
 						"name": schema.StringAttribute{
 							Description: "Tag's name",
-							Computed:    true,
+							Required:    true,
 						},
 						"value": schema.StringAttribute{
 							Description: "The value of the tag",
-							Computed:    true,
+							Required:    true,
 						},
 					},
 				},
@@ -278,7 +281,13 @@ func (r *TorqueCatalogItemResource) Create(ctx context.Context, req resource.Cre
 			return
 		}
 	}
-
+	for _, tag := range data.Tags {
+		err = r.client.CreateBlueprintTagValue(data.SpaceName.ValueString(), tag.Name.ValueString(), tag.Value.ValueString(), data.RepositoryName.ValueString(), data.BlueprintName.ValueString())
+		if err != nil {
+			resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create Catalog Item, failed to set blueprint tags, got error: %s", err))
+			return
+		}
+	}
 	tflog.Trace(ctx, "Resource Created Successful!")
 
 	// Save data into Terraform state.
@@ -377,6 +386,15 @@ func (r *TorqueCatalogItemResource) Update(ctx context.Context, req resource.Upd
 			}
 		}
 	}
+
+	for _, tag := range data.Tags {
+		err = r.client.SetBlueprintTagValue(data.SpaceName.ValueString(), tag.Name.ValueString(), tag.Value.ValueString(), data.RepositoryName.ValueString(), data.BlueprintName.ValueString())
+		if err != nil {
+			resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create Catalog Item, failed to set blueprint tags, got error: %s", err))
+			return
+		}
+	}
+
 	var labels []string
 	data.Labels.ElementsAs(ctx, &labels, false)
 	err = r.client.EditCatalogItemLabels(data.SpaceName.ValueString(), data.BlueprintName.ValueString(), data.RepositoryName.ValueString(), labels)
@@ -422,6 +440,13 @@ func (r *TorqueCatalogItemResource) Delete(ctx context.Context, req resource.Del
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create Catalog Item, failed to set blueprint display name, got error: %s", err))
 		return
+	}
+	for _, tag := range data.Tags {
+		err = r.client.DeleteBlueprintTagValue(data.SpaceName.ValueString(), tag.Name.ValueString(), data.RepositoryName.ValueString(), data.BlueprintName.ValueString())
+		if err != nil {
+			resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to delete Catalog Item, failed to delete blueprint tags, got error: %s", err))
+			return
+		}
 	}
 	err = r.client.EditCatalogItemLabels(data.SpaceName.ValueString(), data.BlueprintName.ValueString(), data.RepositoryName.ValueString(), nil)
 	if err != nil {
