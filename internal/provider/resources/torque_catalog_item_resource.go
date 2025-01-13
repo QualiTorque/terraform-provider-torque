@@ -6,13 +6,13 @@ import (
 	"regexp"
 	"time"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/boolvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -91,10 +91,15 @@ func (r *TorqueCatalogItemResource) Schema(ctx context.Context, req resource.Sch
 				MarkdownDescription: "The maximum duration of an environment instantiated from this blueprint.",
 				Required:            false,
 				Optional:            true,
+				Computed:            true,
 				Validators: []validator.String{
 					stringvalidator.RegexMatches(
 						regexp.MustCompile(`^P(?:(\d+)D)?T(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?$`),
 						"must be a valid ISO 8601 timestamp (e.g., 2023-08-19T14:23:30Z or 2023-08-19T14:23:30+02:00)",
+					),
+					stringvalidator.ConflictsWith(path.Expressions{
+						path.MatchRoot("always_on"),
+					}...,
 					),
 				},
 			},
@@ -103,12 +108,14 @@ func (r *TorqueCatalogItemResource) Schema(ctx context.Context, req resource.Sch
 				Required:            false,
 				Optional:            true,
 				Computed:            true,
-				Default:             stringdefault.StaticString("PT2H"),
 				Validators: []validator.String{
 					stringvalidator.RegexMatches(
 						regexp.MustCompile(`^P(?:(\d+)D)?T(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?$`),
 						"must be a valid ISO 8601 timestamp (e.g., 2023-08-19T14:23:30Z or 2023-08-19T14:23:30+02:00)",
 					),
+					stringvalidator.ConflictsWith(path.Expressions{
+						path.MatchRoot("always_on"),
+					}...),
 				},
 			},
 			"default_extend": schema.StringAttribute{
@@ -116,12 +123,15 @@ func (r *TorqueCatalogItemResource) Schema(ctx context.Context, req resource.Sch
 				Required:            false,
 				Optional:            true,
 				Computed:            true,
-				Default:             stringdefault.StaticString("PT2H"),
+
 				Validators: []validator.String{
 					stringvalidator.RegexMatches(
 						regexp.MustCompile(`^P(?:(\d+)D)?T(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?$`),
 						"must be a valid ISO 8601 timestamp (e.g., 2023-08-19T14:23:30Z or 2023-08-19T14:23:30+02:00)",
 					),
+					stringvalidator.ConflictsWith(path.Expressions{
+						path.MatchRoot("always_on"),
+					}...),
 				},
 			},
 			"max_active_environments": schema.Int32Attribute{
@@ -135,6 +145,15 @@ func (r *TorqueCatalogItemResource) Schema(ctx context.Context, req resource.Sch
 				Optional:            true,
 				Computed:            true,
 				Default:             booldefault.StaticBool(false),
+				Validators: []validator.Bool{
+					boolvalidator.ConflictsWith(
+						path.Expressions{
+							path.MatchRoot("default_duration"),
+							path.MatchRoot("default_extend"),
+							path.MatchRoot("max_duration"),
+						}...,
+					),
+				},
 			},
 			"allow_scheduling": schema.BoolAttribute{
 				MarkdownDescription: "Specify if environments from this blueprint can be scheduled to launch at a future time.",
@@ -180,6 +199,21 @@ func (r *TorqueCatalogItemResource) Create(ctx context.Context, req resource.Cre
 
 	if resp.Diagnostics.HasError() {
 		return
+	}
+	if data.AlwaysOn.ValueBool() {
+		data.MaxDuration = types.StringNull()
+		data.DefaultExtend = types.StringNull()
+		data.DefaultDuration = types.StringNull()
+	} else {
+		if data.MaxDuration.IsNull() || data.MaxDuration.IsUnknown() {
+			data.MaxDuration = types.StringValue("PT2H")
+		}
+		if data.DefaultExtend.IsNull() || data.DefaultExtend.IsUnknown() {
+			data.DefaultExtend = types.StringValue("PT2H")
+		}
+		if data.DefaultDuration.IsNull() || data.DefaultDuration.IsUnknown() {
+			data.DefaultDuration = types.StringValue("PT2H")
+		}
 	}
 	var maxActiveEnvironments *int32
 	if !data.MaxActiveEnvironments.IsNull() {
@@ -259,6 +293,23 @@ func (r *TorqueCatalogItemResource) Update(ctx context.Context, req resource.Upd
 	if resp.Diagnostics.HasError() {
 		return
 	}
+
+	if data.AlwaysOn.ValueBool() {
+		data.MaxDuration = types.StringNull()
+		data.DefaultExtend = types.StringNull()
+		data.DefaultDuration = types.StringNull()
+	} else {
+		if data.MaxDuration.IsNull() || data.MaxDuration.IsUnknown() {
+			data.MaxDuration = types.StringValue("PT2H")
+		}
+		if data.DefaultExtend.IsNull() || data.DefaultExtend.IsUnknown() {
+			data.DefaultExtend = types.StringValue("PT2H")
+		}
+		if data.DefaultDuration.IsNull() || data.DefaultDuration.IsUnknown() {
+			data.DefaultDuration = types.StringValue("PT2H")
+		}
+	}
+
 	var maxActiveEnvironments *int32
 	if !data.MaxActiveEnvironments.IsNull() {
 		value := data.MaxActiveEnvironments.ValueInt32()
