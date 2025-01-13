@@ -251,5 +251,6 @@ func (p *torqueProvider) DataSources(_ context.Context) []func() datasource.Data
 		data_sources.NewSpaceBlueprintDataSource,
 		data_sources.NewTorqueWorkflowDataSource,
 		data_sources.NewSpaceCustomIconDataSource,
+		data_sources.NewSpacesDataSource,
 	}
 }

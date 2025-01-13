@@ -61,9 +61,11 @@ type UserSpaceAssociation struct {
 }
 
 type Space struct {
-	Name  string `json:"name"`
-	Color string `json:"color"`
-	Icon  string `json:"icon"`
+	Name        string `json:"name"`
+	Color       string `json:"color"`
+	Icon        string `json:"icon"`
+	NumOfUsers  int32  `json:"users_count"`
+	NumOfGroups int32  `json:"groups_count"`
 }
 
 type AgentSpaceAssociation struct {

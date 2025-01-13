@@ -448,16 +448,6 @@ func (c *Client) UpdateGroup(groupName string, description string, idpId string,
 	return nil
 }
 
-//  https://portal.qtorque.io/api/spaces/events-ms
-// {"name":"events-ms","users_count":34,"groups_count":1,"color":"darkBlue","icon":"cloud","spaceName":"events-ms"}
-// {
-// 	"name": "10-CloudShell",
-// 	"users_count": 34,
-// 	"groups_count": 1,
-// 	"color": "darkBlue",
-// 	"icon": "screen"
-// },
-
 func (c *Client) UpdateSpace(current_space string, name string, color string, icon string) error {
 
 	data := Space{
