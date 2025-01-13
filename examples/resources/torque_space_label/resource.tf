@@ -13,7 +13,8 @@ provider "torque" {
 }
 
 resource "torque_space_label" "label" {
-  space_name = "target_space"
-  name       = "k8s"
-  color      = "blue"
+  space_name   = "target_space"
+  name         = "k8s"
+  color        = "blue"
+  quick_filter = true
 }

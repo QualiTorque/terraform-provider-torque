@@ -337,14 +337,16 @@ type spaceDefinition struct {
 }
 
 type Label struct {
-	Name  string `json:"name"`
-	Color string `json:"color"`
+	Name        string `json:"name"`
+	Color       string `json:"color"`
+	QuickFilter bool   `json:"quick_filter"`
 }
 
 type LabelRequest struct {
 	OriginalName string `json:"original_name"`
 	Name         string `json:"name"`
 	Color        string `json:"color"`
+	QuickFilter  bool   `json:"quick_filter"`
 }
 
 type CatalogItemLabelsRequest struct {

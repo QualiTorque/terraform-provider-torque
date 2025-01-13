@@ -8,6 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
@@ -31,9 +32,10 @@ type TorqueSpaceLabelResource struct {
 
 // TorqueSpaceLabelResourceModel describes the resource data model.
 type TorqueSpaceLabelResourceModel struct {
-	SpaceName types.String `tfsdk:"space_name"`
-	Name      types.String `tfsdk:"name"`
-	Color     types.String `tfsdk:"color"`
+	SpaceName   types.String `tfsdk:"space_name"`
+	Name        types.String `tfsdk:"name"`
+	Color       types.String `tfsdk:"color"`
+	QuickFilter types.Bool   `tfsdk:"quick_filter"`
 }
 
 func (r *TorqueSpaceLabelResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
@@ -63,6 +65,13 @@ func (r *TorqueSpaceLabelResource) Schema(ctx context.Context, req resource.Sche
 				Validators: []validator.String{
 					stringvalidator.OneOf([]string{"aws", "darkGray", "frogGreen", "pink", "orange", "blueGray", "blue", "bordeaux", "teal", "grey"}...),
 				},
+			},
+			"quick_filter": schema.BoolAttribute{
+				MarkdownDescription: "Display this label as a quick filter in the self-service catalog.",
+				Required:            false,
+				Optional:            true,
+				Computed:            true,
+				Default:             booldefault.StaticBool(false),
 			},
 		},
 	}
@@ -98,7 +107,7 @@ func (r *TorqueSpaceLabelResource) Create(ctx context.Context, req resource.Crea
 	}
 
 	err := r.client.CreateLabel(data.SpaceName.ValueString(),
-		data.Name.ValueString(), data.Color.ValueString())
+		data.Name.ValueString(), data.Color.ValueString(), data.QuickFilter.ValueBool())
 
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create label, got error: %s", err))
@@ -158,7 +167,7 @@ func (r *TorqueSpaceLabelResource) Update(ctx context.Context, req resource.Upda
 	}
 	current_name := state.Name
 	// Update existing order
-	err := r.client.UpdateLabel(current_name.ValueString(), data.SpaceName.ValueString(), data.Name.ValueString(), data.Color.ValueString())
+	err := r.client.UpdateLabel(current_name.ValueString(), data.SpaceName.ValueString(), data.Name.ValueString(), data.Color.ValueString(), data.QuickFilter.ValueBool())
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Error Updating Torque label",

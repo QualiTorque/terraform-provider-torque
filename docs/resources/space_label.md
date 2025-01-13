@@ -28,9 +28,10 @@ provider "torque" {
 }
 
 resource "torque_space_label" "label" {
-  space_name = "target_space"
-  name       = "k8s"
-  color      = "blue"
+  space_name   = "target_space"
+  name         = "k8s"
+  color        = "blue"
+  quick_filter = true
 }
 ```
 
@@ -42,3 +43,7 @@ resource "torque_space_label" "label" {
 - `color` (String) Color of the label. Allowed values: aws, darkGray, frogGreen, pink, orange, blueGray, blue, bordeaux, teal, grey
 - `name` (String) Name of the new label to be added to torque
 - `space_name` (String) Name of the space where this label will be added to Torque
+
+### Optional
+
+- `quick_filter` (Boolean) Display this label as a quick filter in the self-service catalog.

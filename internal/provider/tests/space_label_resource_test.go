@@ -32,6 +32,7 @@ func TestSpaceLabelResource(t *testing.T) {
 					resource.TestCheckResourceAttr("torque_space_label.test", "space_name", space_name),
 					resource.TestCheckResourceAttr("torque_space_label.test", "name", label),
 					resource.TestCheckResourceAttr("torque_space_label.test", "color", "aws"),
+					resource.TestCheckResourceAttr("torque_space_label.test", "quick_filter", "false"),
 				),
 			},
 			// Update and Read testing
@@ -41,12 +42,14 @@ func TestSpaceLabelResource(t *testing.T) {
 					space_name = "%s"
 					name       = "%s"
 					color      = "bordeaux"
+					quick_filter = "true"
 				}
 				`, space_name, newLabelName),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr("torque_space_label.test", "space_name", space_name),
 					resource.TestCheckResourceAttr("torque_space_label.test", "name", newLabelName),
 					resource.TestCheckResourceAttr("torque_space_label.test", "color", "bordeaux"),
+					resource.TestCheckResourceAttr("torque_space_label.test", "quick_filter", "true"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
