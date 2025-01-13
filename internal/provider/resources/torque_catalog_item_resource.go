@@ -46,6 +46,7 @@ type TorqueCatalogItemResourceModel struct {
 	AlwaysOn              types.Bool   `tfsdk:"always_on"`
 	AllowScheduling       types.Bool   `tfsdk:"allow_scheduling"`
 	CustomIcon            types.String `tfsdk:"custom_icon"`
+	Labels                types.List   `tfsdk:"labels"`
 }
 
 func (r *TorqueCatalogItemResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
@@ -168,6 +169,13 @@ func (r *TorqueCatalogItemResource) Schema(ctx context.Context, req resource.Sch
 				Optional:            true,
 				Computed:            false,
 			},
+			"labels": schema.ListAttribute{
+				MarkdownDescription: "List of labels to associate with this catalog item.",
+				Required:            false,
+				Optional:            true,
+				Computed:            false,
+				ElementType:         types.StringType,
+			},
 		},
 	}
 }
@@ -243,6 +251,15 @@ func (r *TorqueCatalogItemResource) Create(ctx context.Context, req resource.Cre
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create Catalog Item, failed to publish blueprint in space, got error: %s", err))
 		return
+	}
+	if !data.Labels.IsNull() {
+		var labels []string
+		data.Labels.ElementsAs(ctx, &labels, false)
+		err = r.client.EditCatalogItemLabels(data.SpaceName.ValueString(), data.BlueprintName.ValueString(), data.RepositoryName.ValueString(), labels)
+		if err != nil {
+			resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create Catalog Item, failed to associate labels, got error: %s", err))
+			return
+		}
 	}
 
 	tflog.Trace(ctx, "Resource Created Successful!")
@@ -343,7 +360,13 @@ func (r *TorqueCatalogItemResource) Update(ctx context.Context, req resource.Upd
 			}
 		}
 	}
-
+	var labels []string
+	data.Labels.ElementsAs(ctx, &labels, false)
+	err = r.client.EditCatalogItemLabels(data.SpaceName.ValueString(), data.BlueprintName.ValueString(), data.RepositoryName.ValueString(), labels)
+	if err != nil {
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update Catalog Item, failed to update labels, got error: %s", err))
+		return
+	}
 	// Save updated data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
@@ -358,13 +381,32 @@ func (r *TorqueCatalogItemResource) Delete(ctx context.Context, req resource.Del
 		return
 	}
 
-	// Delete the space.
 	err := r.client.UnpublishBlueprintInSpace(data.SpaceName.ValueString(), data.RepositoryName.ValueString(), data.BlueprintName.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to unpublish blueprint from space, got error: %s", err))
 		return
 	}
 	err = r.client.SetCatalogItemIcon(data.SpaceName.ValueString(), data.BlueprintName.ValueString(), data.RepositoryName.ValueString(), default_icon)
+	if err != nil {
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to remove Catalog Item custom icon, failed to set catalog item custom icon, got error: %s", err))
+		return
+	}
+
+	data.MaxDuration = types.StringValue("PT2H")
+	data.DefaultExtend = types.StringValue("PT2H")
+	data.DefaultDuration = types.StringValue("PT2H")
+
+	err = r.client.SetBlueprintPolicies(data.SpaceName.ValueString(), data.RepositoryName.ValueString(), data.BlueprintName.ValueString(), data.MaxDuration.ValueString(), data.DefaultDuration.ValueString(), data.DefaultExtend.ValueString(), nil, false, false)
+	if err != nil {
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to set blueprint policies, got error: %s", err))
+		return
+	}
+	err = r.client.UpdateBlueprintDisplayName(data.SpaceName.ValueString(), data.RepositoryName.ValueString(), data.BlueprintName.ValueString(), data.BlueprintName.ValueString())
+	if err != nil {
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create Catalog Item, failed to set blueprint display name, got error: %s", err))
+		return
+	}
+	err = r.client.EditCatalogItemLabels(data.SpaceName.ValueString(), data.BlueprintName.ValueString(), data.RepositoryName.ValueString(), nil)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to remove Catalog Item custom icon, failed to set catalog item custom icon, got error: %s", err))
 		return

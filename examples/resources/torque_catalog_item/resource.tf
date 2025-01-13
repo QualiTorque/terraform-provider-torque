@@ -24,4 +24,5 @@ resource "torque_catalog_item" "catalog_item" {
   always_on               = false
   allow_scheduling        = true
   custom_icon             = "blueprint_icons/key"
+  labels                  = ["label1", "label2"]
 }
