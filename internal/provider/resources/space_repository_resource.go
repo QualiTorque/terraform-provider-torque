@@ -3,6 +3,7 @@ package resources
 import (
 	"context"
 	"fmt"
+	"regexp"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -73,6 +74,10 @@ func (r *TorqueSpaceRepositoryResource) Schema(ctx context.Context, req resource
 					stringvalidator.ConflictsWith(path.Expressions{
 						path.MatchRoot("credential_name"),
 					}...),
+					stringvalidator.RegexMatches(
+						regexp.MustCompile(`^\S.*$`),
+						"must not be empty string",
+					),
 				},
 			},
 			"repository_type": schema.StringAttribute{
