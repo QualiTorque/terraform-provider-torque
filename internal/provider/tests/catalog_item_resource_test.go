@@ -49,6 +49,7 @@ func TestCatalogItemResource(t *testing.T) {
 					resource.TestCheckNoResourceAttr("torque_catalog_item.catalog_item", "default_duration"),
 					resource.TestCheckNoResourceAttr("torque_catalog_item.catalog_item", "default_extend"),
 					resource.TestCheckNoResourceAttr("torque_catalog_item.catalog_item", "max_duration"),
+					resource.TestCheckNoResourceAttr("torque_catalog_item.catalog_item", "labels"),
 					testBlueprintPublished(unique_blueprint_name),
 				),
 			},
@@ -58,7 +59,8 @@ func TestCatalogItemResource(t *testing.T) {
 				resource "torque_catalog_item" "catalog_item" {
 					space_name      = "%s"
 					blueprint_name  = "%s"
-					repository_name = "%s"					
+					repository_name = "%s"	
+					labels          = ["k8s","aws"]				
 				}
 				`, spaceName, new_unique_blueprint_name, repository_name),
 				Check: resource.ComposeAggregateTestCheckFunc(
@@ -69,6 +71,7 @@ func TestCatalogItemResource(t *testing.T) {
 					resource.TestCheckResourceAttr("torque_catalog_item.catalog_item", "default_duration", "PT2H"),
 					resource.TestCheckResourceAttr("torque_catalog_item.catalog_item", "default_extend", "PT2H"),
 					resource.TestCheckResourceAttr("torque_catalog_item.catalog_item", "max_duration", "PT2H"),
+					resource.TestCheckResourceAttr("torque_catalog_item.catalog_item", "labels.#", "2"),
 					testBlueprintPublished(new_unique_blueprint_name),
 				),
 			},
@@ -80,7 +83,8 @@ func TestCatalogItemResource(t *testing.T) {
 					repository_name = "%s"
 					default_duration = "PT3H"
 					default_extend = "PT9H"
-					max_duration = "PT30H"					
+					max_duration = "PT30H"
+					labels          = ["k8s"]						
 				}
 				`, spaceName, new_unique_blueprint_name, repository_name),
 				Check: resource.ComposeAggregateTestCheckFunc(
@@ -91,6 +95,7 @@ func TestCatalogItemResource(t *testing.T) {
 					resource.TestCheckResourceAttr("torque_catalog_item.catalog_item", "default_duration", "PT3H"),
 					resource.TestCheckResourceAttr("torque_catalog_item.catalog_item", "default_extend", "PT9H"),
 					resource.TestCheckResourceAttr("torque_catalog_item.catalog_item", "max_duration", "PT30H"),
+					resource.TestCheckResourceAttr("torque_catalog_item.catalog_item", "labels.#", "1"),
 					testBlueprintPublished(new_unique_blueprint_name),
 				),
 			},
