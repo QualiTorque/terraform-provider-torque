@@ -58,12 +58,10 @@ func (c *Client) EditCatalogItemLabels(space_name string, blueprint_name string,
 		RepositoryName: repository_name,
 		Labels:         labels,
 	}
-	fmt.Println(&data)
 	payload, err := json.Marshal(data)
 	if err != nil {
 		log.Fatalf("impossible to marshall label update request: %s", err)
 	}
-	fmt.Println(string(payload))
 	req, err := http.NewRequest("PUT", fmt.Sprintf("%sapi/spaces/%s/catalog/labels", c.HostURL, space_name), bytes.NewReader(payload))
 	if err != nil {
 		return err
