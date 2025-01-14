@@ -54,55 +54,7 @@ func (c *Client) DeleteSpace(name string) error {
 	return nil
 }
 
-func (c *Client) AddAgentToSpace(agent string, ns string, sa string, space string, agnet_type string) error {
-	fmt.Println(c.HostURL + "api/spaces")
 
-	data := AgentSpaceAssociation{
-		Type:                  agnet_type,
-		DefaultNamespace:      ns,
-		DefaultServiceAccount: sa,
-	}
-
-	payload, err := json.Marshal(data)
-	if err != nil {
-		log.Fatalf("impossible to marshall agent association: %s", err)
-	}
-
-	req, err := http.NewRequest("POST", fmt.Sprintf("%sapi/spaces/%s/agents/%s", c.HostURL, space, agent), bytes.NewReader(payload))
-	if err != nil {
-		return err
-	}
-
-	req.Header.Add("Content-Type", "application/json")
-	req.Header.Add("Accept", "application/json")
-
-	_, err = c.doRequest(req, &c.Token)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (c *Client) RemoveAgentFromSpace(agent string, space string) error {
-
-	req, err := http.NewRequest("DELETE", fmt.Sprintf("%sapi/spaces/%s/agents/%s", c.HostURL, space, agent), nil)
-	if err != nil {
-		return err
-	}
-
-	req.Header.Add("Content-Type", "application/json")
-	req.Header.Add("Accept", "application/json")
-
-	_, err = c.doRequest(req, &c.Token)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-// /api/spaces/{space_name}/blueprints.
 func (c *Client) GetSpaceBlueprints(space_name string) ([]Blueprint, error) {
 	req, err := http.NewRequest("GET", fmt.Sprintf("%sapi/spaces/%s/blueprints", c.HostURL, space_name), nil)
 	if err != nil {

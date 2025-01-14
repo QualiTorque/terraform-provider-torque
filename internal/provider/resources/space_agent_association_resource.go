@@ -7,8 +7,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/qualitorque/terraform-provider-torque/client"
 )
 
@@ -44,11 +45,16 @@ func (r *TorqueAgentSpaceAssociationResource) Schema(ctx context.Context, req re
 			"space_name": schema.StringAttribute{
 				MarkdownDescription: "Existing Torque Space name",
 				Required:            true,
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.RequiresReplace(),
+				},
 			},
 			"agent_name": schema.StringAttribute{
 				Description: "Agent name to associate to the space",
 				Required:    true,
-			},
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.RequiresReplace(),
+				}},
 			"service_account": schema.StringAttribute{
 				Description: "Default service account to be used with the agent in the space",
 				Required:    true,
@@ -97,8 +103,6 @@ func (r *TorqueAgentSpaceAssociationResource) Create(ctx context.Context, req re
 		return
 	}
 
-	tflog.Trace(ctx, "Resource Created Successful!")
-
 	// Save data into Terraform state.
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
@@ -134,7 +138,12 @@ func (r *TorqueAgentSpaceAssociationResource) Update(ctx context.Context, req re
 	if resp.Diagnostics.HasError() {
 		return
 	}
-
+	err := r.client.UpdateAgentSpaceAssociation(data.AgentName.ValueString(), data.Namespace.ValueString(),
+		data.ServiceAccount.ValueString(), data.SpaceName.ValueString(), "K8S")
+	if err != nil {
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to attach agent to space, got error: %s", err))
+		return
+	}
 	// If applicable, this is a great opportunity to initialize any necessary
 	// provider client data and make a call using it.
 	// httpResp, err := r.client.Do(httpReq)
@@ -157,7 +166,6 @@ func (r *TorqueAgentSpaceAssociationResource) Delete(ctx context.Context, req re
 		return
 	}
 
-	// Remove repos from space.
 	err := r.client.RemoveAgentFromSpace(data.AgentName.ValueString(), data.SpaceName.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to attach agent to space, got error: %s", err))
