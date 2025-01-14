@@ -8,6 +8,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
@@ -64,6 +66,9 @@ func (r *TorqueSpaceEmailNotificationResource) Schema(ctx context.Context, req r
 			"space_name": schema.StringAttribute{
 				MarkdownDescription: "Space name to add the notification to",
 				Required:            true,
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.RequiresReplace(),
+				},
 			},
 			"notification_name": schema.StringAttribute{
 				MarkdownDescription: "The notification cofngiuration name in the space",
@@ -234,13 +239,32 @@ func (r *TorqueSpaceEmailNotificationResource) Read(ctx context.Context, req res
 
 func (r *TorqueSpaceEmailNotificationResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 	var data TorqueSpaceEmailNotificationResourceModel
+	var state TorqueSpaceEmailNotificationResourceModel
 
-	// Read Terraform plan data into the model
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
-
+	resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
+
+	var idle []int64
+	if len(data.IdleReminder) > 0 {
+		for _, reminder := range data.IdleReminder {
+			idle = append(idle, reminder.ValueInt64())
+		}
+	}
+
+	_, err := r.client.UpdateSpaceEmailNotification(state.NotificationId.ValueString(), data.SpaceName.ValueString(), data.NotificationName.ValueString(), data.EnvironmentLaunched.ValueBool(),
+		data.EnvironmentDeployed.ValueBool(), data.EnvironmentForceEnded.ValueBool(), data.EnvironmentIdle.ValueBool(), data.EnvironmentExtended.ValueBool(), data.DriftDetected.ValueBool(),
+		data.WorkflowFailed.ValueBool(), data.WorkflowStarted.ValueBool(), data.UpdatesDetected.ValueBool(), data.CollaboratorAdded.ValueBool(), data.ActionFailed.ValueBool(),
+		data.EnvironmentEndingFailed.ValueBool(), data.EnvironmentEnded.ValueBool(), data.EnvironmentActiveWithError.ValueBool(), data.WorkflowStartReminder.ValueInt64(), data.EndThreashold.ValueInt64(),
+		idle)
+
+	if err != nil {
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update notification in space, got error: %s", err))
+		return
+	}
+	data.NotificationId = state.NotificationId
 
 	// Save updated data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
