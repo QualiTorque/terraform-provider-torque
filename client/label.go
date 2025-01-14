@@ -8,10 +8,11 @@ import (
 	"net/http"
 )
 
-func (c *Client) CreateLabel(space_name string, name string, color string) error {
+func (c *Client) CreateLabel(space_name string, name string, color string, quick_filter bool) error {
 	data := Label{
-		Name:  name,
-		Color: color,
+		Name:        name,
+		Color:       color,
+		QuickFilter: quick_filter,
 	}
 
 	payload, err := json.Marshal(data)
@@ -63,11 +64,12 @@ func (c *Client) GetLabel(space_name string, name string) (*Label, error) {
 	return &label, nil
 }
 
-func (c *Client) UpdateLabel(original_name string, space_name string, name string, color string) error {
+func (c *Client) UpdateLabel(original_name string, space_name string, name string, color string, quick_filter bool) error {
 	data := LabelRequest{
 		OriginalName: original_name,
 		Name:         name,
 		Color:        color,
+		QuickFilter:  quick_filter,
 	}
 
 	payload, err := json.Marshal(data)
