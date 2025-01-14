@@ -183,8 +183,6 @@ func (c *Client) UpdateSpaceEmailNotification(notification_id string, space_name
 }
 
 func (c *Client) DeleteSpaceNotification(space_name string, notification_id string) error {
-	fmt.Println(c.HostURL + "api/spaces")
-
 	req, err := http.NewRequest("DELETE", fmt.Sprintf("%sapi/spaces/%s/subscriptions?subscriptionId=%s", c.HostURL, space_name, notification_id), nil)
 	if err != nil {
 		return err
