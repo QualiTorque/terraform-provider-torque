@@ -54,7 +54,6 @@ func (c *Client) DeleteSpace(name string) error {
 	return nil
 }
 
-
 func (c *Client) GetSpaceBlueprints(space_name string) ([]Blueprint, error) {
 	req, err := http.NewRequest("GET", fmt.Sprintf("%sapi/spaces/%s/blueprints", c.HostURL, space_name), nil)
 	if err != nil {
