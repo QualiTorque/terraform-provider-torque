@@ -485,3 +485,14 @@ type ResourceInventoryDetails struct {
 	Type    string  `json:"type"`
 	ViewArn *string `json:"view_arn"`
 }
+
+type DeploymentEngine struct {
+	Name                   string        `json:"name"`
+	Description            string        `json:"description"`
+	Type                   string        `json:"type"`
+	AuthToken              string        `json:"auth_token"`
+	AgentName              string        `json:"agent_name"`
+	ServerUrl              string        `json:"server_url"`
+	PollingIntervalSeconds int32         `json:"polling_interval_seconds"`
+	AllowedSpaces          AllowedSpaces `json:"allowed_spaces"`
+}

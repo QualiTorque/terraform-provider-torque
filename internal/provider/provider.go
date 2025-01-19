@@ -236,6 +236,7 @@ func (p *torqueProvider) Resources(ctx context.Context) []func() resource.Resour
 		resources.NewTorqueAwsResourceInventoryResource,
 		resources.NewTorqueAzureBlobObjectInputSourceResource,
 		resources.NewTorqueAzureBlobObjectContentInputSourceResource,
+		resources.NewTorqueDeploymentEngineResource,
 	}
 }
 
