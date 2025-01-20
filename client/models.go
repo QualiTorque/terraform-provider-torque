@@ -517,3 +517,23 @@ type AgentDetails struct {
 	Name string `json:"name"`
 	Type string `json:"type"`
 }
+
+type ApprovalChannel struct {
+	Name        string                 `json:"name"`
+	Description string                 `json:"description"`
+	Details     ApprovalChannelDetails `json:"details"`
+}
+
+type ApprovalChannelDetails struct {
+	Type           string     `json:"type"`
+	Approvers      []Approver `json:"approvers"`
+	Headers        *string    `json:"headers,omitempty"`
+	BaseUrl        *string    `json:"base_url,omitempty"`
+	UserName       *string    `json:"user_name,omitempty"`
+	Password       *string    `json:"password,omitempty"`
+	WebhookAddress *string    `json:"webhook_address,omitempty"`
+}
+
+type Approver struct {
+	UserEmail string `json:"user_email"`
+}
