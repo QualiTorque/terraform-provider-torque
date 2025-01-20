@@ -17,8 +17,11 @@ func TestTorqueEmailApprovalChannel(t *testing.T) {
 	const (
 		approval_channel = "approval_channel"
 		description      = "description"
+		new_description  = "new_description"
 		approver         = "terraformtester@quali.com"
+		approver2        = "terraformtester2@quali.com"
 	)
+
 	var unique_name = approval_channel + "_" + index
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { testAccPreCheck(t) },
@@ -30,7 +33,6 @@ func TestTorqueEmailApprovalChannel(t *testing.T) {
 					name                     = "%s"
 					description              = "%s"
 					approvers               = ["%s"]
-
 				}
 				`, unique_name, description, approver),
 				ConfigStateChecks: []statecheck.StateCheck{
@@ -48,6 +50,37 @@ func TestTorqueEmailApprovalChannel(t *testing.T) {
 						"torque_email_approval_channel.channel",
 						tfjsonpath.New("approvers").AtSliceIndex(0),
 						knownvalue.StringExact(approver),
+					),
+				},
+			},
+			{
+				Config: providerConfig + fmt.Sprintf(`
+				resource "torque_email_approval_channel" "channel" {
+					name                     = "%s"
+					description              = "%s"
+					approvers               = ["%s","%s"]
+				}
+				`, unique_name, new_description, approver, approver2),
+				ConfigStateChecks: []statecheck.StateCheck{
+					statecheck.ExpectKnownValue(
+						"torque_email_approval_channel.channel",
+						tfjsonpath.New("name"),
+						knownvalue.StringExact(unique_name),
+					),
+					statecheck.ExpectKnownValue(
+						"torque_email_approval_channel.channel",
+						tfjsonpath.New("description"),
+						knownvalue.StringExact(new_description),
+					),
+					statecheck.ExpectKnownValue(
+						"torque_email_approval_channel.channel",
+						tfjsonpath.New("approvers").AtSliceIndex(0),
+						knownvalue.StringExact(approver),
+					),
+					statecheck.ExpectKnownValue(
+						"torque_email_approval_channel.channel",
+						tfjsonpath.New("approvers").AtSliceIndex(1),
+						knownvalue.StringExact(approver2),
 					),
 				},
 			},

@@ -9,6 +9,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/qualitorque/terraform-provider-torque/client"
@@ -52,17 +55,21 @@ func (r *TorqueEmailApprovalChannelResource) Schema(ctx context.Context, req res
 				Optional:            false,
 				Computed:            false,
 				Required:            true,
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.RequiresReplace(),
+				},
 			},
 			"description": schema.StringAttribute{
 				MarkdownDescription: "Description of the approval channel",
 				Optional:            true,
-				Computed:            false,
+				Computed:            true,
 				Required:            false,
+				Default:             stringdefault.StaticString(""),
 			},
 			"approvers": schema.ListAttribute{
-				Description: "List of spaces that can use this approval channel",
-				Required:    false,
-				Optional:    true,
+				Description: "List of existing emails of users that will be the approvers of this approval channel",
+				Required:    true,
+				Optional:    false,
 				ElementType: types.StringType,
 				Validators: []validator.List{
 					listvalidator.SizeAtLeast(1), // Ensure the list has at least one entry if required
@@ -118,35 +125,26 @@ func (r *TorqueEmailApprovalChannelResource) Create(ctx context.Context, req res
 
 func (r *TorqueEmailApprovalChannelResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	var data TorqueEmailApprovalChannelResourceModel
-
+	approvers := []string{}
 	diags := req.State.Get(ctx, &data)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	// input_source, err := r.client.GetInputSource(data.Name.ValueString())
-	// if err != nil {
-	// 	resp.Diagnostics.AddError(
-	// 		"Error Reading Input Source details",
-	// 		"Could not read Input Source "+data.Name.ValueString()+": "+err.Error(),
-	// 	)
-	// 	return
-	// }
-	// data.Name = types.StringValue(input_source.Name)
-	// data.Description = types.StringValue(input_source.Description)
-	// data.BucketName = types.StringValue(input_source.Details.BucketName.Value)
-	// data.BucketNameOverridable = types.BoolValue(input_source.Details.BucketName.Overridable)
-	// data.CredentialName = types.StringValue(input_source.Details.CredentialName)
-	// data.AllSpaces = types.BoolValue(input_source.AllowedSpaces.AllSpaces)
-	// if len(input_source.AllowedSpaces.SpecificSpaces) > 0 {
-	// 	data.SpecificSpaces, _ = types.ListValueFrom(ctx, types.StringType, input_source.AllowedSpaces.SpecificSpaces)
-	// } else {
-	// 	data.SpecificSpaces = types.ListNull(types.StringType)
-	// }
-	// data.FilterPattern = types.StringValue(input_source.Details.FilterPattern.Value)
-	// data.FilterPatternOverridable = types.BoolValue(input_source.Details.FilterPattern.Overridable)
-	// data.PathPrefix = types.StringValue(input_source.Details.PathPrefix.Value)
-	// data.PathPrefixOverridable = types.BoolValue(input_source.Details.PathPrefix.Overridable)
+	approval_channel, err := r.client.GetApprovalChannel(data.Name.ValueString())
+	if err != nil {
+		resp.Diagnostics.AddError(
+			"Error Reading Approval Channel details",
+			"Could not read Approval Channel "+data.Name.ValueString()+": "+err.Error(),
+		)
+		return
+	}
+	data.Name = types.StringValue(approval_channel.Name)
+	data.Description = types.StringValue(approval_channel.Description)
+	for _, approver := range approval_channel.Details.Approvers {
+		approvers = append(approvers, approver.UserEmail)
+	}
+	data.Approvers, _ = types.ListValueFrom(ctx, types.StringType, approvers)
 
 	diags = resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
@@ -157,40 +155,23 @@ func (r *TorqueEmailApprovalChannelResource) Read(ctx context.Context, req resou
 
 func (r *TorqueEmailApprovalChannelResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 	var data TorqueEmailApprovalChannelResourceModel
-	// var state TorqueEmailApprovalChannelResourceModel
-	// var details client.InputSourceDetails
-	// var allowed_spaces client.AllowedSpaces
-	// const input_source_type = "s3-object"
-	// var specificSpaces []string
-	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
-	// resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
+	var details client.ApprovalChannelDetails
+	var approvers []client.Approver
 
-	// if resp.Diagnostics.HasError() {
-	// 	return
-	// }
-	// allowed_spaces.AllSpaces = data.AllSpaces.ValueBool()
-	// if !data.SpecificSpaces.IsNull() {
-	// 	allowed_spaces.AllSpaces = false
-	// 	for _, val := range data.SpecificSpaces.Elements() {
-	// 		specificSpaces = append(specificSpaces, strings.Replace(val.String(), "\"", "", -1))
-	// 	}
-	// 	allowed_spaces.SpecificSpaces = specificSpaces
-	// } else {
-	// 	allowed_spaces.AllSpaces = data.AllSpaces.ValueBool() // true
-	// }
-	// details.BucketName.Overridable = data.BucketNameOverridable.ValueBool()
-	// details.BucketName.Value = data.BucketName.ValueString()
-	// details.FilterPattern.Overridable = data.FilterPatternOverridable.ValueBool()
-	// details.FilterPattern.Value = data.FilterPattern.ValueString()
-	// details.PathPrefix.Overridable = data.PathPrefixOverridable.ValueBool()
-	// details.PathPrefix.Value = data.PathPrefix.ValueString()
-	// details.Type = input_source_type
-	// details.CredentialName = data.CredentialName.ValueString()
-	// err := r.client.UpdateInputSource(state.Name.ValueString(), data.Name.ValueString(), data.Description.ValueString(), allowed_spaces, details)
-	// if err != nil {
-	// 	resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create Input Source, got error: %s", err))
-	// 	return
-	// }
+	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
+
+	for _, approver := range data.Approvers.Elements() {
+		approvers = append(approvers, client.Approver{
+			UserEmail: strings.Replace(approver.String(), "\"", "", -1),
+		})
+	}
+	details.Approvers = approvers
+	details.Type = approval_channel_type
+	err := r.client.UpdateApprovalChannel(data.Name.ValueString(), data.Description.ValueString(), details)
+	if err != nil {
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update Input Source, got error: %s", err))
+		return
+	}
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
