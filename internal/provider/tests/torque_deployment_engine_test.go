@@ -31,7 +31,8 @@ func TestTorqueDeploymentEngineResource(t *testing.T) {
 		specific_spaces                  = "TorqueTerraformProvider"
 		new_polling_interval_seconds_int = 60
 	)
-
+	var unique_deployment_engine_name = deployment_engine_name + "_" + index
+	var new_unique_deployment_engine_name = new_deployment_engine_name + "_" + index
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { testAccPreCheck(t) },
 		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
@@ -48,12 +49,12 @@ func TestTorqueDeploymentEngineResource(t *testing.T) {
 					polling_interval_seconds = "%s"
 					all_spaces               = "%s"
 				}
-				`, deployment_engine_name, description, agent_name, auth_token, server_url, polling_interval_seconds, all_spaces),
+				`, unique_deployment_engine_name, description, agent_name, auth_token, server_url, polling_interval_seconds, all_spaces),
 				ConfigStateChecks: []statecheck.StateCheck{
 					statecheck.ExpectKnownValue(
 						"torque_deployment_engine.engine",
 						tfjsonpath.New("name"),
-						knownvalue.StringExact(deployment_engine_name),
+						knownvalue.StringExact(unique_deployment_engine_name),
 					),
 					statecheck.ExpectKnownValue(
 						"torque_deployment_engine.engine",
@@ -94,12 +95,12 @@ func TestTorqueDeploymentEngineResource(t *testing.T) {
 					specific_spaces          = ["%s"]
 					// all_spaces               = "%s"
 				}
-				`, new_deployment_engine_name, new_description, agent_name, new_auth_token, new_server_url, new_polling_interval_seconds, specific_spaces, all_spaces),
+				`, new_unique_deployment_engine_name, new_description, agent_name, new_auth_token, new_server_url, new_polling_interval_seconds, specific_spaces, all_spaces),
 				ConfigStateChecks: []statecheck.StateCheck{
 					statecheck.ExpectKnownValue(
 						"torque_deployment_engine.engine",
 						tfjsonpath.New("name"),
-						knownvalue.StringExact(new_deployment_engine_name),
+						knownvalue.StringExact(new_unique_deployment_engine_name),
 					),
 					statecheck.ExpectKnownValue(
 						"torque_deployment_engine.engine",
