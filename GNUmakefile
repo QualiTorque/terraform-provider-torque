@@ -1,5 +1,6 @@
 default: testacc
-
+generate:
+	cd tools; go generate ./...
 # Run acceptance tests
 .PHONY: testacc
 testacc:
