@@ -10,6 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int32default"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
@@ -85,22 +86,22 @@ func (r *TorqueDeploymentEngineResource) Schema(ctx context.Context, req resourc
 			},
 			"server_url": schema.StringAttribute{
 				MarkdownDescription: "Server URL of the deployment engine",
-				Optional:            true,
+				Optional:            false,
 				Computed:            false,
-				Required:            false,
+				Required:            true,
 			},
 			"auth_token": schema.StringAttribute{
 				MarkdownDescription: "Token of the deployment engine.",
 				Optional:            false,
-				Computed:            false,
 				Required:            true,
 				Sensitive:           true,
 			},
 			"polling_interval_seconds": schema.Int32Attribute{
 				MarkdownDescription: "Polling interval of the deployment engine in seconds.",
 				Optional:            true,
-				Computed:            false,
+				Computed:            true,
 				Required:            false,
+				Default:             int32default.StaticInt32(30),
 			},
 			"all_spaces": schema.BoolAttribute{
 				Description: "Specify if the deployment engine can be used in all spaces. Defaults to true, use specific spaces attribute for allowing only specific spaces.",
@@ -109,7 +110,6 @@ func (r *TorqueDeploymentEngineResource) Schema(ctx context.Context, req resourc
 				PlanModifiers: []planmodifier.Bool{
 					&allSpacesModifier{},
 				},
-				// Default:     booldefault.StaticBool(true),
 				Validators: []validator.Bool{
 					// Validate only this attribute or other_attr is configured or neither.
 					boolvalidator.ConflictsWith(path.Expressions{
@@ -182,35 +182,33 @@ func (r *TorqueDeploymentEngineResource) Create(ctx context.Context, req resourc
 
 func (r *TorqueDeploymentEngineResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	var data TorqueDeploymentEngineResourceModel
-
 	diags := req.State.Get(ctx, &data)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	// input_source, err := r.client.GetInputSource(data.Name.ValueString())
-	// if err != nil {
-	// 	resp.Diagnostics.AddError(
-	// 		"Error Reading deployment engine details",
-	// 		"Could not read deployment engine "+data.Name.ValueString()+": "+err.Error(),
-	// 	)
-	// 	return
-	// }
-	// data.Name = types.StringValue(input_source.Name)
-	// data.Description = types.StringValue(input_source.Description)
-	// data.StorageAccountName = types.StringValue(input_source.Details.StorageAccountName.Value)
-	// data.StorageAccountNameOverridable = types.BoolValue(input_source.Details.StorageAccountName.Overridable)
-	// data.ContainerName = types.StringValue(input_source.Details.ContainerName.Value)
-	// data.ContainerNameOverridable = types.BoolValue(input_source.Details.ContainerName.Overridable)
-	// data.CredentialName = types.StringValue(input_source.Details.CredentialName)
-	// data.AllSpaces = types.BoolValue(input_source.AllowedSpaces.AllSpaces)
-	// if len(input_source.AllowedSpaces.SpecificSpaces) > 0 {
-	// 	data.SpecificSpaces, _ = types.ListValueFrom(ctx, types.StringType, input_source.AllowedSpaces.SpecificSpaces)
-	// } else {
-	// 	data.SpecificSpaces = types.ListNull(types.StringType)
-	// }
-	// data.FilterPattern = types.StringValue(input_source.Details.FilterPattern.Value)
-	// data.FilterPatternOverridable = types.BoolValue(input_source.Details.FilterPattern.Overridable)
+
+	deployment_engine, err := r.client.GetDeploymentEngine(data.Name.ValueString())
+	if err != nil {
+		resp.Diagnostics.AddError(
+			"Error Reading deployment engine details",
+			"Could not read deployment engine "+data.Name.ValueString()+": "+err.Error(),
+		)
+		return
+	}
+	data.Name = types.StringValue(deployment_engine.Name)
+	data.Description = types.StringValue(deployment_engine.Description)
+	data.Type = types.StringValue(deployment_engine.Type)
+	data.AgentName = types.StringValue(deployment_engine.Agent.Name)
+	data.ServerUrl = types.StringValue(deployment_engine.ServerUrl)
+	data.PollingIntervalSeconds = types.Int32Value(int32(deployment_engine.PollingIntervalSeconds.Value))
+
+	data.AllSpaces = types.BoolValue(deployment_engine.AllowedSpaces.AllSpaces)
+	if len(deployment_engine.AllowedSpaces.SpecificSpaces) > 0 {
+		data.SpecificSpaces, _ = types.ListValueFrom(ctx, types.StringType, deployment_engine.AllowedSpaces.SpecificSpaces)
+	} else {
+		data.SpecificSpaces = types.ListNull(types.StringType)
+	}
 
 	diags = resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
@@ -221,45 +219,29 @@ func (r *TorqueDeploymentEngineResource) Read(ctx context.Context, req resource.
 
 func (r *TorqueDeploymentEngineResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 	var data TorqueDeploymentEngineResourceModel
-	// var state TorqueDeploymentEngineResourceModel
-	// var details client.InputSourceDetails
+	var state TorqueDeploymentEngineResourceModel
 
-	// details.PathPrefix = &client.OverridableValue{}         // pointer initialization
-	// details.StorageAccountName = &client.OverridableValue{} // pointer initialization
-	// details.ContainerName = &client.OverridableValue{}      // pointer initialization
+	var allowed_spaces client.AllowedSpaces
+	var specificSpaces []string
 
-	// var allowed_spaces client.AllowedSpaces
-	// const input_source_type = "azure-blob-content"
-	// var specificSpaces []string
-	// resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
-	// resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
+	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
+	resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
+	allowed_spaces.AllSpaces = data.AllSpaces.ValueBool()
+	if !data.SpecificSpaces.IsNull() {
+		allowed_spaces.AllSpaces = false
+		for _, val := range data.SpecificSpaces.Elements() {
+			specificSpaces = append(specificSpaces, strings.Replace(val.String(), "\"", "", -1))
+		}
+		allowed_spaces.SpecificSpaces = specificSpaces
+	} else {
+		allowed_spaces.AllSpaces = data.AllSpaces.ValueBool() // true
+	}
 
-	// if resp.Diagnostics.HasError() {
-	// 	return
-	// }
-	// allowed_spaces.AllSpaces = data.AllSpaces.ValueBool()
-	// if !data.SpecificSpaces.IsNull() {
-	// 	allowed_spaces.AllSpaces = false
-	// 	for _, val := range data.SpecificSpaces.Elements() {
-	// 		specificSpaces = append(specificSpaces, strings.Replace(val.String(), "\"", "", -1))
-	// 	}
-	// 	allowed_spaces.SpecificSpaces = specificSpaces
-	// } else {
-	// 	allowed_spaces.AllSpaces = data.AllSpaces.ValueBool() // true
-	// }
-	// details.StorageAccountName.Overridable = data.StorageAccountNameOverridable.ValueBool()
-	// details.StorageAccountName.Value = data.StorageAccountName.ValueString()
-	// details.ContainerName.Overridable = data.ContainerNameOverridable.ValueBool()
-	// details.ContainerName.Value = data.ContainerName.ValueString()
-	// details.FilterPattern.Overridable = data.FilterPatternOverridable.ValueBool()
-	// details.FilterPattern.Value = data.FilterPattern.ValueString()
-	// details.Type = input_source_type
-	// details.CredentialName = data.CredentialName.ValueString()
-	// err := r.client.UpdateInputSource(state.Name.ValueString(), data.Name.ValueString(), data.Description.ValueString(), allowed_spaces, details)
-	// if err != nil {
-	// 	resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create deployment engine, got error: %s", err))
-	// 	return
-	// }
+	err := r.client.UpdateDeploymentEngine(argocd_engine_type, state.Name.ValueString(), data.Name.ValueString(), data.Description.ValueString(), data.AgentName.ValueString(), data.AuthToken.ValueString(), data.PollingIntervalSeconds.ValueInt32(), data.ServerUrl.ValueString(), allowed_spaces)
+	if err != nil {
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update deployment engine, got error: %s", err))
+		return
+	}
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
