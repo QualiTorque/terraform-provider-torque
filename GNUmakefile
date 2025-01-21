@@ -1,7 +1,17 @@
-default: testacc
+default: fmt lint install generate
+
+build:
+	go build -v ./...
 generate:
 	cd tools; go generate ./...
-# Run acceptance tests
-.PHONY: testacc
+install: build
+	go install -v ./...
+lint:
+	golangci-lint run
+fmt:
+	gofmt -s -w -e .
+	
 testacc:
-	TF_ACC=1 go test ./... -v $(TESTARGS) -timeout 120m
+	TF_ACC=1 VERSION=1.4.4 go test -v -cover -timeout 120m ./...
+
+.PHONY: fmt lint test testacc build install generate
