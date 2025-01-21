@@ -527,6 +527,7 @@ type ApprovalChannel struct {
 type ApprovalChannelDetails struct {
 	Type           string     `json:"type"`
 	Approvers      []Approver `json:"approvers"`
+	Approver       *Approver  `json:"approver,omitempty"`
 	Headers        *string    `json:"headers,omitempty"`
 	BaseUrl        *string    `json:"base_url,omitempty"`
 	UserName       *string    `json:"user_name,omitempty"`
