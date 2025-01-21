@@ -239,6 +239,7 @@ func (p *torqueProvider) Resources(ctx context.Context) []func() resource.Resour
 		resources.NewTorqueDeploymentEngineResource,
 		resources.NewTorqueEmailApprovalChannelResource,
 		resources.NewTorqueTeamsApprovalChannelResource,
+		resources.NewTorqueServiceNowApprovalChannelResource,
 	}
 }
 
