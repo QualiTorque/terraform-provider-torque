@@ -12,7 +12,7 @@ func (c *Client) CreateSpaceEmailNotification(space_name string, notification_na
 	environment_deployed bool, environment_force_ended bool, environment_idle bool, environment_extended bool,
 	drift_detected bool, workflow_failed bool, workflow_started bool, updates_detected bool,
 	collaborator_added bool, action_failed bool, environment_ending_failed bool, environment_ended bool,
-	environment_active_with_error bool, workflow_start_reminder int64, end_threshold int64, idle_reminder []int64) (string, error) {
+	environment_active_with_error bool, workflow_start_reminder int64, end_threshold int64, blueprint_published bool, blueprint_unpublished bool, idle_reminder []int64) (string, error) {
 
 	data := SubscriptionsRequest{
 		Name:        notification_name,
@@ -73,10 +73,15 @@ func (c *Client) CreateSpaceEmailNotification(space_name string, notification_na
 	if environment_active_with_error {
 		data.Events = append(data.Events, "EnvironmentActiveWithError")
 	}
-
+	if blueprint_published {
+		data.Events = append(data.Events, "BlueprintPublished")
+	}
+	if blueprint_unpublished {
+		data.Events = append(data.Events, "BlueprintUnpublished")
+	}
 	payload, err := json.Marshal(data)
 	if err != nil {
-		log.Fatalf("impossible to marshall update space request: %s", err)
+		log.Fatalf("impossible to marshall space notification request: %s", err)
 	}
 
 	req, err := http.NewRequest("POST", fmt.Sprintf("%sapi/spaces/%s/subscriptions", c.HostURL, space_name), bytes.NewReader(payload))
@@ -99,7 +104,7 @@ func (c *Client) UpdateSpaceEmailNotification(notification_id string, space_name
 	environment_deployed bool, environment_force_ended bool, environment_idle bool, environment_extended bool,
 	drift_detected bool, workflow_failed bool, workflow_started bool, updates_detected bool,
 	collaborator_added bool, action_failed bool, environment_ending_failed bool, environment_ended bool,
-	environment_active_with_error bool, workflow_start_reminder int64, end_threshold int64, idle_reminder []int64) (string, error) {
+	environment_active_with_error bool, workflow_start_reminder int64, end_threshold int64, blueprint_published bool, blueprint_unpublished bool, idle_reminder []int64) (string, error) {
 
 	data := SubscriptionsRequest{
 		Name:        notification_name,
@@ -160,7 +165,12 @@ func (c *Client) UpdateSpaceEmailNotification(notification_id string, space_name
 	if environment_active_with_error {
 		data.Events = append(data.Events, "EnvironmentActiveWithError")
 	}
-
+	if blueprint_published {
+		data.Events = append(data.Events, "BlueprintPublished")
+	}
+	if blueprint_unpublished {
+		data.Events = append(data.Events, "BlueprintUnpublished")
+	}
 	payload, err := json.Marshal(data)
 	if err != nil {
 		log.Fatalf("impossible to marshall update space request: %s", err)

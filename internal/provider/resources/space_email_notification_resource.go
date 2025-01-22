@@ -50,6 +50,8 @@ type TorqueSpaceEmailNotificationResourceModel struct {
 	WorkflowStartReminder      types.Int64   `tfsdk:"workflow_start_reminder"` // if this is set - Kate - need to set also - "workflow_events_notifier": { "notify_on_all_workflows": true}
 	EndThreashold              types.Int64   `tfsdk:"end_threshold"`
 	IdleReminder               []types.Int64 `tfsdk:"idle_reminders"`
+	BlueprintPublished         types.Bool    `tfsdk:"blueprint_published"`
+	BlueprintUnpublished       types.Bool    `tfsdk:"blueprint_unpublished"`
 	NotificationId             types.String  `tfsdk:"notification_id"`
 }
 
@@ -160,6 +162,16 @@ func (r *TorqueSpaceEmailNotificationResource) Schema(ctx context.Context, req r
 				Computed:            false,
 				ElementType:         types.Int64Type,
 			},
+			"blueprint_published": schema.BoolAttribute{
+				MarkdownDescription: "Configure notification for the \"Blueprint Published\" event",
+				Optional:            true,
+				Computed:            false,
+			},
+			"blueprint_unpublished": schema.BoolAttribute{
+				MarkdownDescription: "Configure notification for the \"Blueprint Unpublished\" event",
+				Optional:            true,
+				Computed:            false,
+			},
 			"notification_id": schema.StringAttribute{
 				MarkdownDescription: "The id of the newly added notification",
 				Computed:            true,
@@ -208,7 +220,7 @@ func (r *TorqueSpaceEmailNotificationResource) Create(ctx context.Context, req r
 		data.EnvironmentDeployed.ValueBool(), data.EnvironmentForceEnded.ValueBool(), data.EnvironmentIdle.ValueBool(), data.EnvironmentExtended.ValueBool(), data.DriftDetected.ValueBool(),
 		data.WorkflowFailed.ValueBool(), data.WorkflowStarted.ValueBool(), data.UpdatesDetected.ValueBool(), data.CollaboratorAdded.ValueBool(), data.ActionFailed.ValueBool(),
 		data.EnvironmentEndingFailed.ValueBool(), data.EnvironmentEnded.ValueBool(), data.EnvironmentActiveWithError.ValueBool(), data.WorkflowStartReminder.ValueInt64(), data.EndThreashold.ValueInt64(),
-		idle)
+		data.BlueprintPublished.ValueBool(), data.BlueprintUnpublished.ValueBool(), idle)
 
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create notification in space, got error: %s", err))
@@ -258,7 +270,7 @@ func (r *TorqueSpaceEmailNotificationResource) Update(ctx context.Context, req r
 		data.EnvironmentDeployed.ValueBool(), data.EnvironmentForceEnded.ValueBool(), data.EnvironmentIdle.ValueBool(), data.EnvironmentExtended.ValueBool(), data.DriftDetected.ValueBool(),
 		data.WorkflowFailed.ValueBool(), data.WorkflowStarted.ValueBool(), data.UpdatesDetected.ValueBool(), data.CollaboratorAdded.ValueBool(), data.ActionFailed.ValueBool(),
 		data.EnvironmentEndingFailed.ValueBool(), data.EnvironmentEnded.ValueBool(), data.EnvironmentActiveWithError.ValueBool(), data.WorkflowStartReminder.ValueInt64(), data.EndThreashold.ValueInt64(),
-		idle)
+		data.BlueprintPublished.ValueBool(), data.BlueprintUnpublished.ValueBool(), idle)
 
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update notification in space, got error: %s", err))
