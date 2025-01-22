@@ -540,3 +540,15 @@ type ApprovalChannelDetails struct {
 type Approver struct {
 	UserEmail string `json:"user_email"`
 }
+
+type Audit struct {
+	Type       string           `json:"type"`
+	Properties *AuditProperties `json:"properties,omitempty"`
+}
+
+type AuditProperties struct {
+	Url         string `json:"url"`
+	Username    string `json:"username"`
+	Password    string `json:"password"`
+	Certificate string `json:"certificate"`
+}
