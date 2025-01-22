@@ -12,29 +12,28 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
-	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/qualitorque/terraform-provider-torque/client"
 )
 
 // Ensure provider defined types fully satisfy framework interfaces.
-var _ resource.Resource = &TorqueSpaceEmailNotificationResource{}
-var _ resource.ResourceWithImportState = &TorqueSpaceEmailNotificationResource{}
+var _ resource.Resource = &TorqueSpaceGenericWebhookNotificationResource{}
+var _ resource.ResourceWithImportState = &TorqueSpaceGenericWebhookNotificationResource{}
 
-func NewTorqueSpaceEmailNotificationResource() resource.Resource {
-	return &TorqueSpaceEmailNotificationResource{}
+func NewTorqueSpaceGenericWebhookNotificationResource() resource.Resource {
+	return &TorqueSpaceGenericWebhookNotificationResource{}
 }
 
-// TorqueSpaceEmailNotificationResource defines the resource implementation.
-type TorqueSpaceEmailNotificationResource struct {
+// TorqueSpaceGenericWebhookNotificationResource defines the resource implementation.
+type TorqueSpaceGenericWebhookNotificationResource struct {
 	client *client.Client
 }
 
 const (
-	email_notification_type = "Email"
+	generic_webhook_notification_type = "GenericWebhook"
 )
 
-// TorqueSpaceEmailNotificationResourceModel describes the resource data model.
-type TorqueSpaceEmailNotificationResourceModel struct {
+// TorqueSpaceGenericWebhookNotificationResourceModel describes the resource data model.
+type TorqueSpaceGenericWebhookNotificationResourceModel struct {
 	SpaceName                  types.String  `tfsdk:"space_name"`
 	NotificationName           types.String  `tfsdk:"notification_name"`
 	EnvironmentLaunched        types.Bool    `tfsdk:"environment_launched"`
@@ -56,18 +55,19 @@ type TorqueSpaceEmailNotificationResourceModel struct {
 	IdleReminder               []types.Int64 `tfsdk:"idle_reminders"`
 	BlueprintPublished         types.Bool    `tfsdk:"blueprint_published"`
 	BlueprintUnpublished       types.Bool    `tfsdk:"blueprint_unpublished"`
+	WebHook                    types.String  `tfsdk:"web_hook"`
+	Token                      types.String  `tfsdk:"token"`
 	NotificationId             types.String  `tfsdk:"notification_id"`
 }
 
-func (r *TorqueSpaceEmailNotificationResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
-	resp.TypeName = "torque_space_email_notification"
+func (r *TorqueSpaceGenericWebhookNotificationResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
+	resp.TypeName = "torque_space_generic_webhook_notification"
 }
 
-func (r *TorqueSpaceEmailNotificationResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
+func (r *TorqueSpaceGenericWebhookNotificationResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "Creation of a new notification is a Torque space",
-
+		MarkdownDescription: "Creation of a new Generic Webhook notification is a Torque space",
 		Attributes: map[string]schema.Attribute{
 			"space_name": schema.StringAttribute{
 				MarkdownDescription: "Space name to add the notification to",
@@ -176,6 +176,18 @@ func (r *TorqueSpaceEmailNotificationResource) Schema(ctx context.Context, req r
 				Optional:            true,
 				Computed:            false,
 			},
+			"web_hook": schema.StringAttribute{
+				MarkdownDescription: "The webhook to send the notification to",
+				Optional:            false,
+				Computed:            false,
+				Required:            true,
+			},
+			"token": schema.StringAttribute{
+				MarkdownDescription: "The token of the generic webhook to send the notification to",
+				Optional:            false,
+				Computed:            false,
+				Required:            true,
+			},
 			"notification_id": schema.StringAttribute{
 				MarkdownDescription: "The id of the newly added notification",
 				Computed:            true,
@@ -184,7 +196,7 @@ func (r *TorqueSpaceEmailNotificationResource) Schema(ctx context.Context, req r
 	}
 }
 
-func (r *TorqueSpaceEmailNotificationResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
+func (r *TorqueSpaceGenericWebhookNotificationResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
 	// Prevent panic if the provider has not been configured.
 	if req.ProviderData == nil {
 		return
@@ -204,8 +216,8 @@ func (r *TorqueSpaceEmailNotificationResource) Configure(ctx context.Context, re
 	r.client = client
 }
 
-func (r *TorqueSpaceEmailNotificationResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
-	var data TorqueSpaceEmailNotificationResourceModel
+func (r *TorqueSpaceGenericWebhookNotificationResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
+	var data TorqueSpaceGenericWebhookNotificationResourceModel
 
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
 
@@ -220,11 +232,11 @@ func (r *TorqueSpaceEmailNotificationResource) Create(ctx context.Context, req r
 		}
 	}
 
-	notification, err := r.client.CreateSpaceNotification(email_notification_type, data.SpaceName.ValueString(), data.NotificationName.ValueString(), data.EnvironmentLaunched.ValueBool(),
+	notification, err := r.client.CreateSpaceNotification(generic_webhook_notification_type, data.SpaceName.ValueString(), data.NotificationName.ValueString(), data.EnvironmentLaunched.ValueBool(),
 		data.EnvironmentDeployed.ValueBool(), data.EnvironmentForceEnded.ValueBool(), data.EnvironmentIdle.ValueBool(), data.EnvironmentExtended.ValueBool(), data.DriftDetected.ValueBool(),
 		data.WorkflowFailed.ValueBool(), data.WorkflowStarted.ValueBool(), data.UpdatesDetected.ValueBool(), data.CollaboratorAdded.ValueBool(), data.ActionFailed.ValueBool(),
 		data.EnvironmentEndingFailed.ValueBool(), data.EnvironmentEnded.ValueBool(), data.EnvironmentActiveWithError.ValueBool(), data.WorkflowStartReminder.ValueInt64(), data.EndThreashold.ValueInt64(),
-		data.BlueprintPublished.ValueBool(), data.BlueprintUnpublished.ValueBool(), idle, nil, nil)
+		data.BlueprintPublished.ValueBool(), data.BlueprintUnpublished.ValueBool(), idle, data.WebHook.ValueStringPointer(), data.Token.ValueStringPointer())
 
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create notification in space, got error: %s", err))
@@ -233,14 +245,12 @@ func (r *TorqueSpaceEmailNotificationResource) Create(ctx context.Context, req r
 
 	data.NotificationId = basetypes.NewStringValue(strings.Replace(notification, "\"", "", -1))
 
-	tflog.Trace(ctx, "Resource Created Successful!")
-
 	// Save data into Terraform state.
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
-func (r *TorqueSpaceEmailNotificationResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
-	var data TorqueSpaceEmailNotificationResourceModel
+func (r *TorqueSpaceGenericWebhookNotificationResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
+	var data TorqueSpaceGenericWebhookNotificationResourceModel
 
 	// Read Terraform prior state data into the model.
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
@@ -253,9 +263,9 @@ func (r *TorqueSpaceEmailNotificationResource) Read(ctx context.Context, req res
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
-func (r *TorqueSpaceEmailNotificationResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var data TorqueSpaceEmailNotificationResourceModel
-	var state TorqueSpaceEmailNotificationResourceModel
+func (r *TorqueSpaceGenericWebhookNotificationResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+	var data TorqueSpaceGenericWebhookNotificationResourceModel
+	var state TorqueSpaceGenericWebhookNotificationResourceModel
 
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
 	resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
@@ -270,11 +280,11 @@ func (r *TorqueSpaceEmailNotificationResource) Update(ctx context.Context, req r
 		}
 	}
 
-	_, err := r.client.UpdateSpaceNotification(state.NotificationId.ValueString(), email_notification_type, data.SpaceName.ValueString(), data.NotificationName.ValueString(), data.EnvironmentLaunched.ValueBool(),
+	_, err := r.client.UpdateSpaceNotification(state.NotificationId.ValueString(), generic_webhook_notification_type, data.SpaceName.ValueString(), data.NotificationName.ValueString(), data.EnvironmentLaunched.ValueBool(),
 		data.EnvironmentDeployed.ValueBool(), data.EnvironmentForceEnded.ValueBool(), data.EnvironmentIdle.ValueBool(), data.EnvironmentExtended.ValueBool(), data.DriftDetected.ValueBool(),
 		data.WorkflowFailed.ValueBool(), data.WorkflowStarted.ValueBool(), data.UpdatesDetected.ValueBool(), data.CollaboratorAdded.ValueBool(), data.ActionFailed.ValueBool(),
 		data.EnvironmentEndingFailed.ValueBool(), data.EnvironmentEnded.ValueBool(), data.EnvironmentActiveWithError.ValueBool(), data.WorkflowStartReminder.ValueInt64(), data.EndThreashold.ValueInt64(),
-		data.BlueprintPublished.ValueBool(), data.BlueprintUnpublished.ValueBool(), idle, nil, nil)
+		data.BlueprintPublished.ValueBool(), data.BlueprintUnpublished.ValueBool(), idle, data.WebHook.ValueStringPointer(), data.Token.ValueStringPointer())
 
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update notification in space, got error: %s", err))
@@ -286,8 +296,8 @@ func (r *TorqueSpaceEmailNotificationResource) Update(ctx context.Context, req r
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
-func (r *TorqueSpaceEmailNotificationResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
-	var data TorqueSpaceEmailNotificationResourceModel
+func (r *TorqueSpaceGenericWebhookNotificationResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+	var data TorqueSpaceGenericWebhookNotificationResourceModel
 
 	// Read Terraform prior state data into the model.
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
@@ -305,6 +315,6 @@ func (r *TorqueSpaceEmailNotificationResource) Delete(ctx context.Context, req r
 
 }
 
-func (r *TorqueSpaceEmailNotificationResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+func (r *TorqueSpaceGenericWebhookNotificationResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resource.ImportStatePassthroughID(ctx, path.Root("notification_name"), req, resp)
 }

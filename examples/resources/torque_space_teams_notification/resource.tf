@@ -13,9 +13,10 @@ provider "torque" {
 }
 
 
-resource "torque_space_email_notification" "new_notification" {
+resource "torque_space_teams_notification" "new_notification" {
   space_name                    = "space"
   notification_name             = "notification_name"
+  webhook                       = "https://webhook.com"
   environment_launched          = false
   environment_deployed          = false
   environment_force_ended       = false

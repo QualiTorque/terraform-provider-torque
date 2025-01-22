@@ -13,17 +13,12 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/tfjsonpath"
 )
 
-const (
-	notificationName = "notification"
-)
-
 func TestSpaceEmailNotificationResource(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { testAccPreCheck(t) },
 		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			{
-				// Can't create account level tag with possible values
 				Config: providerConfig + fmt.Sprintf(`
 				resource "torque_space_email_notification" "notification" {
 					space_name                    = "%s"
@@ -42,6 +37,8 @@ func TestSpaceEmailNotificationResource(t *testing.T) {
 					environment_ending_failed     = true
 					environment_ended             = true
 					environment_active_with_error = true
+					blueprint_published           = true
+					blueprint_unpublished         = true
 					idle_reminders                = [1, 2, 3]
 				}
 				`, fullSpaceName, notificationName),
@@ -128,6 +125,16 @@ func TestSpaceEmailNotificationResource(t *testing.T) {
 					),
 					statecheck.ExpectKnownValue(
 						"torque_space_email_notification.notification",
+						tfjsonpath.New("blueprint_published"),
+						knownvalue.Bool(true),
+					),
+					statecheck.ExpectKnownValue(
+						"torque_space_email_notification.notification",
+						tfjsonpath.New("blueprint_unpublished"),
+						knownvalue.Bool(true),
+					),
+					statecheck.ExpectKnownValue(
+						"torque_space_email_notification.notification",
 						tfjsonpath.New("idle_reminders"),
 						knownvalue.ListExact([]knownvalue.Check{
 							knownvalue.Int32Exact(1),
@@ -138,7 +145,6 @@ func TestSpaceEmailNotificationResource(t *testing.T) {
 				},
 			},
 			{
-				// Can't create account level tag with possible values
 				Config: providerConfig + fmt.Sprintf(`
 				resource "torque_space_email_notification" "notification" {
 					space_name                    = "%s"
@@ -157,6 +163,8 @@ func TestSpaceEmailNotificationResource(t *testing.T) {
 					environment_ending_failed     = false
 					environment_ended             = false
 					environment_active_with_error = false
+					blueprint_published           = false
+					blueprint_unpublished         = true
 					idle_reminders                = [1, 2]
 				}
 				`, fullSpaceName, notificationName),
@@ -240,6 +248,16 @@ func TestSpaceEmailNotificationResource(t *testing.T) {
 						"torque_space_email_notification.notification",
 						tfjsonpath.New("environment_active_with_error"),
 						knownvalue.Bool(false),
+					),
+					statecheck.ExpectKnownValue(
+						"torque_space_email_notification.notification",
+						tfjsonpath.New("blueprint_published"),
+						knownvalue.Bool(false),
+					),
+					statecheck.ExpectKnownValue(
+						"torque_space_email_notification.notification",
+						tfjsonpath.New("blueprint_unpublished"),
+						knownvalue.Bool(true),
 					),
 					statecheck.ExpectKnownValue(
 						"torque_space_email_notification.notification",

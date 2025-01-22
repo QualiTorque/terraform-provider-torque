@@ -240,6 +240,9 @@ func (p *torqueProvider) Resources(ctx context.Context) []func() resource.Resour
 		resources.NewTorqueEmailApprovalChannelResource,
 		resources.NewTorqueTeamsApprovalChannelResource,
 		resources.NewTorqueServiceNowApprovalChannelResource,
+		resources.NewTorqueSpaceTeamsNotificationResource,
+		resources.NewTorqueSpaceSlackNotificationResource,
+		resources.NewTorqueSpaceGenericWebhookNotificationResource,
 	}
 }
 

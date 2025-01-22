@@ -8,21 +8,61 @@ import (
 	"net/http"
 )
 
-func (c *Client) CreateSpaceEmailNotification(space_name string, notification_name string, environment_launched bool,
+const (
+	email_notification_type   = "Email"
+	slack_notification_type   = "Slack"
+	teams_notification_type   = "Teams"
+	webhook_notification_type = "GenericWebhook"
+)
+
+func (c *Client) CreateSpaceNotification(notification_type string, space_name string, notification_name string, environment_launched bool,
 	environment_deployed bool, environment_force_ended bool, environment_idle bool, environment_extended bool,
 	drift_detected bool, workflow_failed bool, workflow_started bool, updates_detected bool,
 	collaborator_added bool, action_failed bool, environment_ending_failed bool, environment_ended bool,
-	environment_active_with_error bool, workflow_start_reminder int64, end_threshold int64, idle_reminder []int64) (string, error) {
-
-	data := SubscriptionsRequest{
-		Name:        notification_name,
-		Description: "",
-		Target: SubscriptionsTargetRequest{
-			Type:        "Email",
+	environment_active_with_error bool, workflow_start_reminder int64, end_threshold int64, blueprint_published bool, blueprint_unpublished bool, idle_reminder []int64, webhook *string, token *string) (string, error) {
+	var data SubscriptionsRequest
+	switch notification_type {
+	case email_notification_type:
+		data = SubscriptionsRequest{
+			Name:        notification_name,
 			Description: "",
-		},
+			Target: SubscriptionsTargetRequest{
+				Type:        email_notification_type,
+				Description: "",
+			},
+		}
+	case slack_notification_type:
+		data = SubscriptionsRequest{
+			Name:        notification_name,
+			Description: "",
+			Target: SubscriptionsTargetRequest{
+				Type:        slack_notification_type,
+				Description: "",
+				WebHook:     webhook,
+			},
+		}
+	case teams_notification_type:
+		data = SubscriptionsRequest{
+			Name:        notification_name,
+			Description: "",
+			Target: SubscriptionsTargetRequest{
+				Type:        teams_notification_type,
+				Description: "",
+				WebHook:     webhook,
+			},
+		}
+	case webhook_notification_type:
+		data = SubscriptionsRequest{
+			Name:        notification_name,
+			Description: "",
+			Target: SubscriptionsTargetRequest{
+				Type:        webhook_notification_type,
+				Description: "",
+				WebHook:     webhook,
+				Token:       token,
+			},
+		}
 	}
-
 	if environment_launched {
 		data.Events = append(data.Events, "EnvironmentLaunched")
 	}
@@ -73,10 +113,15 @@ func (c *Client) CreateSpaceEmailNotification(space_name string, notification_na
 	if environment_active_with_error {
 		data.Events = append(data.Events, "EnvironmentActiveWithError")
 	}
-
+	if blueprint_published {
+		data.Events = append(data.Events, "BlueprintPublished")
+	}
+	if blueprint_unpublished {
+		data.Events = append(data.Events, "BlueprintUnpublished")
+	}
 	payload, err := json.Marshal(data)
 	if err != nil {
-		log.Fatalf("impossible to marshall update space request: %s", err)
+		log.Fatalf("impossible to marshall space notification request: %s", err)
 	}
 
 	req, err := http.NewRequest("POST", fmt.Sprintf("%sapi/spaces/%s/subscriptions", c.HostURL, space_name), bytes.NewReader(payload))
@@ -95,19 +140,54 @@ func (c *Client) CreateSpaceEmailNotification(space_name string, notification_na
 	return string(body), nil
 }
 
-func (c *Client) UpdateSpaceEmailNotification(notification_id string, space_name string, notification_name string, environment_launched bool,
+func (c *Client) UpdateSpaceNotification(notification_id string, notification_type string, space_name string, notification_name string, environment_launched bool,
 	environment_deployed bool, environment_force_ended bool, environment_idle bool, environment_extended bool,
 	drift_detected bool, workflow_failed bool, workflow_started bool, updates_detected bool,
 	collaborator_added bool, action_failed bool, environment_ending_failed bool, environment_ended bool,
-	environment_active_with_error bool, workflow_start_reminder int64, end_threshold int64, idle_reminder []int64) (string, error) {
+	environment_active_with_error bool, workflow_start_reminder int64, end_threshold int64, blueprint_published bool, blueprint_unpublished bool, idle_reminder []int64, webhook *string, token *string) (string, error) {
 
-	data := SubscriptionsRequest{
-		Name:        notification_name,
-		Description: "",
-		Target: SubscriptionsTargetRequest{
-			Type:        "Email",
+	var data SubscriptionsRequest
+	switch notification_type {
+	case email_notification_type:
+		data = SubscriptionsRequest{
+			Name:        notification_name,
 			Description: "",
-		},
+			Target: SubscriptionsTargetRequest{
+				Type:        email_notification_type,
+				Description: "",
+			},
+		}
+	case slack_notification_type:
+		data = SubscriptionsRequest{
+			Name:        notification_name,
+			Description: "",
+			Target: SubscriptionsTargetRequest{
+				Type:        slack_notification_type,
+				Description: "",
+				WebHook:     webhook,
+			},
+		}
+	case teams_notification_type:
+		data = SubscriptionsRequest{
+			Name:        notification_name,
+			Description: "",
+			Target: SubscriptionsTargetRequest{
+				Type:        teams_notification_type,
+				Description: "",
+				WebHook:     webhook,
+			},
+		}
+	case webhook_notification_type:
+		data = SubscriptionsRequest{
+			Name:        notification_name,
+			Description: "",
+			Target: SubscriptionsTargetRequest{
+				Type:        webhook_notification_type,
+				Description: "",
+				WebHook:     webhook,
+				Token:       token,
+			},
+		}
 	}
 
 	if environment_launched {
@@ -160,7 +240,12 @@ func (c *Client) UpdateSpaceEmailNotification(notification_id string, space_name
 	if environment_active_with_error {
 		data.Events = append(data.Events, "EnvironmentActiveWithError")
 	}
-
+	if blueprint_published {
+		data.Events = append(data.Events, "BlueprintPublished")
+	}
+	if blueprint_unpublished {
+		data.Events = append(data.Events, "BlueprintUnpublished")
+	}
 	payload, err := json.Marshal(data)
 	if err != nil {
 		log.Fatalf("impossible to marshall update space request: %s", err)
