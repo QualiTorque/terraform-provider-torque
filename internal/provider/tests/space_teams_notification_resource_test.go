@@ -187,7 +187,7 @@ func TestSpaceTeamsNotificationResource(t *testing.T) {
 						knownvalue.StringExact(notificationName),
 					),
 					statecheck.ExpectKnownValue(
-						"torque_space_slack_notification.notification",
+						"torque_space_teams_notification.notification",
 						tfjsonpath.New("web_hook"),
 						knownvalue.StringExact(web_hook),
 					),
