@@ -30,5 +30,7 @@ resource "torque_space_email_notification" "new_notification" {
   environment_ending_failed     = true
   environment_ended             = true
   environment_active_with_error = true
+  blueprint_published           = true
+  blueprint_unpublished         = true
   idle_reminders                = [1, 2, 3]
 }

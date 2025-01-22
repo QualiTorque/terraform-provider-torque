@@ -45,6 +45,8 @@ resource "torque_space_email_notification" "new_notification" {
   environment_ending_failed     = true
   environment_ended             = true
   environment_active_with_error = true
+  blueprint_published           = true
+  blueprint_unpublished         = true
   idle_reminders                = [1, 2, 3]
 }
 ```
@@ -60,6 +62,8 @@ resource "torque_space_email_notification" "new_notification" {
 ### Optional
 
 - `action_failed` (Boolean) Configure notification for the "Action Failed" event
+- `blueprint_published` (Boolean) Configure notification for the "Blueprint Published" event
+- `blueprint_unpublished` (Boolean) Configure notification for the "Blueprint Unpublished" event
 - `collaborator_added` (Boolean) Configure notification for the "Collaborator Added" event
 - `drift_detected` (Boolean) Configure notification for the "Drift Detected" event
 - `end_threshold` (Number) Time in minutes to send notification environment end event reminder notification before an environment ends. For example, 10
