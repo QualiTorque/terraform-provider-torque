@@ -13,9 +13,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/tfjsonpath"
 )
 
-const (
-	notificationName = "notification"
-)
 
 func TestSpaceEmailNotificationResource(t *testing.T) {
 	resource.Test(t, resource.TestCase{

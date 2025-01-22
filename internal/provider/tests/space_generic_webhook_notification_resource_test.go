@@ -13,11 +13,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/tfjsonpath"
 )
 
-const (
-	web_hook = "https://web_hook.com"
-)
-
-func TestSpaceTeamsNotificationResource(t *testing.T) {
+func TestSpaceGenericWebhookNotificationResource(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { testAccPreCheck(t) },
 		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
@@ -25,10 +21,11 @@ func TestSpaceTeamsNotificationResource(t *testing.T) {
 			{
 				// Can't create account level tag with possible values
 				Config: providerConfig + fmt.Sprintf(`
-				resource "torque_space_teams_notification" "notification" {
+				resource "torque_space_generic_webhook_notification" "notification" {
 					space_name                    = "%s"
 					notification_name             = "%s"
 					web_hook                      = "%s"
+					token                         = "%s"
 					environment_launched          = false
 					environment_deployed          = false
 					environment_force_ended       = false
@@ -47,105 +44,110 @@ func TestSpaceTeamsNotificationResource(t *testing.T) {
 					blueprint_unpublished         = true
 					idle_reminders                = [1, 2, 3]
 				}
-				`, fullSpaceName, notificationName, web_hook),
+				`, fullSpaceName, notificationName, web_hook, webhook_token),
 				ConfigStateChecks: []statecheck.StateCheck{
 					statecheck.ExpectKnownValue(
-						"torque_space_teams_notification.notification",
+						"torque_space_generic_webhook_notification.notification",
 						tfjsonpath.New("space_name"),
 						knownvalue.StringExact(fullSpaceName),
 					),
 					statecheck.ExpectKnownValue(
-						"torque_space_teams_notification.notification",
+						"torque_space_generic_webhook_notification.notification",
 						tfjsonpath.New("notification_name"),
 						knownvalue.StringExact(notificationName),
 					),
 					statecheck.ExpectKnownValue(
-						"torque_space_teams_notification.notification",
+						"torque_space_generic_webhook_notification.notification",
 						tfjsonpath.New("web_hook"),
 						knownvalue.StringExact(web_hook),
 					),
 					statecheck.ExpectKnownValue(
-						"torque_space_teams_notification.notification",
+						"torque_space_generic_webhook_notification.notification",
+						tfjsonpath.New("token"),
+						knownvalue.StringExact(webhook_token),
+					),
+					statecheck.ExpectKnownValue(
+						"torque_space_generic_webhook_notification.notification",
 						tfjsonpath.New("environment_launched"),
 						knownvalue.Bool(false),
 					),
 					statecheck.ExpectKnownValue(
-						"torque_space_teams_notification.notification",
+						"torque_space_generic_webhook_notification.notification",
 						tfjsonpath.New("environment_deployed"),
 						knownvalue.Bool(false),
 					),
 					statecheck.ExpectKnownValue(
-						"torque_space_teams_notification.notification",
+						"torque_space_generic_webhook_notification.notification",
 						tfjsonpath.New("environment_force_ended"),
 						knownvalue.Bool(false),
 					),
 					statecheck.ExpectKnownValue(
-						"torque_space_teams_notification.notification",
+						"torque_space_generic_webhook_notification.notification",
 						tfjsonpath.New("environment_idle"),
 						knownvalue.Bool(false),
 					),
 					statecheck.ExpectKnownValue(
-						"torque_space_teams_notification.notification",
+						"torque_space_generic_webhook_notification.notification",
 						tfjsonpath.New("environment_extended"),
 						knownvalue.Bool(false),
 					),
 					statecheck.ExpectKnownValue(
-						"torque_space_teams_notification.notification",
+						"torque_space_generic_webhook_notification.notification",
 						tfjsonpath.New("drift_detected"),
 						knownvalue.Bool(false),
 					),
 					statecheck.ExpectKnownValue(
-						"torque_space_teams_notification.notification",
+						"torque_space_generic_webhook_notification.notification",
 						tfjsonpath.New("workflow_failed"),
 						knownvalue.Bool(true),
 					),
 					statecheck.ExpectKnownValue(
-						"torque_space_teams_notification.notification",
+						"torque_space_generic_webhook_notification.notification",
 						tfjsonpath.New("workflow_started"),
 						knownvalue.Bool(true),
 					),
 					statecheck.ExpectKnownValue(
-						"torque_space_teams_notification.notification",
+						"torque_space_generic_webhook_notification.notification",
 						tfjsonpath.New("updates_detected"),
 						knownvalue.Bool(true),
 					),
 					statecheck.ExpectKnownValue(
-						"torque_space_teams_notification.notification",
+						"torque_space_generic_webhook_notification.notification",
 						tfjsonpath.New("collaborator_added"),
 						knownvalue.Bool(true),
 					),
 					statecheck.ExpectKnownValue(
-						"torque_space_teams_notification.notification",
+						"torque_space_generic_webhook_notification.notification",
 						tfjsonpath.New("action_failed"),
 						knownvalue.Bool(false),
 					),
 					statecheck.ExpectKnownValue(
-						"torque_space_teams_notification.notification",
+						"torque_space_generic_webhook_notification.notification",
 						tfjsonpath.New("environment_ending_failed"),
 						knownvalue.Bool(true),
 					),
 					statecheck.ExpectKnownValue(
-						"torque_space_teams_notification.notification",
+						"torque_space_generic_webhook_notification.notification",
 						tfjsonpath.New("environment_ended"),
 						knownvalue.Bool(true),
 					),
 					statecheck.ExpectKnownValue(
-						"torque_space_teams_notification.notification",
+						"torque_space_generic_webhook_notification.notification",
 						tfjsonpath.New("environment_active_with_error"),
 						knownvalue.Bool(true),
 					),
 					statecheck.ExpectKnownValue(
-						"torque_space_teams_notification.notification",
+						"torque_space_generic_webhook_notification.notification",
 						tfjsonpath.New("blueprint_published"),
 						knownvalue.Bool(true),
 					),
 					statecheck.ExpectKnownValue(
-						"torque_space_teams_notification.notification",
+						"torque_space_generic_webhook_notification.notification",
 						tfjsonpath.New("blueprint_unpublished"),
 						knownvalue.Bool(true),
 					),
 					statecheck.ExpectKnownValue(
-						"torque_space_teams_notification.notification",
+						"torque_space_generic_webhook_notification.notification",
 						tfjsonpath.New("idle_reminders"),
 						knownvalue.ListExact([]knownvalue.Check{
 							knownvalue.Int32Exact(1),
@@ -158,10 +160,11 @@ func TestSpaceTeamsNotificationResource(t *testing.T) {
 			{
 				// Can't create account level tag with possible values
 				Config: providerConfig + fmt.Sprintf(`
-				resource "torque_space_teams_notification" "notification" {
+				resource "torque_space_generic_webhook_notification" "notification" {
 					space_name                    = "%s"
 					notification_name             = "%s"
 					web_hook                      = "%s"
+					token                         = "%s"
 					environment_launched          = true
 					environment_deployed          = true
 					environment_force_ended       = true
@@ -180,100 +183,110 @@ func TestSpaceTeamsNotificationResource(t *testing.T) {
 					blueprint_unpublished         = true
 					idle_reminders                = [1, 2]
 				}
-				`, fullSpaceName, notificationName, web_hook),
+				`, fullSpaceName, notificationName, web_hook, webhook_token),
 				ConfigStateChecks: []statecheck.StateCheck{
 					statecheck.ExpectKnownValue(
-						"torque_space_teams_notification.notification",
+						"torque_space_generic_webhook_notification.notification",
 						tfjsonpath.New("space_name"),
 						knownvalue.StringExact(fullSpaceName),
 					),
 					statecheck.ExpectKnownValue(
-						"torque_space_teams_notification.notification",
+						"torque_space_generic_webhook_notification.notification",
 						tfjsonpath.New("notification_name"),
 						knownvalue.StringExact(notificationName),
 					),
 					statecheck.ExpectKnownValue(
-						"torque_space_teams_notification.notification",
+						"torque_space_generic_webhook_notification.notification",
+						tfjsonpath.New("web_hook"),
+						knownvalue.StringExact(web_hook),
+					),
+					statecheck.ExpectKnownValue(
+						"torque_space_generic_webhook_notification.notification",
+						tfjsonpath.New("token"),
+						knownvalue.StringExact(webhook_token),
+					),
+					statecheck.ExpectKnownValue(
+						"torque_space_generic_webhook_notification.notification",
 						tfjsonpath.New("environment_launched"),
 						knownvalue.Bool(true),
 					),
 					statecheck.ExpectKnownValue(
-						"torque_space_teams_notification.notification",
+						"torque_space_generic_webhook_notification.notification",
 						tfjsonpath.New("environment_deployed"),
 						knownvalue.Bool(true),
 					),
 					statecheck.ExpectKnownValue(
-						"torque_space_teams_notification.notification",
+						"torque_space_generic_webhook_notification.notification",
 						tfjsonpath.New("environment_force_ended"),
 						knownvalue.Bool(true),
 					),
 					statecheck.ExpectKnownValue(
-						"torque_space_teams_notification.notification",
+						"torque_space_generic_webhook_notification.notification",
 						tfjsonpath.New("environment_idle"),
 						knownvalue.Bool(true),
 					),
 					statecheck.ExpectKnownValue(
-						"torque_space_teams_notification.notification",
+						"torque_space_generic_webhook_notification.notification",
 						tfjsonpath.New("environment_extended"),
 						knownvalue.Bool(true),
 					),
 					statecheck.ExpectKnownValue(
-						"torque_space_teams_notification.notification",
+						"torque_space_generic_webhook_notification.notification",
 						tfjsonpath.New("drift_detected"),
 						knownvalue.Bool(true),
 					),
 					statecheck.ExpectKnownValue(
-						"torque_space_teams_notification.notification",
+						"torque_space_generic_webhook_notification.notification",
 						tfjsonpath.New("workflow_failed"),
 						knownvalue.Bool(false),
 					),
 					statecheck.ExpectKnownValue(
-						"torque_space_teams_notification.notification",
+						"torque_space_generic_webhook_notification.notification",
 						tfjsonpath.New("workflow_started"),
 						knownvalue.Bool(false),
 					),
 					statecheck.ExpectKnownValue(
-						"torque_space_teams_notification.notification",
+						"torque_space_generic_webhook_notification.notification",
 						tfjsonpath.New("updates_detected"),
 						knownvalue.Bool(false),
 					),
 					statecheck.ExpectKnownValue(
-						"torque_space_teams_notification.notification",
+						"torque_space_generic_webhook_notification.notification",
 						tfjsonpath.New("collaborator_added"),
 						knownvalue.Bool(false),
 					),
 					statecheck.ExpectKnownValue(
-						"torque_space_teams_notification.notification",
+						"torque_space_generic_webhook_notification.notification",
 						tfjsonpath.New("action_failed"),
 						knownvalue.Bool(false),
 					),
 					statecheck.ExpectKnownValue(
-						"torque_space_teams_notification.notification",
+						"torque_space_generic_webhook_notification.notification",
 						tfjsonpath.New("environment_ending_failed"),
 						knownvalue.Bool(false),
 					),
 					statecheck.ExpectKnownValue(
-						"torque_space_teams_notification.notification",
+						"torque_space_generic_webhook_notification.notification",
 						tfjsonpath.New("environment_ended"),
 						knownvalue.Bool(false),
 					),
 					statecheck.ExpectKnownValue(
-						"torque_space_teams_notification.notification",
+						"torque_space_generic_webhook_notification.notification",
 						tfjsonpath.New("environment_active_with_error"),
 						knownvalue.Bool(false),
 					),
 					statecheck.ExpectKnownValue(
-						"torque_space_teams_notification.notification",
+						"torque_space_generic_webhook_notification.notification",
 						tfjsonpath.New("blueprint_published"),
 						knownvalue.Bool(false),
 					),
 					statecheck.ExpectKnownValue(
-						"torque_space_teams_notification.notification",
+						"torque_space_generic_webhook_notification.notification",
 						tfjsonpath.New("blueprint_unpublished"),
 						knownvalue.Bool(true),
 					),
 					statecheck.ExpectKnownValue(
-						"torque_space_teams_notification.notification",
+						"torque_space_generic_webhook_notification.notification",
 						tfjsonpath.New("idle_reminders"),
 						knownvalue.ListExact([]knownvalue.Check{
 							knownvalue.Int32Exact(1),
@@ -281,7 +294,7 @@ func TestSpaceTeamsNotificationResource(t *testing.T) {
 						}),
 					),
 					statecheck.ExpectKnownValue(
-						"torque_space_teams_notification.notification",
+						"torque_space_generic_webhook_notification.notification",
 						tfjsonpath.New("idle_reminders"),
 						knownvalue.ListSizeExact(2),
 					),

@@ -17,24 +17,24 @@ import (
 )
 
 // Ensure provider defined types fully satisfy framework interfaces.
-var _ resource.Resource = &TorqueSpaceTeamsNotificationResource{}
-var _ resource.ResourceWithImportState = &TorqueSpaceTeamsNotificationResource{}
+var _ resource.Resource = &TorqueSpaceSlackNotificationResource{}
+var _ resource.ResourceWithImportState = &TorqueSpaceSlackNotificationResource{}
 
-func NewTorqueSpaceTeamsNotificationResource() resource.Resource {
-	return &TorqueSpaceTeamsNotificationResource{}
+func NewTorqueSpaceSlackNotificationResource() resource.Resource {
+	return &TorqueSpaceSlackNotificationResource{}
 }
 
-// TorqueSpaceTeamsNotificationResource defines the resource implementation.
-type TorqueSpaceTeamsNotificationResource struct {
+// TorqueSpaceSlackNotificationResource defines the resource implementation.
+type TorqueSpaceSlackNotificationResource struct {
 	client *client.Client
 }
 
 const (
-	teams_notification_type = "Teams"
+	slack_notification_type = "Slack"
 )
 
-// TorqueSpaceTeamsNotificationResourceModel describes the resource data model.
-type TorqueSpaceTeamsNotificationResourceModel struct {
+// TorqueSpaceSlackNotificationResourceModel describes the resource data model.
+type TorqueSpaceSlackNotificationResourceModel struct {
 	SpaceName                  types.String  `tfsdk:"space_name"`
 	NotificationName           types.String  `tfsdk:"notification_name"`
 	EnvironmentLaunched        types.Bool    `tfsdk:"environment_launched"`
@@ -60,14 +60,14 @@ type TorqueSpaceTeamsNotificationResourceModel struct {
 	NotificationId             types.String  `tfsdk:"notification_id"`
 }
 
-func (r *TorqueSpaceTeamsNotificationResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
-	resp.TypeName = "torque_space_teams_notification"
+func (r *TorqueSpaceSlackNotificationResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
+	resp.TypeName = "torque_space_slack_notification"
 }
 
-func (r *TorqueSpaceTeamsNotificationResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
+func (r *TorqueSpaceSlackNotificationResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "Creation of a new MS Teams notification is a Torque space",
+		MarkdownDescription: "Creation of a new Slack notification is a Torque space",
 
 		Attributes: map[string]schema.Attribute{
 			"space_name": schema.StringAttribute{
@@ -191,7 +191,7 @@ func (r *TorqueSpaceTeamsNotificationResource) Schema(ctx context.Context, req r
 	}
 }
 
-func (r *TorqueSpaceTeamsNotificationResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
+func (r *TorqueSpaceSlackNotificationResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
 	// Prevent panic if the provider has not been configured.
 	if req.ProviderData == nil {
 		return
@@ -211,8 +211,8 @@ func (r *TorqueSpaceTeamsNotificationResource) Configure(ctx context.Context, re
 	r.client = client
 }
 
-func (r *TorqueSpaceTeamsNotificationResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
-	var data TorqueSpaceTeamsNotificationResourceModel
+func (r *TorqueSpaceSlackNotificationResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
+	var data TorqueSpaceSlackNotificationResourceModel
 
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
 
@@ -227,7 +227,7 @@ func (r *TorqueSpaceTeamsNotificationResource) Create(ctx context.Context, req r
 		}
 	}
 
-	notification, err := r.client.CreateSpaceNotification(teams_notification_type, data.SpaceName.ValueString(), data.NotificationName.ValueString(), data.EnvironmentLaunched.ValueBool(),
+	notification, err := r.client.CreateSpaceNotification(slack_notification_type, data.SpaceName.ValueString(), data.NotificationName.ValueString(), data.EnvironmentLaunched.ValueBool(),
 		data.EnvironmentDeployed.ValueBool(), data.EnvironmentForceEnded.ValueBool(), data.EnvironmentIdle.ValueBool(), data.EnvironmentExtended.ValueBool(), data.DriftDetected.ValueBool(),
 		data.WorkflowFailed.ValueBool(), data.WorkflowStarted.ValueBool(), data.UpdatesDetected.ValueBool(), data.CollaboratorAdded.ValueBool(), data.ActionFailed.ValueBool(),
 		data.EnvironmentEndingFailed.ValueBool(), data.EnvironmentEnded.ValueBool(), data.EnvironmentActiveWithError.ValueBool(), data.WorkflowStartReminder.ValueInt64(), data.EndThreashold.ValueInt64(),
@@ -246,8 +246,8 @@ func (r *TorqueSpaceTeamsNotificationResource) Create(ctx context.Context, req r
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
-func (r *TorqueSpaceTeamsNotificationResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
-	var data TorqueSpaceTeamsNotificationResourceModel
+func (r *TorqueSpaceSlackNotificationResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
+	var data TorqueSpaceSlackNotificationResourceModel
 
 	// Read Terraform prior state data into the model.
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
@@ -260,9 +260,9 @@ func (r *TorqueSpaceTeamsNotificationResource) Read(ctx context.Context, req res
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
-func (r *TorqueSpaceTeamsNotificationResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var data TorqueSpaceTeamsNotificationResourceModel
-	var state TorqueSpaceTeamsNotificationResourceModel
+func (r *TorqueSpaceSlackNotificationResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+	var data TorqueSpaceSlackNotificationResourceModel
+	var state TorqueSpaceSlackNotificationResourceModel
 
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
 	resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
@@ -277,7 +277,7 @@ func (r *TorqueSpaceTeamsNotificationResource) Update(ctx context.Context, req r
 		}
 	}
 
-	_, err := r.client.UpdateSpaceNotification(state.NotificationId.ValueString(), teams_notification_type, data.SpaceName.ValueString(), data.NotificationName.ValueString(), data.EnvironmentLaunched.ValueBool(),
+	_, err := r.client.UpdateSpaceNotification(state.NotificationId.ValueString(), slack_notification_type, data.SpaceName.ValueString(), data.NotificationName.ValueString(), data.EnvironmentLaunched.ValueBool(),
 		data.EnvironmentDeployed.ValueBool(), data.EnvironmentForceEnded.ValueBool(), data.EnvironmentIdle.ValueBool(), data.EnvironmentExtended.ValueBool(), data.DriftDetected.ValueBool(),
 		data.WorkflowFailed.ValueBool(), data.WorkflowStarted.ValueBool(), data.UpdatesDetected.ValueBool(), data.CollaboratorAdded.ValueBool(), data.ActionFailed.ValueBool(),
 		data.EnvironmentEndingFailed.ValueBool(), data.EnvironmentEnded.ValueBool(), data.EnvironmentActiveWithError.ValueBool(), data.WorkflowStartReminder.ValueInt64(), data.EndThreashold.ValueInt64(),
@@ -293,8 +293,8 @@ func (r *TorqueSpaceTeamsNotificationResource) Update(ctx context.Context, req r
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
-func (r *TorqueSpaceTeamsNotificationResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
-	var data TorqueSpaceTeamsNotificationResourceModel
+func (r *TorqueSpaceSlackNotificationResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+	var data TorqueSpaceSlackNotificationResourceModel
 
 	// Read Terraform prior state data into the model.
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
@@ -312,6 +312,6 @@ func (r *TorqueSpaceTeamsNotificationResource) Delete(ctx context.Context, req r
 
 }
 
-func (r *TorqueSpaceTeamsNotificationResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+func (r *TorqueSpaceSlackNotificationResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resource.ImportStatePassthroughID(ctx, path.Root("notification_name"), req, resp)
 }
