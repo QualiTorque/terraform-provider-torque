@@ -29,6 +29,10 @@ type TorqueSpaceEmailNotificationResource struct {
 	client *client.Client
 }
 
+const (
+	email_notification_type = "Email"
+)
+
 // TorqueSpaceEmailNotificationResourceModel describes the resource data model.
 type TorqueSpaceEmailNotificationResourceModel struct {
 	SpaceName                  types.String  `tfsdk:"space_name"`
@@ -216,11 +220,11 @@ func (r *TorqueSpaceEmailNotificationResource) Create(ctx context.Context, req r
 		}
 	}
 
-	notification, err := r.client.CreateSpaceEmailNotification(data.SpaceName.ValueString(), data.NotificationName.ValueString(), data.EnvironmentLaunched.ValueBool(),
+	notification, err := r.client.CreateSpaceNotification(email_notification_type, data.SpaceName.ValueString(), data.NotificationName.ValueString(), data.EnvironmentLaunched.ValueBool(),
 		data.EnvironmentDeployed.ValueBool(), data.EnvironmentForceEnded.ValueBool(), data.EnvironmentIdle.ValueBool(), data.EnvironmentExtended.ValueBool(), data.DriftDetected.ValueBool(),
 		data.WorkflowFailed.ValueBool(), data.WorkflowStarted.ValueBool(), data.UpdatesDetected.ValueBool(), data.CollaboratorAdded.ValueBool(), data.ActionFailed.ValueBool(),
 		data.EnvironmentEndingFailed.ValueBool(), data.EnvironmentEnded.ValueBool(), data.EnvironmentActiveWithError.ValueBool(), data.WorkflowStartReminder.ValueInt64(), data.EndThreashold.ValueInt64(),
-		data.BlueprintPublished.ValueBool(), data.BlueprintUnpublished.ValueBool(), idle)
+		data.BlueprintPublished.ValueBool(), data.BlueprintUnpublished.ValueBool(), idle, nil, nil)
 
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create notification in space, got error: %s", err))
@@ -266,11 +270,11 @@ func (r *TorqueSpaceEmailNotificationResource) Update(ctx context.Context, req r
 		}
 	}
 
-	_, err := r.client.UpdateSpaceEmailNotification(state.NotificationId.ValueString(), data.SpaceName.ValueString(), data.NotificationName.ValueString(), data.EnvironmentLaunched.ValueBool(),
+	_, err := r.client.UpdateSpaceNotification(state.NotificationId.ValueString(), email_notification_type, data.SpaceName.ValueString(), data.NotificationName.ValueString(), data.EnvironmentLaunched.ValueBool(),
 		data.EnvironmentDeployed.ValueBool(), data.EnvironmentForceEnded.ValueBool(), data.EnvironmentIdle.ValueBool(), data.EnvironmentExtended.ValueBool(), data.DriftDetected.ValueBool(),
 		data.WorkflowFailed.ValueBool(), data.WorkflowStarted.ValueBool(), data.UpdatesDetected.ValueBool(), data.CollaboratorAdded.ValueBool(), data.ActionFailed.ValueBool(),
 		data.EnvironmentEndingFailed.ValueBool(), data.EnvironmentEnded.ValueBool(), data.EnvironmentActiveWithError.ValueBool(), data.WorkflowStartReminder.ValueInt64(), data.EndThreashold.ValueInt64(),
-		data.BlueprintPublished.ValueBool(), data.BlueprintUnpublished.ValueBool(), idle)
+		data.BlueprintPublished.ValueBool(), data.BlueprintUnpublished.ValueBool(), idle, nil, nil)
 
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update notification in space, got error: %s", err))

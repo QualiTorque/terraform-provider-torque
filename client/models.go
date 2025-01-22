@@ -178,8 +178,10 @@ type SubscriptionsRequest struct {
 }
 
 type SubscriptionsTargetRequest struct {
-	Type        string `json:"type"`
-	Description string `json:"description"`
+	Type        string  `json:"type"`
+	Description string  `json:"description"`
+	WebHook     *string `json:"web_hook,omitempty"`
+	Token       *string `json:"token,omitempty"`
 }
 
 type SubscriptionsWorkflowEventNotifierRequest struct {
