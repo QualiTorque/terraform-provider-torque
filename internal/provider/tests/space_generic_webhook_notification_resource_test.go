@@ -19,7 +19,6 @@ func TestSpaceGenericWebhookNotificationResource(t *testing.T) {
 		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			{
-				// Can't create account level tag with possible values
 				Config: providerConfig + fmt.Sprintf(`
 				resource "torque_space_generic_webhook_notification" "notification" {
 					space_name                    = "%s"
@@ -158,7 +157,6 @@ func TestSpaceGenericWebhookNotificationResource(t *testing.T) {
 				},
 			},
 			{
-				// Can't create account level tag with possible values
 				Config: providerConfig + fmt.Sprintf(`
 				resource "torque_space_generic_webhook_notification" "notification" {
 					space_name                    = "%s"

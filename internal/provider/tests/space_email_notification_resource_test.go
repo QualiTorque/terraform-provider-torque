@@ -13,14 +13,12 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/tfjsonpath"
 )
 
-
 func TestSpaceEmailNotificationResource(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { testAccPreCheck(t) },
 		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			{
-				// Can't create account level tag with possible values
 				Config: providerConfig + fmt.Sprintf(`
 				resource "torque_space_email_notification" "notification" {
 					space_name                    = "%s"
@@ -147,7 +145,6 @@ func TestSpaceEmailNotificationResource(t *testing.T) {
 				},
 			},
 			{
-				// Can't create account level tag with possible values
 				Config: providerConfig + fmt.Sprintf(`
 				resource "torque_space_email_notification" "notification" {
 					space_name                    = "%s"

@@ -19,7 +19,6 @@ func TestSpaceSlackNotificationResource(t *testing.T) {
 		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			{
-				// Can't create account level tag with possible values
 				Config: providerConfig + fmt.Sprintf(`
 				resource "torque_space_slack_notification" "notification" {
 					space_name                    = "%s"
@@ -152,7 +151,6 @@ func TestSpaceSlackNotificationResource(t *testing.T) {
 				},
 			},
 			{
-				// Can't create account level tag with possible values
 				Config: providerConfig + fmt.Sprintf(`
 				resource "torque_space_slack_notification" "notification" {
 					space_name                    = "%s"

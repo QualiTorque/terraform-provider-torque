@@ -67,8 +67,7 @@ func (r *TorqueSpaceGenericWebhookNotificationResource) Metadata(ctx context.Con
 func (r *TorqueSpaceGenericWebhookNotificationResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "Creation of a new Slack notification is a Torque space",
-
+		MarkdownDescription: "Creation of a new Generic Webhook notification is a Torque space",
 		Attributes: map[string]schema.Attribute{
 			"space_name": schema.StringAttribute{
 				MarkdownDescription: "Space name to add the notification to",
