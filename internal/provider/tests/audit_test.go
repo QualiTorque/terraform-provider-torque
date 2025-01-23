@@ -42,75 +42,76 @@ func TestTorqueAuditResource(t *testing.T) {
 	})
 }
 
-func TestTorqueElasticsearchAuditResource(t *testing.T) {
-	resource.Test(t, resource.TestCase{
-		PreCheck:                 func() { testAccPreCheck(t) },
-		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
-		Steps: []resource.TestStep{
-			{
-				Config: providerConfig + fmt.Sprintf(`
-				resource "torque_elasticsearch_audit" "audit" {
-					url      = "%s"
-					username = "%s"
-					password = "%s"
-					certificate = "%s"
-				}
-				`, url, username, password, certificate),
-				ConfigStateChecks: []statecheck.StateCheck{
-					statecheck.ExpectKnownValue(
-						"torque_elasticsearch_audit.audit",
-						tfjsonpath.New("url"),
-						knownvalue.StringExact(url),
-					),
-					statecheck.ExpectKnownValue(
-						"torque_elasticsearch_audit.audit",
-						tfjsonpath.New("username"),
-						knownvalue.StringExact(username),
-					),
-					statecheck.ExpectKnownValue(
-						"torque_elasticsearch_audit.audit",
-						tfjsonpath.New("password"),
-						knownvalue.StringExact(password),
-					),
-					statecheck.ExpectKnownValue(
-						"torque_elasticsearch_audit.audit",
-						tfjsonpath.New("certificate"),
-						knownvalue.StringExact(certificate),
-					),
-				},
-			},
-			{
-				Config: providerConfig + fmt.Sprintf(`
-				resource "torque_elasticsearch_audit" "audit" {
-					url      = "%s"
-					username = "%s"
-					password = "%s"
-					certificate = "%s"
-				}
-				`, new_url, new_username, new_password, new_certificate),
-				ConfigStateChecks: []statecheck.StateCheck{
-					statecheck.ExpectKnownValue(
-						"torque_elasticsearch_audit.audit",
-						tfjsonpath.New("url"),
-						knownvalue.StringExact(new_url),
-					),
-					statecheck.ExpectKnownValue(
-						"torque_elasticsearch_audit.audit",
-						tfjsonpath.New("username"),
-						knownvalue.StringExact(new_username),
-					),
-					statecheck.ExpectKnownValue(
-						"torque_elasticsearch_audit.audit",
-						tfjsonpath.New("password"),
-						knownvalue.StringExact(new_password),
-					),
-					statecheck.ExpectKnownValue(
-						"torque_elasticsearch_audit.audit",
-						tfjsonpath.New("certificate"),
-						knownvalue.StringExact(new_certificate),
-					),
-				},
-			},
-		},
-	})
-}
+// Disabled till we come up with a solution to run account level singular resource test in parallel 
+// func TestTorqueElasticsearchAuditResource(t *testing.T) {
+// 	resource.Test(t, resource.TestCase{
+// 		PreCheck:                 func() { testAccPreCheck(t) },
+// 		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
+// 		Steps: []resource.TestStep{
+// 			{
+// 				Config: providerConfig + fmt.Sprintf(`
+// 				resource "torque_elasticsearch_audit" "audit" {
+// 					url      = "%s"
+// 					username = "%s"
+// 					password = "%s"
+// 					certificate = "%s"
+// 				}
+// 				`, url, username, password, certificate),
+// 				ConfigStateChecks: []statecheck.StateCheck{
+// 					statecheck.ExpectKnownValue(
+// 						"torque_elasticsearch_audit.audit",
+// 						tfjsonpath.New("url"),
+// 						knownvalue.StringExact(url),
+// 					),
+// 					statecheck.ExpectKnownValue(
+// 						"torque_elasticsearch_audit.audit",
+// 						tfjsonpath.New("username"),
+// 						knownvalue.StringExact(username),
+// 					),
+// 					statecheck.ExpectKnownValue(
+// 						"torque_elasticsearch_audit.audit",
+// 						tfjsonpath.New("password"),
+// 						knownvalue.StringExact(password),
+// 					),
+// 					statecheck.ExpectKnownValue(
+// 						"torque_elasticsearch_audit.audit",
+// 						tfjsonpath.New("certificate"),
+// 						knownvalue.StringExact(certificate),
+// 					),
+// 				},
+// 			},
+// 			{
+// 				Config: providerConfig + fmt.Sprintf(`
+// 				resource "torque_elasticsearch_audit" "audit" {
+// 					url      = "%s"
+// 					username = "%s"
+// 					password = "%s"
+// 					certificate = "%s"
+// 				}
+// 				`, new_url, new_username, new_password, new_certificate),
+// 				ConfigStateChecks: []statecheck.StateCheck{
+// 					statecheck.ExpectKnownValue(
+// 						"torque_elasticsearch_audit.audit",
+// 						tfjsonpath.New("url"),
+// 						knownvalue.StringExact(new_url),
+// 					),
+// 					statecheck.ExpectKnownValue(
+// 						"torque_elasticsearch_audit.audit",
+// 						tfjsonpath.New("username"),
+// 						knownvalue.StringExact(new_username),
+// 					),
+// 					statecheck.ExpectKnownValue(
+// 						"torque_elasticsearch_audit.audit",
+// 						tfjsonpath.New("password"),
+// 						knownvalue.StringExact(new_password),
+// 					),
+// 					statecheck.ExpectKnownValue(
+// 						"torque_elasticsearch_audit.audit",
+// 						tfjsonpath.New("certificate"),
+// 						knownvalue.StringExact(new_certificate),
+// 					),
+// 				},
+// 			},
+// 		},
+// 	})
+// }
