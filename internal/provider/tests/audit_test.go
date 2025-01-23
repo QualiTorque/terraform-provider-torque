@@ -114,4 +114,3 @@ func TestTorqueElasticsearchAuditResource(t *testing.T) {
 		},
 	})
 }
-
