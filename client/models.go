@@ -547,8 +547,8 @@ type Audit struct {
 }
 
 type AuditProperties struct {
-	Url         string `json:"url"`
-	Username    string `json:"username"`
-	Password    string `json:"password"`
-	Certificate string `json:"certificate"`
+	Url         string  `json:"url"`
+	Username    string  `json:"username"`
+	Password    string  `json:"password"`
+	Certificate *string `json:"certificate"`
 }
