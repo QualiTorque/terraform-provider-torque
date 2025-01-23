@@ -16,7 +16,7 @@ func (c *Client) CreateAuditTarget(audit_type string, properties *AuditPropertie
 
 	payload, err := json.Marshal(data)
 	if err != nil {
-		log.Fatalf("impossible to marshall create approval channel request: %s", err)
+		log.Fatalf("impossible to marshall create audit target request: %s", err)
 	}
 
 	req, err := http.NewRequest("PUT", fmt.Sprintf("%sapi/settings/audit/config", c.HostURL), bytes.NewReader(payload))
