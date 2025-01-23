@@ -244,6 +244,7 @@ func (p *torqueProvider) Resources(ctx context.Context) []func() resource.Resour
 		resources.NewTorqueSpaceSlackNotificationResource,
 		resources.NewTorqueSpaceGenericWebhookNotificationResource,
 		resources.NewTorqueAuditResource,
+		resources.NewTorqueElasticsearchAuditResource,
 	}
 }
 

@@ -16,7 +16,7 @@ func (c *Client) CreateAuditTarget(audit_type string, properties *AuditPropertie
 
 	payload, err := json.Marshal(data)
 	if err != nil {
-		log.Fatalf("impossible to marshall create approval channel request: %s", err)
+		log.Fatalf("impossible to marshall create audit target request: %s", err)
 	}
 
 	req, err := http.NewRequest("PUT", fmt.Sprintf("%sapi/settings/audit/config", c.HostURL), bytes.NewReader(payload))
@@ -33,6 +33,28 @@ func (c *Client) CreateAuditTarget(audit_type string, properties *AuditPropertie
 	}
 
 	return nil
+}
+
+func (c *Client) GetAudit() (*Audit, error) {
+	req, err := http.NewRequest("GET", fmt.Sprintf("%sapi/settings/audit/config", c.HostURL), nil)
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Add("Content-Type", "application/json")
+	req.Header.Add("Accept", "application/json")
+
+	body, err := c.doRequest(req, &c.Token)
+	if err != nil {
+		return nil, err
+	}
+
+	audit := Audit{}
+
+	err = json.Unmarshal(body, &audit)
+	if err != nil {
+		return nil, err
+	}
+	return &audit, nil
 }
 
 func (c *Client) DeleteAudit(name string) error {
