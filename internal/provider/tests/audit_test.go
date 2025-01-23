@@ -4,24 +4,9 @@
 package tests
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
-	"github.com/hashicorp/terraform-plugin-testing/knownvalue"
-	"github.com/hashicorp/terraform-plugin-testing/statecheck"
-	"github.com/hashicorp/terraform-plugin-testing/tfjsonpath"
-)
-
-const (
-	url             = "https://elastic.com:9000"
-	username        = "elastic_user"
-	password        = "password"
-	certificate     = "cert"
-	new_url         = "https://elastic.com:9001"
-	new_username    = "new_elastic_user"
-	new_password    = "new_password"
-	new_certificate = "new_cert"
 )
 
 func TestTorqueAuditResource(t *testing.T) {
@@ -42,7 +27,19 @@ func TestTorqueAuditResource(t *testing.T) {
 	})
 }
 
-// Disabled till we come up with a solution to run account level singular resource test in parallel 
+// Disabled till we come up with a solution to run account level singular resource test in parallel
+
+// const (
+// 	url             = "https://elastic.com:9000"
+// 	username        = "elastic_user"
+// 	password        = "password"
+// 	certificate     = "cert"
+// 	new_url         = "https://elastic.com:9001"
+// 	new_username    = "new_elastic_user"
+// 	new_password    = "new_password"
+// 	new_certificate = "new_cert"
+// )
+
 // func TestTorqueElasticsearchAuditResource(t *testing.T) {
 // 	resource.Test(t, resource.TestCase{
 // 		PreCheck:                 func() { testAccPreCheck(t) },
