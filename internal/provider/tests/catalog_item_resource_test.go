@@ -81,9 +81,10 @@ func TestCatalogItemResource(t *testing.T) {
 					space_name      = "%s"
 					blueprint_name  = "%s"
 					repository_name = "%s"
+					display_name    ="display_name"
 					default_duration = "PT3H"
 					default_extend = "PT9H"
-					max_duration = "PT30H"
+					max_duration = "P1DT6H"
 					labels          = ["k8s"]						
 				}
 				`, spaceName, new_unique_blueprint_name, repository_name),
@@ -94,7 +95,7 @@ func TestCatalogItemResource(t *testing.T) {
 					resource.TestCheckResourceAttr("torque_catalog_item.catalog_item", "always_on", "false"),
 					resource.TestCheckResourceAttr("torque_catalog_item.catalog_item", "default_duration", "PT3H"),
 					resource.TestCheckResourceAttr("torque_catalog_item.catalog_item", "default_extend", "PT9H"),
-					resource.TestCheckResourceAttr("torque_catalog_item.catalog_item", "max_duration", "PT30H"),
+					resource.TestCheckResourceAttr("torque_catalog_item.catalog_item", "max_duration", "P1DT6H"),
 					resource.TestCheckResourceAttr("torque_catalog_item.catalog_item", "labels.#", "1"),
 					testBlueprintPublished(new_unique_blueprint_name),
 				),
