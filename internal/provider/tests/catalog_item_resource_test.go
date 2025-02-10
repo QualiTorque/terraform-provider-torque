@@ -19,13 +19,14 @@ const (
 	blueprint_name     = "ec2"
 	repository_name    = "TerraformProviderAcceptanceTests"
 	new_blueprint_name = "rds"
+	display_name       = "display_name"
 )
 
 func TestCatalogItemResource(t *testing.T) {
 	spaceName := os.Getenv("TORQUE_SPACE")
 	var unique_blueprint_name = blueprint_name + "_" + index
 	var new_unique_blueprint_name = new_blueprint_name + "_" + index
-
+	var unique_display_name = display_name + "_" + index
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { testAccPreCheck(t) },
 		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
@@ -78,16 +79,16 @@ func TestCatalogItemResource(t *testing.T) {
 			{
 				Config: providerConfig + fmt.Sprintf(`
 				resource "torque_catalog_item" "catalog_item" {
-					space_name      = "%s"
-					blueprint_name  = "%s"
-					repository_name = "%s"
-					display_name    ="display_name"
+					space_name       = "%s"
+					blueprint_name   = "%s"
+					repository_name  = "%s"
+					display_name     = "%s"
 					default_duration = "PT3H"
-					default_extend = "PT9H"
-					max_duration = "P1DT6H"
-					labels          = ["k8s"]						
+					default_extend   = "PT9H"
+					max_duration     = "P1DT6H"
+					labels           = ["k8s"]						
 				}
-				`, spaceName, new_unique_blueprint_name, repository_name),
+				`, spaceName, new_unique_blueprint_name, repository_name, unique_display_name),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr("torque_catalog_item.catalog_item", "space_name", spaceName),
 					resource.TestCheckResourceAttr("torque_catalog_item.catalog_item", "blueprint_name", new_unique_blueprint_name),
