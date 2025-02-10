@@ -50,4 +50,4 @@ resource "torque_gitlab_enterprise_repository_space_association" "repository" {
 
 ### Optional
 
-- `token` (String) Authentication Token to the project/repository. If omitted, existing credentials provided in the credential_name field will be used for authentication. If provided, a new credentials object will be created.
+- `token` (String, Deprecated) Authentication Token to the project/repository. If omitted, existing credentials provided in the credential_name field will be used for authentication. If provided, a new credentials object will be created.

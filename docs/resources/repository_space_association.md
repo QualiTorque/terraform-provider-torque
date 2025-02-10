@@ -49,6 +49,6 @@ resource "torque_repository_space_association" "repository" {
 
 ### Optional
 
-- `access_token` (String) Personal Access Token (PAT) to authenticate with to the repository. Credentials will be automatically created with the specified token, or use existing credentials instead.
+- `access_token` (String, Deprecated) Personal Access Token (PAT) to authenticate with to the repository. Credentials will be automatically created with the specified token, or use existing credentials instead.
 - `branch` (String) Repository branch to use for blueprints and automation assets
 - `credential_name` (String) The name of existing credentials to use.

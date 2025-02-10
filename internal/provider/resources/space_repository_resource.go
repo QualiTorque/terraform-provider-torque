@@ -69,6 +69,7 @@ func (r *TorqueSpaceRepositoryResource) Schema(ctx context.Context, req resource
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.RequiresReplace(),
 				},
+				DeprecationMessage: "The access_token attribute is deprecated and will be removed in a future release. Use the torque_git_credentials resource to store the token and reference it in this resource using the credential_name attribute instead.",
 				Validators: []validator.String{
 					// Validate only this attribute or other_attr is configured or neither.
 					stringvalidator.ConflictsWith(path.Expressions{
