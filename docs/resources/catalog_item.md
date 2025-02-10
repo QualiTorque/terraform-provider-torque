@@ -31,6 +31,7 @@ resource "torque_catalog_item" "catalog_item" {
   space_name              = "space"
   blueprint_name          = "blueprint_name"
   repository_name         = "repository_name"
+  self_service            = true
   display_name            = "display_name"
   max_duration            = "PT2H"
   default_duration        = "PT2H"
@@ -63,3 +64,4 @@ resource "torque_catalog_item" "catalog_item" {
 - `labels` (List of String) List of labels to associate with this catalog item.
 - `max_active_environments` (Number) Sets the maximum number of concurrent active environments insantiated from this blueprint.
 - `max_duration` (String) The maximum duration of an environment instantiated from this blueprint.
+- `self_service` (Boolean) Specify if environments launched from this blueprint should be always on or not.

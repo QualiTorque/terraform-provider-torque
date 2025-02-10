@@ -16,6 +16,7 @@ resource "torque_catalog_item" "catalog_item" {
   space_name              = "space"
   blueprint_name          = "blueprint_name"
   repository_name         = "repository_name"
+  self_service            = true
   display_name            = "display_name"
   max_duration            = "PT2H"
   default_duration        = "PT2H"
