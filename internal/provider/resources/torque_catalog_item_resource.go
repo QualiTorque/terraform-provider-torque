@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"regexp"
-	"time"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/boolvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
@@ -38,6 +37,7 @@ type TorqueCatalogItemResourceModel struct {
 	SpaceName             types.String `tfsdk:"space_name"`
 	BlueprintName         types.String `tfsdk:"blueprint_name"`
 	DisplayName           types.String `tfsdk:"display_name"`
+	SelfService           types.Bool   `tfsdk:"self_service"`
 	RepositoryName        types.String `tfsdk:"repository_name"`
 	MaxDuration           types.String `tfsdk:"max_duration"`
 	DefaultDuration       types.String `tfsdk:"default_duration"`
@@ -77,7 +77,7 @@ func (r *TorqueCatalogItemResource) Schema(ctx context.Context, req resource.Sch
 			"display_name": schema.StringAttribute{
 				MarkdownDescription: "The display name of the blueprint as it will be displayed in the self-service catalog.",
 				Required:            false,
-				Computed:            false,
+				Computed:            true,
 				Optional:            true,
 			},
 			"repository_name": schema.StringAttribute{
@@ -87,6 +87,13 @@ func (r *TorqueCatalogItemResource) Schema(ctx context.Context, req resource.Sch
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.RequiresReplace(),
 				},
+			},
+			"self_service": schema.BoolAttribute{
+				MarkdownDescription: "Specify if environments launched from this blueprint should be always on or not.",
+				Required:            false,
+				Optional:            true,
+				Computed:            true,
+				Default:             booldefault.StaticBool(true),
 			},
 			"max_duration": schema.StringAttribute{
 				MarkdownDescription: "The maximum duration of an environment instantiated from this blueprint.",
@@ -208,6 +215,7 @@ func (r *TorqueCatalogItemResource) Create(ctx context.Context, req resource.Cre
 	if resp.Diagnostics.HasError() {
 		return
 	}
+
 	if data.AlwaysOn.ValueBool() {
 		data.MaxDuration = types.StringNull()
 		data.DefaultExtend = types.StringNull()
@@ -240,18 +248,23 @@ func (r *TorqueCatalogItemResource) Create(ctx context.Context, req resource.Cre
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create Catalog Item, failed to set blueprint policies, got error: %s", err))
 		return
 	}
-	if !data.DisplayName.IsNull() {
+	if !data.DisplayName.IsNull() && !data.DisplayName.IsUnknown() {
 		err = r.client.UpdateBlueprintDisplayName(data.SpaceName.ValueString(), data.RepositoryName.ValueString(), data.BlueprintName.ValueString(), data.DisplayName.ValueString())
 		if err != nil {
 			resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create Catalog Item, failed to set blueprint display name, got error: %s", err))
 			return
 		}
+	} else {
+		data.DisplayName = data.BlueprintName
 	}
-	err = r.client.PublishBlueprintInSpace(data.SpaceName.ValueString(), data.RepositoryName.ValueString(), data.BlueprintName.ValueString())
-	if err != nil {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create Catalog Item, failed to publish blueprint in space, got error: %s", err))
-		return
+	if data.SelfService.ValueBool() {
+		err = r.client.PublishBlueprintInSpace(data.SpaceName.ValueString(), data.RepositoryName.ValueString(), data.BlueprintName.ValueString())
+		if err != nil {
+			resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create Catalog Item, failed to publish blueprint in space, got error: %s", err))
+			return
+		}
 	}
+
 	if !data.Labels.IsNull() {
 		var labels []string
 		data.Labels.ElementsAs(ctx, &labels, false)
@@ -271,31 +284,31 @@ func (r *TorqueCatalogItemResource) Create(ctx context.Context, req resource.Cre
 
 func (r *TorqueCatalogItemResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	var data TorqueCatalogItemResourceModel
-
 	// Read Terraform prior state data into the model.
+
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
 	diags := req.State.Get(ctx, &data)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	start := time.Now()
-	for time.Since(start) < 20*time.Second {
-		blueprint, err := r.client.GetBlueprint(data.SpaceName.ValueString(), data.BlueprintName.ValueString())
-		if err != nil {
-			resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to get catalog items in space, got error: %s", err.Error()))
-			return
-		}
 
-		if blueprint != nil && blueprint.Published {
-			resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
-			return
-		}
-		time.Sleep(500 * time.Millisecond) // Retry every 500ms
+	blueprint, err := r.client.GetBlueprint(data.SpaceName.ValueString(), data.BlueprintName.ValueString())
+	if err != nil {
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to get catalog items in space, got error: %s", err.Error()))
+		return
 	}
+	data.DisplayName = types.StringValue(blueprint.DisplayName)
+	data.SelfService = types.BoolValue(blueprint.Published)
+	data.RepositoryName = types.StringValue(blueprint.RepoName)
+	data.MaxDuration = types.StringValue(blueprint.Policies.MaxDuration)
+	data.DefaultDuration = types.StringValue(blueprint.Policies.DefaultDuration)
+	data.DefaultExtend = types.StringValue(blueprint.Policies.DefaultExtend)
+	data.MaxActiveEnvironments = types.Int32PointerValue(blueprint.Policies.MaxActiveEnvironments)
+	data.AlwaysOn = types.BoolValue(blueprint.Policies.AlwaysOn)
+	data.AllowScheduling = types.BoolValue(blueprint.Policies.AllowScheduling)
 
-	// Save updated data into Terraform state.
-	resp.Diagnostics.AddError("Blueprint not published to catalog", "Blueprint was found in space but it is not published to catalog")
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
 func (r *TorqueCatalogItemResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
@@ -338,12 +351,14 @@ func (r *TorqueCatalogItemResource) Update(ctx context.Context, req resource.Upd
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to set blueprint policies, got error: %s", err))
 		return
 	}
-	if !data.DisplayName.IsNull() {
+	if !data.DisplayName.IsNull() && !data.DisplayName.IsUnknown() {
 		err = r.client.UpdateBlueprintDisplayName(data.SpaceName.ValueString(), data.RepositoryName.ValueString(), data.BlueprintName.ValueString(), data.DisplayName.ValueString())
 		if err != nil {
-			resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update Catalog Item, failed to set blueprint display name, got error: %s", err))
+			resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create Catalog Item, failed to set blueprint display name, got error: %s", err))
 			return
 		}
+	} else {
+		data.DisplayName = data.BlueprintName
 	}
 	if data.CustomIcon.IsNull() {
 		err := r.client.SetCatalogItemIcon(data.SpaceName.ValueString(), data.BlueprintName.ValueString(), data.RepositoryName.ValueString(), default_icon)
@@ -366,6 +381,19 @@ func (r *TorqueCatalogItemResource) Update(ctx context.Context, req resource.Upd
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update Catalog Item, failed to update labels, got error: %s", err))
 		return
+	}
+	if data.SelfService.ValueBool() && !state.SelfService.ValueBool() {
+		err = r.client.PublishBlueprintInSpace(data.SpaceName.ValueString(), data.RepositoryName.ValueString(), data.BlueprintName.ValueString())
+		if err != nil {
+			resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to edit Catalog Item, failed to publish blueprint in space, got error: %s", err))
+			return
+		}
+	} else if !data.SelfService.ValueBool() && state.SelfService.ValueBool() {
+		err = r.client.UnpublishBlueprintInSpace(data.SpaceName.ValueString(), data.RepositoryName.ValueString(), data.BlueprintName.ValueString())
+		if err != nil {
+			resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to edit Catalog Item, failed to unpublish blueprint in space, got error: %s", err))
+			return
+		}
 	}
 	// Save updated data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
