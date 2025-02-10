@@ -15,7 +15,7 @@ import (
 
 func TestTorqueTeamsApprovalChannel(t *testing.T) {
 	const (
-		approval_channel    = "approval_channel"
+		approval_channel    = "teams_approval_channel"
 		description         = "description"
 		new_description     = "new_description"
 		approver            = "terraformtester@quali.com"
