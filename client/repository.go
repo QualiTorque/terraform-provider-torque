@@ -161,3 +161,30 @@ func (c *Client) UpdateRepoCredentials(space_name string, repo_name string, cred
 
 	return nil
 }
+
+func (c *Client) UpdateRepoConfiguration(space_name string, repo_name string, credential_name string, agents []string, use_all_agents bool) error {
+	data := RepoUpdate{
+		CredentialName: credential_name,
+		Agents:         agents,
+		UseAllAgents:   use_all_agents,
+	}
+	payload, err := json.Marshal(data)
+	if err != nil {
+		log.Fatalf("impossible to marshall repo association: %s", err)
+	}
+
+	req, err := http.NewRequest("PUT", fmt.Sprintf("%sapi/spaces/%s/repositories/%s", c.HostURL, space_name, repo_name), bytes.NewReader(payload))
+	if err != nil {
+		return err
+	}
+
+	req.Header.Add("Content-Type", "application/json")
+	req.Header.Add("Accept", "application/json")
+
+	_, err = c.doRequest(req, &c.Token)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}

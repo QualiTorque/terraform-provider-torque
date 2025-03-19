@@ -554,3 +554,9 @@ type AuditProperties struct {
 	Password    string  `json:"password"`
 	Certificate *string `json:"certificate"`
 }
+
+type RepoUpdate struct {
+	CredentialName string   `json:"credential_name"`
+	Agents         []string `json:"agents"`
+	UseAllAgents   bool     `json:"use_all_agents"`
+}

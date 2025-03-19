@@ -9,6 +9,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -97,18 +99,18 @@ func (r *TorqueSpaceGitlabEnterpriseRepositoryResource) Schema(ctx context.Conte
 				Default:     booldefault.StaticBool(true),
 				Optional:    true,
 				Computed:    true,
-				// PlanModifiers: []planmodifier.String{
-				// 	stringplanmodifier.RequiresReplace(),
-				// },
+				PlanModifiers: []planmodifier.Bool{
+					boolplanmodifier.RequiresReplace(),
+				},
 			},
 			"agents": schema.ListAttribute{
 				Description: "List of specific agents to use to onboard and sync this repository.",
 				Required:    false,
 				Optional:    true,
 				ElementType: types.StringType,
-				// PlanModifiers: []planmodifier.String{
-				// 	stringplanmodifier.RequiresReplace(),
-				// },
+				PlanModifiers: []planmodifier.List{
+					listplanmodifier.RequiresReplace(),
+				},
 			},
 		},
 	}
@@ -173,33 +175,32 @@ func (r *TorqueSpaceGitlabEnterpriseRepositoryResource) Read(ctx context.Context
 
 	// If applicable, this is a great opportunity to initialize any necessary
 	// provider client data and make a call using it.
-	// httpResp, err := r.client.Do(httpReq)
-	// if err != nil {
-	//     resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read example, got error: %s", err))
-	//     return
-	// }
 
 	// Save updated data into Terraform state.
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
 func (r *TorqueSpaceGitlabEnterpriseRepositoryResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	// var data TorqueSpaceGitlabEnterpriseRepositoryResourceModel
+	var data TorqueSpaceGitlabEnterpriseRepositoryResourceModel
 
-	// // Read Terraform plan data into the model
-	// resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
+	// Read Terraform plan data into the model
+	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
 
-	// if resp.Diagnostics.HasError() {
-	// 	return
-	// }
-
-	// // If applicable, this is a great opportunity to initialize any necessary
-	// // provider client data and make a call using it.
-	// // httpResp, err := r.client.Do(httpReq)
-	// // if err != nil {
-	// //     resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update example, got error: %s", err))
-	// //     return
-	// // }
+	if resp.Diagnostics.HasError() {
+		return
+	}
+	agents := []string{}
+	if !data.Agents.IsNull() {
+		for _, agent := range data.Agents.Elements() {
+			agents = append(agents, strings.Trim(agent.String(), "\""))
+		}
+	}
+	err := r.client.UpdateRepoConfiguration(data.SpaceName.ValueString(), data.RepositoryName.ValueString(),
+		data.CredentialName.ValueString(), agents, data.UseAllAgents.ValueBool())
+	if err != nil {
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update repository configuration, got error: %s", err))
+		return
+	}
 
 	// // Save updated data into Terraform state
 	// resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
