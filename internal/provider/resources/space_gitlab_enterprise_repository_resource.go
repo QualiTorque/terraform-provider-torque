@@ -3,10 +3,12 @@ package resources
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -34,6 +36,8 @@ type TorqueSpaceGitlabEnterpriseRepositoryResourceModel struct {
 	Token          types.String `tfsdk:"token"`
 	Branch         types.String `tfsdk:"branch"`
 	CredentialName types.String `tfsdk:"credential_name"`
+	UseAllAgents   types.Bool   `tfsdk:"use_all_agents"`
+	Agents         types.List   `tfsdk:"agents"`
 }
 
 func (r *TorqueSpaceGitlabEnterpriseRepositoryResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
@@ -88,6 +92,24 @@ func (r *TorqueSpaceGitlabEnterpriseRepositoryResource) Schema(ctx context.Conte
 					stringplanmodifier.RequiresReplace(),
 				},
 			},
+			"use_all_agents": schema.BoolAttribute{
+				Description: "Whether all associated agents can be used to onboard and sync this repository.",
+				Default:     booldefault.StaticBool(true),
+				Optional:    true,
+				Computed:    true,
+				// PlanModifiers: []planmodifier.String{
+				// 	stringplanmodifier.RequiresReplace(),
+				// },
+			},
+			"agents": schema.ListAttribute{
+				Description: "List of specific agents to use to onboard and sync this repository.",
+				Required:    false,
+				Optional:    true,
+				ElementType: types.StringType,
+				// PlanModifiers: []planmodifier.String{
+				// 	stringplanmodifier.RequiresReplace(),
+				// },
+			},
 		},
 	}
 }
@@ -120,9 +142,14 @@ func (r *TorqueSpaceGitlabEnterpriseRepositoryResource) Create(ctx context.Conte
 	if resp.Diagnostics.HasError() {
 		return
 	}
-
+	agents := []string{}
+	if !data.Agents.IsNull() {
+		for _, agent := range data.Agents.Elements() {
+			agents = append(agents, strings.Trim(agent.String(), "\""))
+		}
+	}
 	err := r.client.OnboardGitlabEnterpriseRepoToSpace(data.SpaceName.ValueString(), data.RepositoryName.ValueString(),
-		data.RepositoryUrl.ValueString(), data.Token.ValueStringPointer(), data.Branch.ValueString(), data.CredentialName.ValueString())
+		data.RepositoryUrl.ValueString(), data.Token.ValueStringPointer(), data.Branch.ValueString(), data.CredentialName.ValueString(), agents, data.UseAllAgents.ValueBool())
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to onboard repository to space, got error: %s", err))
 		return

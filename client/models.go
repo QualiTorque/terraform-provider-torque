@@ -92,11 +92,13 @@ type RepoSpaceAssociationWithCredentials struct {
 }
 
 type GitlabEnterpriseRepoSpaceAssociation struct {
-	Name           string  `json:"repository_name"`
-	URL            string  `json:"repository_url"`
-	Token          *string `json:"token"`
-	Branch         string  `json:"branch"`
-	CredentialName string  `json:"credential_name"`
+	Name           string   `json:"repository_name"`
+	URL            string   `json:"repository_url"`
+	Token          *string  `json:"token"`
+	Branch         string   `json:"branch"`
+	CredentialName string   `json:"credential_name"`
+	UseAllAgents   bool     `json:"use_all_agents"`
+	Agents         []string `json:"agents"`
 }
 
 type CodeCommitRepoSpaceAssociation struct {
