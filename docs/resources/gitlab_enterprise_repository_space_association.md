@@ -52,6 +52,6 @@ resource "torque_gitlab_enterprise_repository_space_association" "repository" {
 
 ### Optional
 
-- `agents` (List of String) List of specific agents to use to onboard and sync this repository.
+- `agents` (List of String) List of specific agents to use to onboard and sync this repository. Cannot be specified when use_all_agents is true.
 - `token` (String, Deprecated) Authentication Token to the project/repository. If omitted, existing credentials provided in the credential_name field will be used for authentication. If provided, a new credentials object will be created.
-- `use_all_agents` (Boolean) Whether all associated agents can be used to onboard and sync this repository.
+- `use_all_agents` (Boolean) Whether all associated agents can be used to onboard and sync this repository. Must be set to false if agents attribute is used.

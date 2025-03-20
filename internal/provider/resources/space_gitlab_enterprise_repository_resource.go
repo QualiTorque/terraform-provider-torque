@@ -89,29 +89,19 @@ func (r *TorqueSpaceGitlabEnterpriseRepositoryResource) Schema(ctx context.Conte
 			"credential_name": schema.StringAttribute{
 				Description: "The name of the Credentials to use/create. Must be unique in the space.",
 				Required:    true,
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.RequiresReplace(),
-				},
 			},
 			"use_all_agents": schema.BoolAttribute{
-				Description: "Whether all associated agents can be used to onboard and sync this repository.",
+				Description: "Whether all associated agents can be used to onboard and sync this repository. Must be set to false if agents attribute is used.",
 				Default:     booldefault.StaticBool(true),
 				Optional:    true,
 				Computed:    true,
 				Validators:  []validator.Bool{UseAllAgentsValidator{}},
-
-				// PlanModifiers: []planmodifier.Bool{
-				// 	boolplanmodifier.RequiresReplace(),
-				// },
 			},
 			"agents": schema.ListAttribute{
-				Description: "List of specific agents to use to onboard and sync this repository.",
+				Description: "List of specific agents to use to onboard and sync this repository. Cannot be specified when use_all_agents is true.",
 				Required:    false,
 				Optional:    true,
 				ElementType: types.StringType,
-				// PlanModifiers: []planmodifier.List{
-				// 	listplanmodifier.RequiresReplace(),
-				// },
 			},
 		},
 	}
