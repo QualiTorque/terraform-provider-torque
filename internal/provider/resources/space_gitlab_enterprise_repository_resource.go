@@ -9,10 +9,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/qualitorque/terraform-provider-torque/client"
@@ -99,18 +98,20 @@ func (r *TorqueSpaceGitlabEnterpriseRepositoryResource) Schema(ctx context.Conte
 				Default:     booldefault.StaticBool(true),
 				Optional:    true,
 				Computed:    true,
-				PlanModifiers: []planmodifier.Bool{
-					boolplanmodifier.RequiresReplace(),
-				},
+				Validators:  []validator.Bool{UseAllAgentsValidator{}},
+
+				// PlanModifiers: []planmodifier.Bool{
+				// 	boolplanmodifier.RequiresReplace(),
+				// },
 			},
 			"agents": schema.ListAttribute{
 				Description: "List of specific agents to use to onboard and sync this repository.",
 				Required:    false,
 				Optional:    true,
 				ElementType: types.StringType,
-				PlanModifiers: []planmodifier.List{
-					listplanmodifier.RequiresReplace(),
-				},
+				// PlanModifiers: []planmodifier.List{
+				// 	listplanmodifier.RequiresReplace(),
+				// },
 			},
 		},
 	}
@@ -202,8 +203,8 @@ func (r *TorqueSpaceGitlabEnterpriseRepositoryResource) Update(ctx context.Conte
 		return
 	}
 
-	// // Save updated data into Terraform state
-	// resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
+	// Save updated data into Terraform state
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
 func (r *TorqueSpaceGitlabEnterpriseRepositoryResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
@@ -227,4 +228,46 @@ func (r *TorqueSpaceGitlabEnterpriseRepositoryResource) Delete(ctx context.Conte
 
 func (r *TorqueSpaceGitlabEnterpriseRepositoryResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resource.ImportStatePassthroughID(ctx, path.Root("name"), req, resp)
+}
+
+type UseAllAgentsValidator struct{}
+
+func (v UseAllAgentsValidator) Description(ctx context.Context) string {
+	return "Ensures use_all_agents is false when agents are provided."
+}
+
+func (v UseAllAgentsValidator) MarkdownDescription(ctx context.Context) string {
+	return v.Description(ctx)
+}
+
+func (v UseAllAgentsValidator) ValidateBool(ctx context.Context, req validator.BoolRequest, resp *validator.BoolResponse) {
+	if req.ConfigValue.IsNull() || req.ConfigValue.IsUnknown() {
+		return
+	}
+
+	useAllAgents := req.ConfigValue.ValueBool()
+	var agents []types.String
+
+	// Fetch the agents attribute
+	if diags := req.Config.GetAttribute(ctx, path.Root("agents"), &agents); diags.HasError() {
+		resp.Diagnostics.Append(diags...)
+		return
+	}
+
+	// Check if use_all_agents is true and agents should be empty
+	if useAllAgents && len(agents) > 0 {
+		resp.Diagnostics.AddError(
+			"Invalid Configuration",
+			"Cannot specify agents when use_all_agents is true.",
+		)
+		return
+	}
+
+	// Check if use_all_agents is false and agents list must have at least 1 element
+	if !useAllAgents && len(agents) == 0 {
+		resp.Diagnostics.AddError(
+			"Invalid Configuration",
+			"Agents list must contain at least one element when use_all_agents is false.",
+		)
+	}
 }
