@@ -9,16 +9,19 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/knownvalue"
+	"github.com/hashicorp/terraform-plugin-testing/statecheck"
+	"github.com/hashicorp/terraform-plugin-testing/tfjsonpath"
 )
 
 func TestEnvironmentLabelAssociationResource(t *testing.T) {
 	i, _ := strconv.Atoi(index)
 	environmentIDs := []string{
-		"F2UXQBPCcWXY",
-		"wN2HAEV4Bte0",
-		"QC6DaQ3vIX7S",
 		"v0b0DgneI8wt",
-		"HLjN9yHyCYeD",
+		"N3DTp1UPkW2z",
+		"QC6DaQ3vIX7S",
+		"wVGhj0g1g03u",
+		"gWGHfvmHnMQg",
 	}
 
 	resource.Test(t, resource.TestCase{
@@ -34,13 +37,33 @@ func TestEnvironmentLabelAssociationResource(t *testing.T) {
 					labels = [{"key":"test","value":"test"}]
 				}
 				`, space_name, environmentIDs[i]),
-				Check: resource.ComposeAggregateTestCheckFunc(
-					resource.TestCheckResourceAttr("torque_environment_label_association.test", "space_name", space_name),
-					resource.TestCheckResourceAttr("torque_environment_label_association.test", "environment_id", environmentIDs[i]),
-					resource.TestCheckResourceAttr("torque_environment_label_association.test", "labels.#", "1"),
-					resource.TestCheckResourceAttr("torque_environment_label_association.test", "labels.0.key", "test"),
-					resource.TestCheckResourceAttr("torque_environment_label_association.test", "labels.0.value", "test"),
-				),
+				ConfigStateChecks: []statecheck.StateCheck{
+					statecheck.ExpectKnownValue(
+						"torque_environment_label_association.test",
+						tfjsonpath.New("space_name"),
+						knownvalue.StringExact(space_name),
+					),
+					statecheck.ExpectKnownValue(
+						"torque_environment_label_association.test",
+						tfjsonpath.New("environment_id"),
+						knownvalue.StringExact(environmentIDs[i]),
+					),
+					statecheck.ExpectKnownValue(
+						"torque_environment_label_association.test",
+						tfjsonpath.New("labels").AtSliceIndex(0).AtMapKey("key"),
+						knownvalue.StringExact("test"),
+					),
+					statecheck.ExpectKnownValue(
+						"torque_environment_label_association.test",
+						tfjsonpath.New("labels").AtSliceIndex(0).AtMapKey("value"),
+						knownvalue.StringExact("test"),
+					),
+					statecheck.ExpectKnownValue(
+						"torque_environment_label_association.test",
+						tfjsonpath.New("labels"),
+						knownvalue.ListSizeExact(1),
+					),
+				},
 			},
 			// Update and Read testing
 			{
@@ -49,15 +72,36 @@ func TestEnvironmentLabelAssociationResource(t *testing.T) {
 					space_name = "%s"
 					environment_id       = "%s"
 					labels = [{"key":"key","value":"val"}]
+
 				}
 				`, space_name, environmentIDs[i]),
-				Check: resource.ComposeAggregateTestCheckFunc(
-					resource.TestCheckResourceAttr("torque_environment_label_association.test", "space_name", space_name),
-					resource.TestCheckResourceAttr("torque_environment_label_association.test", "environment_id", environmentIDs[i]),
-					resource.TestCheckResourceAttr("torque_environment_label_association.test", "labels.#", "1"),
-					resource.TestCheckResourceAttr("torque_environment_label_association.test", "labels.0.key", "key"),
-					resource.TestCheckResourceAttr("torque_environment_label_association.test", "labels.0.value", "val"),
-				),
+				ConfigStateChecks: []statecheck.StateCheck{
+					statecheck.ExpectKnownValue(
+						"torque_environment_label_association.test",
+						tfjsonpath.New("space_name"),
+						knownvalue.StringExact(space_name),
+					),
+					statecheck.ExpectKnownValue(
+						"torque_environment_label_association.test",
+						tfjsonpath.New("environment_id"),
+						knownvalue.StringExact(environmentIDs[i]),
+					),
+					statecheck.ExpectKnownValue(
+						"torque_environment_label_association.test",
+						tfjsonpath.New("labels").AtSliceIndex(0).AtMapKey("key"),
+						knownvalue.StringExact("key"),
+					),
+					statecheck.ExpectKnownValue(
+						"torque_environment_label_association.test",
+						tfjsonpath.New("labels").AtSliceIndex(0).AtMapKey("value"),
+						knownvalue.StringExact("val"),
+					),
+					statecheck.ExpectKnownValue(
+						"torque_environment_label_association.test",
+						tfjsonpath.New("labels"),
+						knownvalue.ListSizeExact(1),
+					),
+				},
 			},
 			{
 				Config: providerConfig + fmt.Sprintf(`
@@ -67,15 +111,43 @@ func TestEnvironmentLabelAssociationResource(t *testing.T) {
 					labels = [{"key":"key","value":"val"},{"key":"test","value":"test"}]
 				}
 				`, space_name, environmentIDs[i]),
-				Check: resource.ComposeAggregateTestCheckFunc(
-					resource.TestCheckResourceAttr("torque_environment_label_association.test", "space_name", space_name),
-					resource.TestCheckResourceAttr("torque_environment_label_association.test", "environment_id", environmentIDs[i]),
-					resource.TestCheckResourceAttr("torque_environment_label_association.test", "labels.#", "2"),
-					resource.TestCheckResourceAttr("torque_environment_label_association.test", "labels.0.key", "key"),
-					resource.TestCheckResourceAttr("torque_environment_label_association.test", "labels.0.value", "val"),
-					resource.TestCheckResourceAttr("torque_environment_label_association.test", "labels.1.key", "test"),
-					resource.TestCheckResourceAttr("torque_environment_label_association.test", "labels.1.value", "test"),
-				),
+				ConfigStateChecks: []statecheck.StateCheck{
+					statecheck.ExpectKnownValue(
+						"torque_environment_label_association.test",
+						tfjsonpath.New("space_name"),
+						knownvalue.StringExact(space_name),
+					),
+					statecheck.ExpectKnownValue(
+						"torque_environment_label_association.test",
+						tfjsonpath.New("environment_id"),
+						knownvalue.StringExact(environmentIDs[i]),
+					),
+					statecheck.ExpectKnownValue(
+						"torque_environment_label_association.test",
+						tfjsonpath.New("labels").AtSliceIndex(0).AtMapKey("key"),
+						knownvalue.StringExact("key"),
+					),
+					statecheck.ExpectKnownValue(
+						"torque_environment_label_association.test",
+						tfjsonpath.New("labels").AtSliceIndex(0).AtMapKey("value"),
+						knownvalue.StringExact("val"),
+					),
+					statecheck.ExpectKnownValue(
+						"torque_environment_label_association.test",
+						tfjsonpath.New("labels").AtSliceIndex(1).AtMapKey("key"),
+						knownvalue.StringExact("test"),
+					),
+					statecheck.ExpectKnownValue(
+						"torque_environment_label_association.test",
+						tfjsonpath.New("labels").AtSliceIndex(1).AtMapKey("value"),
+						knownvalue.StringExact("test"),
+					),
+					statecheck.ExpectKnownValue(
+						"torque_environment_label_association.test",
+						tfjsonpath.New("labels"),
+						knownvalue.ListSizeExact(2),
+					),
+				},
 			},
 			// Delete testing automatically occurs in TestCase
 		},
