@@ -21,7 +21,7 @@ func TestEnvironmentDataSource(t *testing.T) {
 		collaborators_length      = "1"
 		collaborator              = "terraformtester@quali.com"
 		is_eac                    = "false"
-		last_used                 = "2024-12-01T17:17:00.77499Z"
+		last_used                 = "2025-03-20T13:28:56.9225879Z"
 		end_time                  = ""
 		start_time                = "2024-08-29T08:40:11.6257438Z"
 		owner_email               = "amir.r@quali.com"

@@ -35,8 +35,8 @@ func (c *Client) CreateEnvironmentLabel(key string, value string) error {
 	return nil
 }
 
-func (c *Client) GetEnvironmentLabel(key string) (*KeyValuePair, error) {
-	req, err := http.NewRequest("GET", fmt.Sprintf("%sapi/environments/labels", c.HostURL), nil)
+func (c *Client) GetEnvironmentLabel(key string, value string) (*KeyValuePair, error) {
+	req, err := http.NewRequest("GET", fmt.Sprintf("%sapi/environments/labels/%s?label_value=%s", c.HostURL, key, value), nil)
 	if err != nil {
 		return nil, err
 	}
@@ -46,19 +46,23 @@ func (c *Client) GetEnvironmentLabel(key string) (*KeyValuePair, error) {
 		return nil, err
 	}
 
-	labels := []KeyValuePair{}
-	err = json.Unmarshal(body, &labels)
+	// labels := []KeyValuePair{}
+	// err = json.Unmarshal(body, &labels)
+	// if err != nil {
+	// 	return nil, err
+	// }
+
+	label := KeyValuePair{}
+	err = json.Unmarshal(body, &label)
 	if err != nil {
 		return nil, err
 	}
-
-	label := KeyValuePair{}
-	for _, label_item := range labels {
-		if key == label_item.Key {
-			label = label_item
-			return &label, nil
-		}
-	}
+	// for _, label_item := range labels {
+	// 	if key == label_item.Key {
+	// 		label = label_item
+	// 		return &label, nil
+	// 	}
+	// }
 
 	return &label, nil
 }

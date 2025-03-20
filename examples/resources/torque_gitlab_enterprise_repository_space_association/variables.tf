@@ -45,3 +45,13 @@ variable "base_url" {
   type        = string
   description = "The base URL of the Gitlab Enetperise instance to be used in Torque"
 }
+
+variable "use_all_agents" {
+  type        = bool
+  description = "Whether all associated agents can be used to onboard and sync this repository. Must be set to false if agents attribute is used."
+}
+
+variable "agents" {
+  type        = string
+  description = "List of specific agents to use to onboard and sync this repository. Cannot be specified when use_all_agents is true."
+}
