@@ -109,7 +109,7 @@ func (r *TorqueEnvironmentLabelResource) Read(ctx context.Context, req resource.
 		return
 	}
 
-	label, err := r.client.GetEnvironmentLabel(data.Key.ValueString())
+	label, err := r.client.GetEnvironmentLabel(data.Key.ValueString(), data.Value.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Error Reading label details",
