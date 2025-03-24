@@ -165,7 +165,7 @@ func (r *TorqueDeploymentEngineResource) Create(ctx context.Context, req resourc
 	if !data.SpecificSpaces.IsNull() {
 		allowed_spaces.AllSpaces = false
 		for _, val := range data.SpecificSpaces.Elements() {
-			specificSpaces = append(specificSpaces, strings.Replace(val.String(), "\"", "", -1))
+			specificSpaces = append(specificSpaces, strings.ReplaceAll(val.String(), "\"", ""))
 		}
 		allowed_spaces.SpecificSpaces = specificSpaces
 	} else {
@@ -230,7 +230,7 @@ func (r *TorqueDeploymentEngineResource) Update(ctx context.Context, req resourc
 	if !data.SpecificSpaces.IsNull() {
 		allowed_spaces.AllSpaces = false
 		for _, val := range data.SpecificSpaces.Elements() {
-			specificSpaces = append(specificSpaces, strings.Replace(val.String(), "\"", "", -1))
+			specificSpaces = append(specificSpaces, strings.ReplaceAll(val.String(), "\"", ""))
 		}
 		allowed_spaces.SpecificSpaces = specificSpaces
 	} else {

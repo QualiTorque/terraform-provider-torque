@@ -219,7 +219,7 @@ func (r *TorqueAzureBlobObjectContentInputSourceResource) Create(ctx context.Con
 	if !data.SpecificSpaces.IsNull() {
 		allowed_spaces.AllSpaces = false
 		for _, val := range data.SpecificSpaces.Elements() {
-			specificSpaces = append(specificSpaces, strings.Replace(val.String(), "\"", "", -1))
+			specificSpaces = append(specificSpaces, strings.ReplaceAll(val.String(), "\"", ""))
 		}
 		allowed_spaces.SpecificSpaces = specificSpaces
 	} else {
@@ -310,7 +310,7 @@ func (r *TorqueAzureBlobObjectContentInputSourceResource) Update(ctx context.Con
 	if !data.SpecificSpaces.IsNull() {
 		allowed_spaces.AllSpaces = false
 		for _, val := range data.SpecificSpaces.Elements() {
-			specificSpaces = append(specificSpaces, strings.Replace(val.String(), "\"", "", -1))
+			specificSpaces = append(specificSpaces, strings.ReplaceAll(val.String(), "\"", ""))
 		}
 		allowed_spaces.SpecificSpaces = specificSpaces
 	} else {
