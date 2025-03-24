@@ -243,7 +243,7 @@ func (r *TorqueSpaceGenericWebhookNotificationResource) Create(ctx context.Conte
 		return
 	}
 
-	data.NotificationId = basetypes.NewStringValue(strings.Replace(notification, "\"", "", -1))
+	data.NotificationId = basetypes.NewStringValue(strings.ReplaceAll(notification, "\"", ""))
 
 	// Save data into Terraform state.
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)

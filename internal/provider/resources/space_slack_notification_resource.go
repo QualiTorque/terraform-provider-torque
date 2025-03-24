@@ -238,7 +238,7 @@ func (r *TorqueSpaceSlackNotificationResource) Create(ctx context.Context, req r
 		return
 	}
 
-	data.NotificationId = basetypes.NewStringValue(strings.Replace(notification, "\"", "", -1))
+	data.NotificationId = basetypes.NewStringValue(strings.ReplaceAll(notification, "\"", ""))
 
 	tflog.Trace(ctx, "Resource Created Successful!")
 

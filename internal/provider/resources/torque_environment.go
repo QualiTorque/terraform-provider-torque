@@ -326,21 +326,21 @@ func (r *TorqueEnvironmentResource) Create(ctx context.Context, req resource.Cre
 
 	if !data.Inputs.IsNull() {
 		for key, value := range data.Inputs.Elements() {
-			inputs[key] = strings.Replace(value.String(), "\"", "", -1)
+			inputs[key] = strings.ReplaceAll(value.String(), "\"", "")
 		}
 	}
 	var tags = make(map[string]string)
 
 	if !data.Tags.IsNull() {
 		for key, value := range data.Tags.Elements() {
-			tags[key] = strings.Replace(value.String(), "\"", "", -1)
+			tags[key] = strings.ReplaceAll(value.String(), "\"", "")
 		}
 	}
 	var collaborators client.Collaborators
 	if data.Collaborators != nil {
 		var emails []string
 		for _, val := range data.Collaborators.CollaboratorsEmails.Elements() {
-			emails = append(emails, strings.Replace(val.String(), "\"", "", -1))
+			emails = append(emails, strings.ReplaceAll(val.String(), "\"", ""))
 		}
 		collaborators.AllSpaceMembers = data.Collaborators.AllSpaceMembers.ValueBool()
 		collaborators.Collaborators = emails

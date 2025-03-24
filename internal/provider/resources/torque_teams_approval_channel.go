@@ -117,7 +117,7 @@ func (r *TorqueTeamsApprovalChannelResource) Create(ctx context.Context, req res
 
 	for _, approver := range data.Approvers.Elements() {
 		approvers = append(approvers, client.Approver{
-			UserEmail: strings.Replace(approver.String(), "\"", "", -1),
+			UserEmail: strings.ReplaceAll(approver.String(), "\"", ""),
 		})
 	}
 	details.Approvers = approvers
@@ -171,7 +171,7 @@ func (r *TorqueTeamsApprovalChannelResource) Update(ctx context.Context, req res
 
 	for _, approver := range data.Approvers.Elements() {
 		approvers = append(approvers, client.Approver{
-			UserEmail: strings.Replace(approver.String(), "\"", "", -1),
+			UserEmail: strings.ReplaceAll(approver.String(), "\"", ""),
 		})
 	}
 	details.Approvers = approvers
