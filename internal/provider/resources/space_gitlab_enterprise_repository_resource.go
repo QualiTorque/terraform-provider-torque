@@ -141,6 +141,7 @@ func (r *TorqueSpaceGitlabEnterpriseRepositoryResource) Create(ctx context.Conte
 	const (
 		StatusSyncing   = "Syncing"
 		StatusConnected = "Connected"
+		Interval        = 4 * time.Second
 	)
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
 
@@ -164,7 +165,6 @@ func (r *TorqueSpaceGitlabEnterpriseRepositoryResource) Create(ctx context.Conte
 		}
 		if repo.Status == StatusSyncing {
 			timeout := time.Duration(data.TimeOut.ValueInt32()) * time.Minute
-			interval := 4 * time.Second
 			for time.Since(start) < timeout {
 				repo, err := r.client.GetRepoDetails(data.SpaceName.ValueString(), data.RepositoryName.ValueString())
 				if err != nil {
@@ -175,7 +175,7 @@ func (r *TorqueSpaceGitlabEnterpriseRepositoryResource) Create(ctx context.Conte
 					resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 					return
 				}
-				time.Sleep(interval)
+				time.Sleep(Interval)
 			}
 			resp.Diagnostics.AddError("Sync Timeout", "Timed out while syncing repository")
 			return
