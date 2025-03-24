@@ -21,4 +21,5 @@ resource "torque_gitlab_enterprise_repository_space_association" "repository" {
   credential_name = "credentials"
   use_all_agents  = false
   agents          = ["eks", "aks"]
+  timeout         = 5
 }
