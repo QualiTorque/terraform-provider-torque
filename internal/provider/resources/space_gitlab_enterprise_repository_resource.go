@@ -4,16 +4,17 @@ import (
 	"context"
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int32default"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/qualitorque/terraform-provider-torque/client"
 )
 
@@ -39,6 +40,7 @@ type TorqueSpaceGitlabEnterpriseRepositoryResourceModel struct {
 	CredentialName types.String `tfsdk:"credential_name"`
 	UseAllAgents   types.Bool   `tfsdk:"use_all_agents"`
 	Agents         types.List   `tfsdk:"agents"`
+	TimeOut        types.Int32  `tfsdk:"timeout"`
 }
 
 func (r *TorqueSpaceGitlabEnterpriseRepositoryResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
@@ -103,6 +105,13 @@ func (r *TorqueSpaceGitlabEnterpriseRepositoryResource) Schema(ctx context.Conte
 				Optional:    true,
 				ElementType: types.StringType,
 			},
+			"timeout": schema.Int32Attribute{
+				Description: "Time in minutes to wait for Torque to sync the repository during the onboarding. Default is 1 minute.",
+				Required:    false,
+				Optional:    true,
+				Computed:    true,
+				Default:     int32default.StaticInt32(1),
+			},
 		},
 	}
 }
@@ -129,7 +138,10 @@ func (r *TorqueSpaceGitlabEnterpriseRepositoryResource) Configure(ctx context.Co
 
 func (r *TorqueSpaceGitlabEnterpriseRepositoryResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	var data TorqueSpaceGitlabEnterpriseRepositoryResourceModel
-
+	const (
+		StatusSyncing   = "Syncing"
+		StatusConnected = "Connected"
+	)
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
 
 	if resp.Diagnostics.HasError() {
@@ -141,16 +153,36 @@ func (r *TorqueSpaceGitlabEnterpriseRepositoryResource) Create(ctx context.Conte
 			agents = append(agents, strings.Trim(agent.String(), "\""))
 		}
 	}
+	start := time.Now()
 	err := r.client.OnboardGitlabEnterpriseRepoToSpace(data.SpaceName.ValueString(), data.RepositoryName.ValueString(),
 		data.RepositoryUrl.ValueString(), data.Token.ValueStringPointer(), data.Branch.ValueString(), data.CredentialName.ValueString(), agents, data.UseAllAgents.ValueBool())
 	if err != nil {
+		repo, err := r.client.GetRepoDetails(data.SpaceName.ValueString(), data.RepositoryName.ValueString())
+		if repo == nil {
+			resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to onboard repository to space, got error: %s", err))
+			return
+		}
+		if repo.Status == StatusSyncing {
+			timeout := time.Duration(data.TimeOut.ValueInt32()) * time.Minute
+			interval := 4 * time.Second
+			for time.Since(start) < timeout {
+				repo, err := r.client.GetRepoDetails(data.SpaceName.ValueString(), data.RepositoryName.ValueString())
+				if err != nil {
+					resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while polling repository status: %s", err))
+					return
+				}
+				if repo.Status == StatusConnected {
+					resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
+					return
+				}
+				time.Sleep(interval)
+			}
+			resp.Diagnostics.AddError("Sync Timeout", "Timed out while syncing repository")
+			return
+		}
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to onboard repository to space, got error: %s", err))
 		return
 	}
-
-	tflog.Trace(ctx, "Resource Created Successful!")
-
-	// Save data into Terraform state.
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 

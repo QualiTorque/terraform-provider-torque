@@ -55,3 +55,9 @@ variable "agents" {
   type        = string
   description = "List of specific agents to use to onboard and sync this repository. Cannot be specified when use_all_agents is true."
 }
+
+variable "timeout" {
+  type        = number
+  description = "Time in minutes to wait for Torque to sync the repository during the onboarding. Default is 1 minute."
+  default     = 1
+}

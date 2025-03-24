@@ -188,3 +188,27 @@ func (c *Client) UpdateRepoConfiguration(space_name string, repo_name string, cr
 
 	return nil
 }
+
+func (c *Client) GetRepoDetails(space_name string, repo_name string) (*RepoDetails, error) {
+	req, err := http.NewRequest("GET", fmt.Sprintf("%sapi/spaces/%s/repositories", c.HostURL, space_name), nil)
+	if err != nil {
+		return nil, err
+	}
+	body, err := c.doRequest(req, &c.Token)
+	if err != nil {
+		return nil, err
+	}
+	repos := []RepoDetails{}
+	err = json.Unmarshal(body, &repos)
+	if err != nil {
+		return nil, err
+	}
+	repo := RepoDetails{}
+	for _, repo_item := range repos {
+		if repo_name == repo_item.Name {
+			repo = repo_item
+			return &repo, nil
+		}
+	}
+	return nil, fmt.Errorf("repository %s not found", repo_name)
+}

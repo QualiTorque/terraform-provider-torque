@@ -560,3 +560,21 @@ type RepoUpdate struct {
 	Agents         []string `json:"agents"`
 	UseAllAgents   bool     `json:"use_all_agents"`
 }
+
+type RepoDetails struct {
+	Name           string   `json:"name"`
+	URL            string   `json:"repository_url"`
+	Token          *string  `json:"token"`
+	Branch         string   `json:"branch"`
+	CredentialName string   `json:"credential_name"`
+	UseAllAgents   bool     `json:"use_all_agents"`
+	Agents         []Agents `json:"agents"`
+	Status         string   `json:"status"`
+	SpaceName      string   `json:"space_name"`
+	Errors         []Error  `json:"errors"`
+}
+
+type Agents struct {
+	Name   string `json:"name"`
+	Status string `json:"status"`
+}
