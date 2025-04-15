@@ -176,18 +176,6 @@ func (r *TorqueSpaceLabelResource) Update(ctx context.Context, req resource.Upda
 		return
 	}
 
-	label, err := r.client.GetLabel(data.SpaceName.ValueString(), data.Name.ValueString())
-	if err != nil {
-		resp.Diagnostics.AddError(
-			"Error Reading label details",
-			"Could not read Torque label name "+data.Name.ValueString()+": "+err.Error(),
-		)
-		return
-	}
-
-	data.Name = types.StringValue(label.Name)
-	data.Color = types.StringValue(label.Color)
-
 	diags = resp.State.Set(ctx, data)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
