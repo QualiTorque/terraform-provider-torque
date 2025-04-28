@@ -330,7 +330,7 @@ func (r *TorqueCatalogItemResource) Update(ctx context.Context, req resource.Upd
 		data.DefaultDuration = types.StringNull()
 	} else {
 		if data.MaxDuration.IsNull() || data.MaxDuration.IsUnknown() {
-			data.MaxDuration = types.StringValue("PT2H")
+			data.MaxDuration = null
 		}
 		if data.DefaultExtend.IsNull() || data.DefaultExtend.IsUnknown() {
 			data.DefaultExtend = types.StringValue("PT2H")
