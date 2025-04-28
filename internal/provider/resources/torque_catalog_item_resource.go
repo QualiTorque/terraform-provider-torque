@@ -222,7 +222,7 @@ func (r *TorqueCatalogItemResource) Create(ctx context.Context, req resource.Cre
 		data.DefaultDuration = types.StringNull()
 	} else {
 		if data.MaxDuration.IsNull() || data.MaxDuration.IsUnknown() {
-			data.MaxDuration = types.StringValue("PT2H")
+			data.MaxDuration = types.StringNull()
 		}
 		if data.DefaultExtend.IsNull() || data.DefaultExtend.IsUnknown() {
 			data.DefaultExtend = types.StringValue("PT2H")
@@ -330,7 +330,7 @@ func (r *TorqueCatalogItemResource) Update(ctx context.Context, req resource.Upd
 		data.DefaultDuration = types.StringNull()
 	} else {
 		if data.MaxDuration.IsNull() || data.MaxDuration.IsUnknown() {
-			data.MaxDuration = null
+			data.MaxDuration = types.StringNull()
 		}
 		if data.DefaultExtend.IsNull() || data.DefaultExtend.IsUnknown() {
 			data.DefaultExtend = types.StringValue("PT2H")
@@ -420,7 +420,7 @@ func (r *TorqueCatalogItemResource) Delete(ctx context.Context, req resource.Del
 		return
 	}
 
-	data.MaxDuration = types.StringValue("PT2H")
+	data.MaxDuration = types.StringNull()
 	data.DefaultExtend = types.StringValue("PT2H")
 	data.DefaultDuration = types.StringValue("PT2H")
 
