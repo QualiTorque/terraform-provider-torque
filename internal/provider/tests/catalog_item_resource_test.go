@@ -71,7 +71,7 @@ func TestCatalogItemResource(t *testing.T) {
 					resource.TestCheckResourceAttr("torque_catalog_item.catalog_item", "always_on", "false"),
 					resource.TestCheckResourceAttr("torque_catalog_item.catalog_item", "default_duration", "PT2H"),
 					resource.TestCheckResourceAttr("torque_catalog_item.catalog_item", "default_extend", "PT2H"),
-					resource.TestCheckResourceAttr("torque_catalog_item.catalog_item", "max_duration", "PT2H"),
+					resource.TestCheckNoResourceAttr("torque_catalog_item.catalog_item", "max_duration"),
 					resource.TestCheckResourceAttr("torque_catalog_item.catalog_item", "labels.#", "2"),
 					testBlueprintPublished(new_unique_blueprint_name),
 				),
