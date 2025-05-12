@@ -107,7 +107,7 @@ func (r *TorqueAssetLibraryItemResource) Create(ctx context.Context, req resourc
 	}
 
 	if data.RepositoryName.IsUnknown() {
-		blueprint, err := r.client.GetBlueprint(data.SpaceName.ValueString(), data.BlueprintName.ValueString())
+		blueprint, err := r.client.GetBlueprint(data.SpaceName.ValueString(), data.RepositoryName.ValueString(), data.BlueprintName.ValueString())
 		if err != nil {
 			resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to retrieve blueprint details, got error: %s", err))
 			return

@@ -30,7 +30,7 @@ func TestCatalogItemResource(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { testAccPreCheck(t) },
 		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
-		CheckDestroy:             testBlueprintNotPublished(new_unique_blueprint_name),
+		CheckDestroy:             testBlueprintNotPublished(repository_name, new_unique_blueprint_name),
 		Steps: []resource.TestStep{
 			// Create and Read testing
 			{
@@ -51,7 +51,7 @@ func TestCatalogItemResource(t *testing.T) {
 					resource.TestCheckNoResourceAttr("torque_catalog_item.catalog_item", "default_extend"),
 					resource.TestCheckNoResourceAttr("torque_catalog_item.catalog_item", "max_duration"),
 					resource.TestCheckNoResourceAttr("torque_catalog_item.catalog_item", "labels"),
-					testBlueprintPublished(unique_blueprint_name),
+					testBlueprintPublished(repository_name, unique_blueprint_name),
 				),
 			},
 			// Update and Read testing
@@ -73,7 +73,7 @@ func TestCatalogItemResource(t *testing.T) {
 					resource.TestCheckResourceAttr("torque_catalog_item.catalog_item", "default_extend", "PT2H"),
 					resource.TestCheckNoResourceAttr("torque_catalog_item.catalog_item", "max_duration"),
 					resource.TestCheckResourceAttr("torque_catalog_item.catalog_item", "labels.#", "2"),
-					testBlueprintPublished(new_unique_blueprint_name),
+					testBlueprintPublished(repository_name, new_unique_blueprint_name),
 				),
 			},
 			{
@@ -98,7 +98,7 @@ func TestCatalogItemResource(t *testing.T) {
 					resource.TestCheckResourceAttr("torque_catalog_item.catalog_item", "default_extend", "PT9H"),
 					resource.TestCheckResourceAttr("torque_catalog_item.catalog_item", "max_duration", "P1DT6H"),
 					resource.TestCheckResourceAttr("torque_catalog_item.catalog_item", "labels.#", "1"),
-					testBlueprintPublished(new_unique_blueprint_name),
+					testBlueprintPublished(repository_name, new_unique_blueprint_name),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -153,15 +153,15 @@ func TestCatalogItemDurationConflicts(t *testing.T) {
 	})
 }
 
-func testBlueprintPublished(blueprint string) resource.TestCheckFunc {
-	return checkBlueprintPublishedCondition(true, blueprint)
+func testBlueprintPublished(repository_name string, blueprint string) resource.TestCheckFunc {
+	return checkBlueprintPublishedCondition(true, repository_name, blueprint)
 }
 
-func testBlueprintNotPublished(blueprint string) resource.TestCheckFunc {
-	return checkBlueprintPublishedCondition(false, blueprint)
+func testBlueprintNotPublished(repository_name string, blueprint string) resource.TestCheckFunc {
+	return checkBlueprintPublishedCondition(false, repository_name, blueprint)
 }
 
-func checkBlueprintPublishedCondition(expectedPublished bool, blueprint string) resource.TestCheckFunc {
+func checkBlueprintPublishedCondition(expectedPublished bool, repository_name string, blueprint string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		host := os.Getenv("TORQUE_HOST")
 		space := os.Getenv("TORQUE_SPACE")
@@ -176,7 +176,7 @@ func checkBlueprintPublishedCondition(expectedPublished bool, blueprint string) 
 		delay := 10 * time.Second
 
 		for i := 0; i < maxRetries; i++ {
-			bp, err := c.GetBlueprint(space, blueprint)
+			bp, err := c.GetBlueprint(space, repository_name, blueprint)
 			if err != nil {
 				return err
 			}

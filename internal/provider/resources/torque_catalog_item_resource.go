@@ -293,7 +293,7 @@ func (r *TorqueCatalogItemResource) Read(ctx context.Context, req resource.ReadR
 		return
 	}
 
-	blueprint, err := r.client.GetBlueprint(data.SpaceName.ValueString(), data.BlueprintName.ValueString())
+	blueprint, err := r.client.GetBlueprint(data.SpaceName.ValueString(), data.RepositoryName.ValueString(), data.BlueprintName.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to get catalog items in space, got error: %s", err.Error()))
 		return

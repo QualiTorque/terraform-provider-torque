@@ -220,17 +220,19 @@ func (d *spaceBlueprintDataSource) Configure(_ context.Context, req datasource.C
 // Read refreshes the Terraform state with the latest data.
 func (d *spaceBlueprintDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var state spaceBlueprintDataSourceModel
-	var name types.String
 	var space_name types.String
+	var repository_name types.String
+	var name types.String
 
 	diags := req.Config.GetAttribute(ctx, path.Root("space_name"), &space_name)
+	diags = append(diags, req.Config.GetAttribute(ctx, path.Root("repository_name"), &repository_name)...)
 	diags = append(diags, req.Config.GetAttribute(ctx, path.Root("name"), &name)...)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	blueprint_data, err := d.client.GetBlueprint(space_name.ValueString(), name.ValueString())
+	blueprint_data, err := d.client.GetBlueprint(space_name.ValueString(), repository_name.ValueString(), name.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to read Blueprint details or it doesn't exist",
