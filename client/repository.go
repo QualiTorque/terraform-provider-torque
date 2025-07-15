@@ -44,18 +44,20 @@ func (c *Client) OnboardCodeCommitRepoToSpace(space_name string, repository_name
 	return nil
 }
 
-func (c *Client) OnboardGitlabEnterpriseRepoToSpace(space_name string, repository_name string, repository_url string, token *string, branch string, credential_name string, agents []string, use_all_agents bool) error {
+func (c *Client) OnboardGitlabEnterpriseRepoToSpace(space_name string, repository_name string, repository_url string, token *string, branch string, credential_name string, agents []string, use_all_agents bool, auto_register_eac bool) error {
 	data := GitlabEnterpriseRepoSpaceAssociation{
-		Token:          token,
-		Name:           repository_name,
-		URL:            repository_url,
-		Branch:         branch,
-		CredentialName: credential_name,
-		Agents:         agents,
-		UseAllAgents:   use_all_agents,
+		Token:           token,
+		Name:            repository_name,
+		URL:             repository_url,
+		Branch:          branch,
+		CredentialName:  credential_name,
+		Agents:          agents,
+		UseAllAgents:    use_all_agents,
+		AutoRegisterEac: auto_register_eac,
 	}
 
 	payload, err := json.Marshal(data)
+
 	if err != nil {
 		log.Fatalf("impossible to marshall agent association: %s", err)
 	}

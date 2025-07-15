@@ -32,15 +32,16 @@ type TorqueSpaceGitlabEnterpriseRepositoryResource struct {
 }
 
 type TorqueSpaceGitlabEnterpriseRepositoryResourceModel struct {
-	SpaceName      types.String `tfsdk:"space_name"`
-	RepositoryName types.String `tfsdk:"repository_name"`
-	RepositoryUrl  types.String `tfsdk:"repository_url"`
-	Token          types.String `tfsdk:"token"`
-	Branch         types.String `tfsdk:"branch"`
-	CredentialName types.String `tfsdk:"credential_name"`
-	UseAllAgents   types.Bool   `tfsdk:"use_all_agents"`
-	Agents         types.List   `tfsdk:"agents"`
-	TimeOut        types.Int32  `tfsdk:"timeout"`
+	SpaceName       types.String `tfsdk:"space_name"`
+	RepositoryName  types.String `tfsdk:"repository_name"`
+	RepositoryUrl   types.String `tfsdk:"repository_url"`
+	Token           types.String `tfsdk:"token"`
+	Branch          types.String `tfsdk:"branch"`
+	CredentialName  types.String `tfsdk:"credential_name"`
+	UseAllAgents    types.Bool   `tfsdk:"use_all_agents"`
+	Agents          types.List   `tfsdk:"agents"`
+	TimeOut         types.Int32  `tfsdk:"timeout"`
+	AutoRegisterEac types.Bool   `tfsdk:"auto_register_eac"`
 }
 
 func (r *TorqueSpaceGitlabEnterpriseRepositoryResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
@@ -112,6 +113,13 @@ func (r *TorqueSpaceGitlabEnterpriseRepositoryResource) Schema(ctx context.Conte
 				Computed:    true,
 				Default:     int32default.StaticInt32(1),
 			},
+			"auto_register_eac": schema.BoolAttribute{
+				Description: "Auto register environment files",
+				Default:     booldefault.StaticBool(false),
+				Required:    false,
+				Optional:    true,
+				Computed:    true,
+			},
 		},
 	}
 }
@@ -156,7 +164,7 @@ func (r *TorqueSpaceGitlabEnterpriseRepositoryResource) Create(ctx context.Conte
 	}
 	start := time.Now()
 	err := r.client.OnboardGitlabEnterpriseRepoToSpace(data.SpaceName.ValueString(), data.RepositoryName.ValueString(),
-		data.RepositoryUrl.ValueString(), data.Token.ValueStringPointer(), data.Branch.ValueString(), data.CredentialName.ValueString(), agents, data.UseAllAgents.ValueBool())
+		data.RepositoryUrl.ValueString(), data.Token.ValueStringPointer(), data.Branch.ValueString(), data.CredentialName.ValueString(), agents, data.UseAllAgents.ValueBool(), data.AutoRegisterEac.ValueBool())
 	if err != nil {
 		repo, err := r.client.GetRepoDetails(data.SpaceName.ValueString(), data.RepositoryName.ValueString())
 		if repo == nil {
