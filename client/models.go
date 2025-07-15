@@ -75,42 +75,46 @@ type AgentSpaceAssociation struct {
 }
 
 type RepoSpaceAssociation struct {
-	URL         string  `json:"repository_url"`
-	AccessToken *string `json:"access_token"`
-	Type        string  `json:"repository_type"`
-	Branch      string  `json:"branch"`
-	Name        string  `json:"repository_name"`
+	URL             string  `json:"repository_url"`
+	AccessToken     *string `json:"access_token"`
+	Type            string  `json:"repository_type"`
+	Branch          string  `json:"branch"`
+	Name            string  `json:"repository_name"`
+	AutoRegisterEac bool    `json:"eac_auto_registration"`
 }
 
 type RepoSpaceAssociationWithCredentials struct {
-	URL            string  `json:"repository_url"`
-	Token          *string `json:"token"`
-	Type           string  `json:"repository_type"`
-	Branch         string  `json:"branch"`
-	Name           string  `json:"repository_name"`
-	CredentialName *string `json:"credential_name"`
+	URL             string  `json:"repository_url"`
+	Token           *string `json:"token"`
+	Type            string  `json:"repository_type"`
+	Branch          string  `json:"branch"`
+	Name            string  `json:"repository_name"`
+	CredentialName  *string `json:"credential_name"`
+	AutoRegisterEac bool    `json:"eac_auto_registration"`
 }
 
 type GitlabEnterpriseRepoSpaceAssociation struct {
-	Name           string   `json:"repository_name"`
-	URL            string   `json:"repository_url"`
-	Token          *string  `json:"token"`
-	Branch         string   `json:"branch"`
-	CredentialName string   `json:"credential_name"`
-	UseAllAgents   bool     `json:"use_all_agents"`
-	Agents         []string `json:"agents"`
+	Name            string   `json:"repository_name"`
+	URL             string   `json:"repository_url"`
+	Token           *string  `json:"token"`
+	Branch          string   `json:"branch"`
+	CredentialName  string   `json:"credential_name"`
+	UseAllAgents    bool     `json:"use_all_agents"`
+	Agents          []string `json:"agents"`
+	AutoRegisterEac bool     `json:"eac_auto_registration"`
 }
 
 type CodeCommitRepoSpaceAssociation struct {
-	URL            string `json:"repository_url"`
-	RoleArn        string `json:"role_arn"`
-	Region         string `json:"region"`
-	Branch         string `json:"branch"`
-	Name           string `json:"repository_name"`
-	ExternalId     string `json:"external_id"`
-	Username       string `json:"username"`
-	Password       string `json:"password"`
-	CredentialName string `json:"credential_name"`
+	URL             string `json:"repository_url"`
+	RoleArn         string `json:"role_arn"`
+	Region          string `json:"region"`
+	Branch          string `json:"branch"`
+	Name            string `json:"repository_name"`
+	ExternalId      string `json:"external_id"`
+	Username        string `json:"username"`
+	Password        string `json:"password"`
+	CredentialName  string `json:"credential_name"`
+	AutoRegisterEac bool   `json:"eac_auto_registration"`
 }
 
 type KeyValuePair struct {
