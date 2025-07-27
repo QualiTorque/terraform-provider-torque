@@ -95,11 +95,8 @@ func (c *Client) OnboardAdoServerRepoToSpace(space_name string, repository_name 
 	if err != nil {
 		log.Fatalf("impossible to marshall agent association: %s", err)
 	}
-	log.Printf("Vido: calling api: %s", payload)
 	req, err := http.NewRequest("POST", fmt.Sprintf("%sapi/spaces/%s/repositories/azureEnterprise", c.HostURL, space_name), bytes.NewReader(payload))
-	log.Printf("Vido: end calling api: %s", "")
 	if err != nil {
-		log.Printf("Vido: end calling api: %s", err)
 		return err
 	}
 
