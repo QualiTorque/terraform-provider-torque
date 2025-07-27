@@ -78,6 +78,39 @@ func (c *Client) OnboardGitlabEnterpriseRepoToSpace(space_name string, repositor
 	return nil
 }
 
+func (c *Client) OnboardAdoServerRepoToSpace(space_name string, repository_name string, repository_url string, token *string, branch string, credential_name string, agents []string, use_all_agents bool, auto_register_eac bool) error {
+	data := AdoServerRepoSpaceAssociation{
+		Token:           token,
+		Name:            repository_name,
+		URL:             repository_url,
+		Branch:          branch,
+		CredentialName:  credential_name,
+		Agents:          agents,
+		UseAllAgents:    use_all_agents,
+		AutoRegisterEac: auto_register_eac,
+	}
+
+	payload, err := json.Marshal(data)
+
+	if err != nil {
+		log.Fatalf("impossible to marshall agent association: %s", err)
+	}
+	req, err := http.NewRequest("POST", fmt.Sprintf("%sapi/spaces/%s/repositories/azureEnterprise", c.HostURL, space_name), bytes.NewReader(payload))
+	if err != nil {
+		return err
+	}
+
+	req.Header.Add("Content-Type", "application/json")
+	req.Header.Add("Accept", "application/json")
+
+	_, err = c.doRequest(req, &c.Token)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (c *Client) OnboardRepoToSpace(space_name string, repo_name string, repo_type string, repo_url string, repo_token *string, repo_branch string, credential_name *string) error {
 	var data interface{}
 	var url string

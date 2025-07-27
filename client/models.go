@@ -104,6 +104,17 @@ type GitlabEnterpriseRepoSpaceAssociation struct {
 	AutoRegisterEac bool     `json:"eac_auto_registration"`
 }
 
+type AdoServerRepoSpaceAssociation struct {
+	Name            string   `json:"repository_name"`
+	URL             string   `json:"repository_url"`
+	Token           *string  `json:"token"`
+	Branch          string   `json:"branch"`
+	CredentialName  string   `json:"credential_name"`
+	UseAllAgents    bool     `json:"use_all_agents"`
+	Agents          []string `json:"agents"`
+	AutoRegisterEac bool     `json:"eac_auto_registration"`
+}
+
 type CodeCommitRepoSpaceAssociation struct {
 	URL             string `json:"repository_url"`
 	RoleArn         string `json:"role_arn"`
