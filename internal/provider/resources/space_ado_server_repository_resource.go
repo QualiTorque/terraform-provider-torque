@@ -20,19 +20,19 @@ import (
 )
 
 // Ensure provider defined types fully satisfy framework interfaces.
-var _ resource.Resource = &TorqueSpaceGitlabEnterpriseRepositoryResource{}
-var _ resource.ResourceWithImportState = &TorqueSpaceGitlabEnterpriseRepositoryResource{}
+var _ resource.Resource = &TorqueSpaceAdoServerRepositoryResource{}
+var _ resource.ResourceWithImportState = &TorqueSpaceAdoServerRepositoryResource{}
 
-func NewTorqueSpaceGitlabEnterpriseRepositoryResource() resource.Resource {
-	return &TorqueSpaceGitlabEnterpriseRepositoryResource{}
+func NewTorqueSpaceAdoServerRepositoryResource() resource.Resource {
+	return &TorqueSpaceAdoServerRepositoryResource{}
 }
 
 // TorqueAgentSpaceAssociationResource defines the resource implementation.
-type TorqueSpaceGitlabEnterpriseRepositoryResource struct {
+type TorqueSpaceAdoServerRepositoryResource struct {
 	client *client.Client
 }
 
-type TorqueSpaceGitlabEnterpriseRepositoryResourceModel struct {
+type TorqueSpaceAdoServerRepositoryResourceModel struct {
 	SpaceName       types.String `tfsdk:"space_name"`
 	RepositoryName  types.String `tfsdk:"repository_name"`
 	RepositoryUrl   types.String `tfsdk:"repository_url"`
@@ -45,13 +45,13 @@ type TorqueSpaceGitlabEnterpriseRepositoryResourceModel struct {
 	AutoRegisterEac types.Bool   `tfsdk:"auto_register_eac"`
 }
 
-func (r *TorqueSpaceGitlabEnterpriseRepositoryResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
-	resp.TypeName = "torque_gitlab_enterprise_repository_space_association"
+func (r *TorqueSpaceAdoServerRepositoryResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
+	resp.TypeName = "torque_ado_server_repository_space_association"
 }
 
-func (r *TorqueSpaceGitlabEnterpriseRepositoryResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
+func (r *TorqueSpaceAdoServerRepositoryResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Onboard a new GitlabEnterprise repository into an existing space",
+		MarkdownDescription: "Onboard a new Ado Server repository into an existing space",
 
 		Attributes: map[string]schema.Attribute{
 			"space_name": schema.StringAttribute{
@@ -62,14 +62,14 @@ func (r *TorqueSpaceGitlabEnterpriseRepositoryResource) Schema(ctx context.Conte
 				},
 			},
 			"repository_name": schema.StringAttribute{
-				Description: "The name of the GitlabEnterprise repository to onboard. In this example, repo_name",
+				Description: "The name of the Ado Server repository to onboard. In this example, repo_name",
 				Required:    true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.RequiresReplace(),
 				},
 			},
 			"repository_url": schema.StringAttribute{
-				Description: "The url of the specific GitlabEnterprise repository/project to onboard. For example: https://gitlab-on-prem.example.com/repo_name",
+				Description: "The url of the specific Ado Server repository/project to onboard. For example: https://ado-on-prem.example.com/repo_name",
 				Required:    true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.RequiresReplace(),
@@ -125,7 +125,7 @@ func (r *TorqueSpaceGitlabEnterpriseRepositoryResource) Schema(ctx context.Conte
 	}
 }
 
-func (r *TorqueSpaceGitlabEnterpriseRepositoryResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
+func (r *TorqueSpaceAdoServerRepositoryResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
 	// Prevent panic if the provider has not been configured.
 	if req.ProviderData == nil {
 		return
@@ -145,8 +145,8 @@ func (r *TorqueSpaceGitlabEnterpriseRepositoryResource) Configure(ctx context.Co
 	r.client = client
 }
 
-func (r *TorqueSpaceGitlabEnterpriseRepositoryResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
-	var data TorqueSpaceGitlabEnterpriseRepositoryResourceModel
+func (r *TorqueSpaceAdoServerRepositoryResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
+	var data TorqueSpaceAdoServerRepositoryResourceModel
 	const (
 		StatusSyncing   = "Syncing"
 		StatusConnected = "Connected"
@@ -164,7 +164,7 @@ func (r *TorqueSpaceGitlabEnterpriseRepositoryResource) Create(ctx context.Conte
 		}
 	}
 	start := time.Now()
-	err := r.client.OnboardGitlabEnterpriseRepoToSpace(data.SpaceName.ValueString(), data.RepositoryName.ValueString(),
+	err := r.client.OnboardAdoServerRepoToSpace(data.SpaceName.ValueString(), data.RepositoryName.ValueString(),
 		data.RepositoryUrl.ValueString(), data.Token.ValueStringPointer(), data.Branch.ValueString(), data.CredentialName.ValueString(), agents, data.UseAllAgents.ValueBool(), data.AutoRegisterEac.ValueBool())
 	if err != nil {
 		repo, err := r.client.GetRepoDetails(data.SpaceName.ValueString(), data.RepositoryName.ValueString())
@@ -195,8 +195,8 @@ func (r *TorqueSpaceGitlabEnterpriseRepositoryResource) Create(ctx context.Conte
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
-func (r *TorqueSpaceGitlabEnterpriseRepositoryResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
-	var data TorqueSpaceGitlabEnterpriseRepositoryResourceModel
+func (r *TorqueSpaceAdoServerRepositoryResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
+	var data TorqueSpaceAdoServerRepositoryResourceModel
 
 	// Read Terraform prior state data into the model.
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
@@ -212,8 +212,8 @@ func (r *TorqueSpaceGitlabEnterpriseRepositoryResource) Read(ctx context.Context
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
-func (r *TorqueSpaceGitlabEnterpriseRepositoryResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var data TorqueSpaceGitlabEnterpriseRepositoryResourceModel
+func (r *TorqueSpaceAdoServerRepositoryResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+	var data TorqueSpaceAdoServerRepositoryResourceModel
 
 	// Read Terraform plan data into the model
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
@@ -238,8 +238,8 @@ func (r *TorqueSpaceGitlabEnterpriseRepositoryResource) Update(ctx context.Conte
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
-func (r *TorqueSpaceGitlabEnterpriseRepositoryResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
-	var data TorqueSpaceGitlabEnterpriseRepositoryResourceModel
+func (r *TorqueSpaceAdoServerRepositoryResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+	var data TorqueSpaceAdoServerRepositoryResourceModel
 
 	// Read Terraform prior state data into the model.
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
@@ -257,6 +257,6 @@ func (r *TorqueSpaceGitlabEnterpriseRepositoryResource) Delete(ctx context.Conte
 
 }
 
-func (r *TorqueSpaceGitlabEnterpriseRepositoryResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+func (r *TorqueSpaceAdoServerRepositoryResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resource.ImportStatePassthroughID(ctx, path.Root("name"), req, resp)
 }
