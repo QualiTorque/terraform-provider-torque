@@ -8,8 +8,8 @@ import (
 	"net/http"
 )
 
-func (c *Client) GetBlueprint(space_name string, name string) (*Blueprint, error) {
-	req, err := http.NewRequest("GET", fmt.Sprintf("%sapi/spaces/%s/blueprints", c.HostURL, space_name), nil)
+func (c *Client) GetBlueprint(space_name string, repository_name string, name string) (*Blueprint, error) {
+	req, err := http.NewRequest("GET", fmt.Sprintf("%sapi/spaces/%s/repositories/%s/blueprints", c.HostURL, space_name, repository_name), nil)
 
 	if err != nil {
 		return nil, err
