@@ -164,12 +164,16 @@ func (r *TorqueSpaceAdoServerRepositoryResource) Create(ctx context.Context, req
 		}
 	}
 	start := time.Now()
-	err := r.client.OnboardAdoServerRepoToSpace(data.SpaceName.ValueString(), data.RepositoryName.ValueString(),
+	onboardErr := r.client.OnboardAdoServerRepoToSpace(data.SpaceName.ValueString(), data.RepositoryName.ValueString(),
 		data.RepositoryUrl.ValueString(), data.Token.ValueStringPointer(), data.Branch.ValueString(), data.CredentialName.ValueString(), agents, data.UseAllAgents.ValueBool(), data.AutoRegisterEac.ValueBool())
-	if err != nil {
+	if onboardErr != nil {
 		repo, err := r.client.GetRepoDetails(data.SpaceName.ValueString(), data.RepositoryName.ValueString())
 		if repo == nil {
-			resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to onboard repository to space, got error: %s", err))
+			resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to onboard repository to space, got error: %s", onboardErr))
+			return
+		}
+		if err != nil {
+			resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to onboard repository to space, got error: %s", onboardErr))
 			return
 		}
 		if repo.Status == StatusSyncing {
@@ -189,7 +193,7 @@ func (r *TorqueSpaceAdoServerRepositoryResource) Create(ctx context.Context, req
 			resp.Diagnostics.AddError("Sync Timeout", "Timed out while syncing repository")
 			return
 		}
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to onboard repository to space, got error: %s", err))
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to onboard repository to space, got error: %s", onboardErr))
 		return
 	}
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
