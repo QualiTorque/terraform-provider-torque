@@ -429,14 +429,20 @@ func (r *TorqueCatalogItemResource) Delete(ctx context.Context, req resource.Del
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to set blueprint policies, got error: %s", err))
 		return
 	}
-	err = r.client.UpdateBlueprintDisplayName(data.SpaceName.ValueString(), data.RepositoryName.ValueString(), data.BlueprintName.ValueString(), data.BlueprintName.ValueString())
-	if err != nil {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create Catalog Item, failed to set blueprint display name, got error: %s", err))
-		return
+	// Only reset the display name if the user had explicitly set a custom one.
+	// When display_name was never provided, it is stored in state as the blueprint name;
+	// calling the API with the same value causes a 422, so we skip the call.
+	// This is a temporary solution, ideally the API should allow idempotent calls to update the display name even when the value doesn't change.
+	if data.DisplayName.ValueString() != data.BlueprintName.ValueString() {
+		err = r.client.UpdateBlueprintDisplayName(data.SpaceName.ValueString(), data.RepositoryName.ValueString(), data.BlueprintName.ValueString(), data.BlueprintName.ValueString())
+		if err != nil {
+			resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to reset blueprint display name, got error: %s", err))
+			return
+		}
 	}
 	err = r.client.EditCatalogItemLabels(data.SpaceName.ValueString(), data.BlueprintName.ValueString(), data.RepositoryName.ValueString(), nil)
 	if err != nil {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to remove Catalog Item custom icon, failed to set catalog item custom icon, got error: %s", err))
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to remove Catalog Item labels, got error: %s", err))
 		return
 	}
 }
