@@ -3,6 +3,7 @@ package resources
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -174,6 +175,9 @@ func (r *TorqueSpaceParameterResource) Delete(ctx context.Context, req resource.
 	// Delete the space.
 	err := r.client.DeleteSpaceParameter(data.SpaceName.ValueString(), data.Name.ValueString())
 	if err != nil {
+		if strings.Contains(err.Error(), "status: 404") {
+			return
+		}
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to delete space parameter, got error: %s", err))
 		return
 	}
