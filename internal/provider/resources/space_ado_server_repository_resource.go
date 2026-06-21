@@ -167,35 +167,35 @@ func (r *TorqueSpaceAdoServerRepositoryResource) Create(ctx context.Context, req
 	onboardErr := r.client.OnboardAdoServerRepoToSpace(data.SpaceName.ValueString(), data.RepositoryName.ValueString(),
 		data.RepositoryUrl.ValueString(), data.Token.ValueStringPointer(), data.Branch.ValueString(), data.CredentialName.ValueString(), agents, data.UseAllAgents.ValueBool(), data.AutoRegisterEac.ValueBool())
 	if onboardErr != nil {
+		// Onboarding both associates the repository with the space and scans it in a single
+		// request. The scan can be slow, so the request may return an error (e.g. timeout) even
+		// though the repository was already associated. Check whether it exists before failing.
 		repo, err := r.client.GetRepoDetails(data.SpaceName.ValueString(), data.RepositoryName.ValueString())
-		if repo == nil {
+		if err != nil || repo == nil {
 			resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to onboard repository to space, got error: %s", onboardErr))
 			return
 		}
-		if err != nil {
-			resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to onboard repository to space, got error: %s", onboardErr))
-			return
-		}
+		// The repository is associated with the space, so the resource exists. Wait for the
+		// asynchronous scan to finish, but treat a timeout as a non-fatal warning so the resource
+		// is still saved to state and re-runs remain idempotent.
 		if repo.Status == StatusSyncing {
 			timeout := time.Duration(data.TimeOut.ValueInt32()) * time.Minute
-			for time.Since(start) < timeout {
-				repo, err := r.client.GetRepoDetails(data.SpaceName.ValueString(), data.RepositoryName.ValueString())
-				if err != nil {
-					resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while polling repository status: %s", err))
-					return
-				}
-				if repo.Status == StatusConnected {
-					resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
-					return
-				}
+			for repo.Status != StatusConnected && time.Since(start) < timeout {
 				time.Sleep(Interval)
+				if current, pollErr := r.client.GetRepoDetails(data.SpaceName.ValueString(), data.RepositoryName.ValueString()); pollErr == nil {
+					repo = current
+				}
 			}
-			resp.Diagnostics.AddError("Sync Timeout", "Timed out while syncing repository")
-			return
+			if repo.Status != StatusConnected {
+				resp.Diagnostics.AddWarning(
+					"Repository Scan Not Completed",
+					"The repository was associated with the space, but its scan did not complete within the configured timeout. The scan continues in the background and the resource has been created.",
+				)
+			}
 		}
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to onboard repository to space, got error: %s", onboardErr))
-		return
 	}
+	// The repository is associated with the space; persist the resource to state regardless of
+	// the scan status to avoid orphaning it and to keep re-runs idempotent.
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
