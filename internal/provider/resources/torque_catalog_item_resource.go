@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"regexp"
+	"strings"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/boolvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
@@ -411,6 +412,14 @@ func (r *TorqueCatalogItemResource) Delete(ctx context.Context, req resource.Del
 
 	err := r.client.UnpublishBlueprintInSpace(data.SpaceName.ValueString(), data.RepositoryName.ValueString(), data.BlueprintName.ValueString())
 	if err != nil {
+		// When self-service is declared in the blueprint YAML source, the API refuses to unpublish the
+		// blueprint and the remaining catalog item cleanup (icon/policies/display name/labels) cannot be
+		// applied either. The catalog item presence is governed by the blueprint source in this case, so
+		// treat this as already in the desired state and drop the resource from state without erroring.
+		if strings.Contains(err.Error(), "IMMUTABLE_FIELD_CAN_BE_CHANGED_ONLY_IN_BLUEPRINT_YAML") {
+			tflog.Warn(ctx, fmt.Sprintf("Skipping catalog item cleanup for blueprint '%s': self-service is managed by the blueprint YAML source and cannot be unpublished via API", data.BlueprintName.ValueString()))
+			return
+		}
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to unpublish blueprint from space, got error: %s", err))
 		return
 	}
